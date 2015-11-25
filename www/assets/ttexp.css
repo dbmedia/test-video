@@ -60,7 +60,9 @@ html, body {
   .ttexp-vertical-menu li {
     text-align: center; }
 
-html, body {
+html,
+body,
+.ember-view {
   background-color: #fffffff;
   margin: 0;
   padding: 0;
