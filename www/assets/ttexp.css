@@ -60,12 +60,15 @@ html, body {
   .ttexp-vertical-menu li {
     text-align: center; }
 
-html,
-body,
-.ember-view {
+html, body {
   background-color: #fffffff;
   margin: 0;
   padding: 0;
+  overflow: hidden; }
+
+.ember-view {
+  width: 100%;
+  height: 100%;
   overflow: hidden; }
 
 .page-index #logo-app {
