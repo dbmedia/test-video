@@ -63,6 +63,7 @@ html, body {
 html, body {
   background-color: #fffffff;
   margin: 0;
+  padding: 0;
   overflow: hidden; }
 
 .page-index #logo-app {
@@ -72,6 +73,7 @@ html, body {
 .page-play {
   background-color: #000000; }
   .page-play #video-container {
+    overflow: hidden;
     height: 100%;
     position: absolute;
     top: 0px;

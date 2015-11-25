@@ -24,5 +24,7 @@
         <allow-intent href="itms-apps:*" />
     </platform>
     <preference name="DisallowOverscroll" value="true" />
+    <preference name="fullscreen" value="true" />
+    <preference name="orientation" value="landscape" />
     <hook type="before_build" src="scripts/build_ember_app.sh" />
 </widget>
