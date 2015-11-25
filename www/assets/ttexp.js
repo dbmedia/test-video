@@ -3155,11 +3155,11 @@ define("ttexp/templates/play", ["exports"], function (exports) {
           "loc": {
             "source": null,
             "start": {
-              "line": 16,
+              "line": 17,
               "column": 0
             },
             "end": {
-              "line": 16,
+              "line": 17,
               "column": 167
             }
           },
@@ -3195,8 +3195,8 @@ define("ttexp/templates/play", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 19,
-            "column": 10
+            "line": 21,
+            "column": 0
           }
         },
         "moduleName": "ttexp/templates/play.hbs"
@@ -3207,23 +3207,31 @@ define("ttexp/templates/play", ["exports"], function (exports) {
       hasRendered: false,
       buildFragment: function buildFragment(dom) {
         var el0 = dom.createDocumentFragment();
-        var el1 = dom.createElement("video");
-        dom.setAttribute(el1, "id", "video-player");
-        dom.setAttribute(el1, "autoplay", "");
+        var el1 = dom.createElement("div");
+        dom.setAttribute(el1, "id", "video-container");
+        dom.setAttribute(el1, "class", "cinemaXXX");
         var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
-        var el2 = dom.createElement("source");
-        dom.setAttribute(el2, "src", "assets/media/trailer.mp4");
-        dom.setAttribute(el2, "type", "video/mp4");
+        var el2 = dom.createElement("video");
+        dom.setAttribute(el2, "id", "video-player");
+        dom.setAttribute(el2, "autoplay", "");
+        var el3 = dom.createTextNode("\n		");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("source");
+        dom.setAttribute(el3, "src", "assets/media/video1.mp4");
+        dom.setAttribute(el3, "type", "video/mp4");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n		Your browser does not support the video tag.\n	");
+        dom.appendChild(el2, el3);
         dom.appendChild(el1, el2);
-        var el2 = dom.createTextNode("\n	Your browser does not support the video tag.\n");
+        var el2 = dom.createTextNode("\n");
         dom.appendChild(el1, el2);
         dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n\n");
+        var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("div");
         dom.setAttribute(el1, "id", "side-chat");
-        dom.setAttribute(el1, "class", "");
+        dom.setAttribute(el1, "class", "minimizedXXX");
         var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
         var el2 = dom.createElement("button");
@@ -3253,21 +3261,21 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         dom.appendChild(el2, el3);
         var el3 = dom.createElement("li");
         dom.setAttribute(el3, "class", "list-group-item");
-        var el4 = dom.createTextNode("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodoDonec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nullas. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.");
+        var el4 = dom.createTextNode("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenenan massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.");
         dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n		");
         dom.appendChild(el2, el3);
         var el3 = dom.createElement("li");
         dom.setAttribute(el3, "class", "list-group-item");
-        var el4 = dom.createTextNode("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodoDonec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nullas. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.");
+        var el4 = dom.createTextNode("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenenan massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.");
         dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n		");
         dom.appendChild(el2, el3);
         var el3 = dom.createElement("li");
         dom.setAttribute(el3, "class", "list-group-item");
-        var el4 = dom.createTextNode("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodoDonec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nullas. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.");
+        var el4 = dom.createTextNode("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenenan massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.");
         dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n	");
@@ -3293,16 +3301,17 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         dom.appendChild(el0, el1);
         var el1 = dom.createComment("");
         dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
         var morphs = new Array(2);
         morphs[0] = dom.createMorphAt(fragment, 4, 4, contextualElement);
         morphs[1] = dom.createMorphAt(fragment, 8, 8, contextualElement);
-        dom.insertBoundary(fragment, null);
         return morphs;
       },
-      statements: [["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [16, 0], [16, 179]]]], ["content", "outlet", ["loc", [null, [19, 0], [19, 10]]]]],
+      statements: [["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [17, 0], [17, 179]]]], ["content", "outlet", ["loc", [null, [20, 0], [20, 10]]]]],
       locals: [],
       templates: [child0]
     };
@@ -3756,7 +3765,7 @@ catch(err) {
 });
 
 if (!runningTests) {
-  require("ttexp/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+58172170"});
+  require("ttexp/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+9c579e0d"});
 }
 
 /* jshint ignore:end */

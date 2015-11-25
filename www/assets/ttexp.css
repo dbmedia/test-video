@@ -1,5 +1,6 @@
 /* http://www.sitepoint.com/architecture-sass-project/ */
 @CHARSET "UTF-8";
+/* http://zerosixthree.se/vertical-align-anything-with-just-3-lines-of-css/ */
 @font-face {
   font-family: 'Titillium Web';
   font-style: normal;
@@ -8,7 +9,7 @@
 
 html, body {
   font-family: 'Titillium Web', sans-serif;
-  font-size: 20px; }
+  font-size: 16px; }
 
 .ttexp-btn {
   padding: 0; }
@@ -50,14 +51,27 @@ html, body {
 
 .page-play {
   background-color: #000000; }
-  .page-play #video-player {
-    max-width: 100%;
-    max-height: 100%;
-    width: 100%;
+  .page-play #video-container {
+    height: 100%;
     position: absolute;
     top: 0px;
     left: 0px;
-    z-index: 100; }
+    z-index: 100;
+    -webkit-transform-style: preserve-3d;
+    -moz-transform-style: preserve-3d;
+    transform-style: preserve-3d; }
+    .page-play #video-container #video-player {
+      max-height: 100%;
+      position: relative;
+      top: 50%;
+      -webkit-transform: translateY(-50%);
+      -ms-transform: translateY(-50%);
+      transform: translateY(-50%); }
+  .page-play #video-container.cinema {
+    width: 100%; }
+    .page-play #video-container.cinema #video-player {
+      max-width: 100%;
+      width: 100%; }
   .page-play #side-chat {
     position: absolute;
     right: 0;
@@ -65,27 +79,40 @@ html, body {
     z-index: 200;
     height: 100%;
     width: 380px;
+    max-width: 30%;
     background-color: rgba(9, 9, 9, 0.7);
-    padding: 96px 32px 32px 32px; }
-    .page-play #side-chat #chat-options li {
-      color: #ffffff;
-      background-color: transparent;
-      border: none;
-      -webkit-border-radius: 0;
-      -moz-border-radius: 0;
-      -ms-border-radius: 0;
-      border-radius: 0;
-      border-top: 1px solid #ffffff;
-      padding: 32px 0px; }
-      .page-play #side-chat #chat-options li:first-child {
-        border-top-width: 3px; }
-    .page-play #side-chat.minimized {
-      width: 64px; }
-      .page-play #side-chat.minimized #chat-options,
-      .page-play #side-chat.minimized #button-audio {
-        display: none; }
-      .page-play #side-chat.minimized #button-chat {
-        left: 16px; }
+    padding: 0;
+    padding-top: 96px; }
+    .page-play #side-chat #chat-options {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: auto; }
+      .page-play #side-chat #chat-options li {
+        color: #ffffff;
+        background-color: transparent;
+        border: none;
+        -webkit-border-radius: 0;
+        -moz-border-radius: 0;
+        -ms-border-radius: 0;
+        border-radius: 0;
+        border-top: 1px solid #ffffff;
+        padding: 0;
+        margin: 0;
+        padding-top: 32px;
+        padding-bottom: 32px;
+        margin-left: 32px;
+        margin-right: 32px; }
+        .page-play #side-chat #chat-options li:first-child {
+          border-top-width: 3px; }
+  .page-play #side-chat.minimized {
+    width: 64px; }
+    .page-play #side-chat.minimized #chat-options,
+    .page-play #side-chat.minimized #button-audio {
+      display: none; }
+    .page-play #side-chat.minimized #button-chat {
+      left: 16px; }
   .page-play #button-close {
     top: 32px;
     left: 32px; }
@@ -98,3 +125,78 @@ html, body {
   .page-play #customer-logo {
     bottom: 32px;
     left: 32px; }
+
+@media only screen and (max-device-width: 1279px) {
+  html, body {
+    font-size: 14px; }
+  .ttexp-btn span {
+    font-size: 28px; }
+  .page-play #side-chat {
+    padding-top: 84px; }
+    .page-play #side-chat #chat-options li {
+      padding-top: 28px;
+      padding-bottom: 28px;
+      margin-left: 28px;
+      margin-right: 28px; }
+  .page-play #button-close {
+    top: 28px;
+    left: 28px; }
+  .page-play #button-chat {
+    top: 28px;
+    left: 28px; }
+  .page-play #button-audio {
+    top: 28px;
+    right: 28px; }
+  .page-play #customer-logo {
+    bottom: 28px;
+    left: 28px; } }
+
+@media only screen and (max-device-width: 1023px) {
+  html, body {
+    font-size: 12px; }
+  .ttexp-btn span {
+    font-size: 18px; }
+  .page-play #side-chat {
+    padding-top: 54px; }
+    .page-play #side-chat #chat-options li {
+      padding-top: 18px;
+      padding-bottom: 18px;
+      margin-left: 18px;
+      margin-right: 18px; }
+  .page-play #button-close {
+    top: 18px;
+    left: 18px; }
+  .page-play #button-chat {
+    top: 18px;
+    left: 18px; }
+  .page-play #button-audio {
+    top: 18px;
+    right: 18px; }
+  .page-play #customer-logo {
+    bottom: 18px;
+    left: 18px; } }
+
+@media only screen and (max-device-width: 639px) {
+  html, body {
+    font-size: 10px; }
+  .ttexp-btn span {
+    font-size: 14px; }
+  .page-play #side-chat {
+    padding-top: 42px; }
+    .page-play #side-chat #chat-options li {
+      padding-top: 14px;
+      padding-bottom: 14px;
+      margin-left: 14px;
+      margin-right: 14px; }
+  .page-play #button-close {
+    top: 14px;
+    left: 14px; }
+  .page-play #button-chat {
+    top: 14px;
+    left: 14px; }
+  .page-play #button-audio {
+    top: 14px;
+    right: 14px; }
+  .page-play #customer-logo {
+    bottom: 14px;
+    left: 14px; } }
