@@ -3765,7 +3765,7 @@ catch(err) {
 });
 
 if (!runningTests) {
-  require("ttexp/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+61105e05"});
+  require("ttexp/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+874764c4"});
 }
 
 /* jshint ignore:end */

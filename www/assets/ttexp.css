@@ -67,9 +67,9 @@ html, body {
   overflow: hidden; }
 
 .ember-view {
-  width: 100%;
-  height: 100%;
-  overflow: hidden; }
+  /* 	width: 100%; */
+  /* 	height: 100%; */
+  /* 	overflow: hidden; */ }
 
 .page-index #logo-app {
   width: 128px;
