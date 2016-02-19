@@ -2,6 +2,7 @@
 
 /* jshint ignore:end */
 
+;(function() {
 /*!
  * @overview  Ember - JavaScript Application Framework
  * @copyright Copyright 2011-2015 Tilde Inc. and contributors
@@ -9,11 +10,10 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   2.1.0
+ * @version   2.3.1
  */
 
-(function() {
-var enifed, requireModule, eriuqer, requirejs, Ember;
+var enifed, requireModule, require, requirejs, Ember;
 var mainContext = this;
 
 (function() {
@@ -44,8 +44,17 @@ var mainContext = this;
       registry[name] = value;
     };
 
-    requirejs = eriuqer = requireModule = function(name) {
+    requirejs = require = requireModule = function(name) {
       return internalRequire(name, null);
+    }
+    require['default'] = require;
+
+    function missingModule(name, referrerName) {
+      if (referrerName) {
+        throw new Error('Could not find module ' + name + ' required by: ' + referrerName);
+      } else {
+        throw new Error('Could not find module ' + name);
+      }
     }
 
     function internalRequire(name, referrerName) {
@@ -58,24 +67,22 @@ var mainContext = this;
       exports = seen[name] = {};
 
       if (!registry[name]) {
-        if (referrerName) {
-          throw new Error('Could not find module ' + name + ' required by: ' + referrerName);
-        } else {
-          throw new Error('Could not find module ' + name);
-        }
+        missingModule(name, referrerName);
       }
 
       var mod = registry[name];
       var deps = mod.deps;
       var callback = mod.callback;
-      var reified = [];
       var length = deps.length;
+      var reified = new Array(length);;
 
       for (var i = 0; i < length; i++) {
         if (deps[i] === 'exports') {
-          reified.push(exports);
+          reified[i] = exports;
+        } else if (deps[i] === 'require') {
+          reified[i] = require;
         } else {
-          reified.push(internalRequire(resolve(deps[i], name), name));
+          reified[i] = internalRequire(deps[i], name);
         }
       }
 
@@ -84,324 +91,19 @@ var mainContext = this;
       return exports;
     };
 
-    function resolve(child, name) {
-      if (child.charAt(0) !== '.') {
-        return child;
-      }
-      var parts = child.split('/');
-      var parentBase = name.split('/').slice(0, -1);
-
-      for (var i = 0, l = parts.length; i < l; i++) {
-        var part = parts[i];
-
-        if (part === '..') {
-          parentBase.pop();
-        } else if (part === '.') {
-          continue;
-        } else {
-          parentBase.push(part);
-        }
-      }
-
-      return parentBase.join('/');
-    }
-
     requirejs._eak_seen = registry;
 
     Ember.__loader = {
       define: enifed,
-      require: eriuqer,
+      require: require,
       registry: registry
     };
   } else {
     enifed = Ember.__loader.define;
-    requirejs = eriuqer = requireModule = Ember.__loader.require;
+    requirejs = require = requireModule = Ember.__loader.require;
   }
 })();
 
-enifed('ember-debug', ['exports', 'ember-metal/core', 'ember-metal/assert', 'ember-metal/features', 'ember-metal/error', 'ember-metal/logger', 'ember-metal/environment', 'ember-debug/deprecate', 'ember-debug/warn', 'ember-debug/is-plain-function'], function (exports, _emberMetalCore, _emberMetalAssert, _emberMetalFeatures, _emberMetalError, _emberMetalLogger, _emberMetalEnvironment, _emberDebugDeprecate, _emberDebugWarn, _emberDebugIsPlainFunction) {
-  'use strict';
-
-  exports._warnIfUsingStrippedFeatureFlags = _warnIfUsingStrippedFeatureFlags;
-
-  _emberMetalCore.default.deprecate = _emberDebugDeprecate.default;
-
-  /**
-  @module ember
-  @submodule ember-debug
-  */
-
-  /**
-  @class Ember
-  @public
-  */
-
-  /**
-    Define an assertion that will throw an exception if the condition is not
-    met. Ember build tools will remove any calls to `Ember.assert()` when
-    doing a production build. Example:
-  
-    ```javascript
-    // Test for truthiness
-    Ember.assert('Must pass a valid object', obj);
-  
-    // Fail unconditionally
-    Ember.assert('This code path should never be run');
-    ```
-  
-    @method assert
-    @param {String} desc A description of the assertion. This will become
-      the text of the Error thrown if the assertion fails.
-    @param {Boolean|Function} test Must be truthy for the assertion to pass. If
-      falsy, an exception will be thrown. If this is a function, it will be executed and
-      its return value will be used as condition.
-    @public
-  */
-  function assert(desc, test) {
-    var throwAssertion;
-
-    if (_emberDebugIsPlainFunction.default(test)) {
-      throwAssertion = !test();
-    } else {
-      throwAssertion = !test;
-    }
-
-    if (throwAssertion) {
-      throw new _emberMetalError.default('Assertion Failed: ' + desc);
-    }
-  }
-
-  /**
-    Display a debug notice. Ember build tools will remove any calls to
-    `Ember.debug()` when doing a production build.
-  
-    ```javascript
-    Ember.debug('I\'m a debug notice!');
-    ```
-  
-    @method debug
-    @param {String} message A debug message to display.
-    @public
-  */
-  function debug(message) {
-    _emberMetalLogger.default.debug('DEBUG: ' + message);
-  }
-
-  /**
-    Alias an old, deprecated method with its new counterpart.
-  
-    Display a deprecation warning with the provided message and a stack trace
-    (Chrome and Firefox only) when the assigned method is called.
-  
-    Ember build tools will not remove calls to `Ember.deprecateFunc()`, though
-    no warnings will be shown in production.
-  
-    ```javascript
-    Ember.oldMethod = Ember.deprecateFunc('Please use the new, updated method', Ember.newMethod);
-    ```
-  
-    @method deprecateFunc
-    @param {String} message A description of the deprecation.
-    @param {Object} [options] The options object for Ember.deprecate.
-    @param {Function} func The new function called to replace its deprecated counterpart.
-    @return {Function} a new function that wrapped the original function with a deprecation warning
-    @private
-  */
-  function deprecateFunc() {
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    if (args.length === 3) {
-      var _ret = (function () {
-        var message = args[0];
-        var options = args[1];
-        var func = args[2];
-
-        return {
-          v: function () {
-            _emberMetalCore.default.deprecate(message, false, options);
-            return func.apply(this, arguments);
-          }
-        };
-      })();
-
-      if (typeof _ret === 'object') return _ret.v;
-    } else {
-      var _ret2 = (function () {
-        var message = args[0];
-        var func = args[1];
-
-        return {
-          v: function () {
-            _emberMetalCore.default.deprecate(message);
-            return func.apply(this, arguments);
-          }
-        };
-      })();
-
-      if (typeof _ret2 === 'object') return _ret2.v;
-    }
-  }
-
-  /**
-    Run a function meant for debugging. Ember build tools will remove any calls to
-    `Ember.runInDebug()` when doing a production build.
-  
-    ```javascript
-    Ember.runInDebug(() => {
-      Ember.Component.reopen({
-        didInsertElement() {
-          console.log("I'm happy");
-        }
-      });
-    });
-    ```
-  
-    @method runInDebug
-    @param {Function} func The function to be executed.
-    @since 1.5.0
-    @public
-  */
-  function runInDebug(func) {
-    func();
-  }
-
-  _emberMetalAssert.registerDebugFunction('assert', assert);
-  _emberMetalAssert.registerDebugFunction('warn', _emberDebugWarn.default);
-  _emberMetalAssert.registerDebugFunction('debug', debug);
-  _emberMetalAssert.registerDebugFunction('deprecate', _emberDebugDeprecate.default);
-  _emberMetalAssert.registerDebugFunction('deprecateFunc', deprecateFunc);
-  _emberMetalAssert.registerDebugFunction('runInDebug', runInDebug);
-
-  /**
-    Will call `Ember.warn()` if ENABLE_ALL_FEATURES, ENABLE_OPTIONAL_FEATURES, or
-    any specific FEATURES flag is truthy.
-  
-    This method is called automatically in debug canary builds.
-  
-    @private
-    @method _warnIfUsingStrippedFeatureFlags
-    @return {void}
-  */
-
-  function _warnIfUsingStrippedFeatureFlags(FEATURES, featuresWereStripped) {
-    if (featuresWereStripped) {
-      _emberMetalCore.default.warn('Ember.ENV.ENABLE_ALL_FEATURES is only available in canary builds.', !_emberMetalCore.default.ENV.ENABLE_ALL_FEATURES, { id: 'ember-debug.feature-flag-with-features-stripped' });
-      _emberMetalCore.default.warn('Ember.ENV.ENABLE_OPTIONAL_FEATURES is only available in canary builds.', !_emberMetalCore.default.ENV.ENABLE_OPTIONAL_FEATURES, { id: 'ember-debug.feature-flag-with-features-stripped' });
-
-      for (var key in FEATURES) {
-        if (FEATURES.hasOwnProperty(key) && key !== 'isEnabled') {
-          _emberMetalCore.default.warn('FEATURE["' + key + '"] is set as enabled, but FEATURE flags are only available in canary builds.', !FEATURES[key], { id: 'ember-debug.feature-flag-with-features-stripped' });
-        }
-      }
-    }
-  }
-
-  if (!_emberMetalCore.default.testing) {
-    // Complain if they're using FEATURE flags in builds other than canary
-    _emberMetalFeatures.FEATURES['features-stripped-test'] = true;
-    var featuresWereStripped = true;
-
-    delete _emberMetalFeatures.FEATURES['features-stripped-test'];
-    _warnIfUsingStrippedFeatureFlags(_emberMetalCore.default.ENV.FEATURES, featuresWereStripped);
-
-    // Inform the developer about the Ember Inspector if not installed.
-    var isFirefox = _emberMetalEnvironment.default.isFirefox;
-    var isChrome = _emberMetalEnvironment.default.isChrome;
-
-    if (typeof window !== 'undefined' && (isFirefox || isChrome) && window.addEventListener) {
-      window.addEventListener('load', function () {
-        if (document.documentElement && document.documentElement.dataset && !document.documentElement.dataset.emberExtension) {
-          var downloadURL;
-
-          if (isChrome) {
-            downloadURL = 'https://chrome.google.com/webstore/detail/ember-inspector/bmdblncegkenkacieihfhpjfppoconhi';
-          } else if (isFirefox) {
-            downloadURL = 'https://addons.mozilla.org/en-US/firefox/addon/ember-inspector/';
-          }
-
-          _emberMetalCore.default.debug('For more advanced debugging, install the Ember Inspector from ' + downloadURL);
-        }
-      }, false);
-    }
-  }
-  /**
-    @public
-    @class Ember.Debug
-  */
-  _emberMetalCore.default.Debug = {};
-
-  /**
-    Allows for runtime registration of handler functions that override the default deprecation behavior.
-    Deprecations are invoked by calls to [Ember.deprecate](http://emberjs.com/api/classes/Ember.html#method_deprecate).
-    The following example demonstrates its usage by registering a handler that throws an error if the
-    message contains the word "should", otherwise defers to the default handler.
-     ```javascript
-    Ember.Debug.registerDeprecationHandler((message, options, next) => {
-      if (message.indexOf('should') !== -1) {
-        throw new Error(`Deprecation message with should: ${message}`);
-      } else {
-        // defer to whatever handler was registered before this one
-        next(message, options);
-      }
-    }
-    ```
-     The handler function takes the following arguments:
-     <ul>
-      <li> <code>message</code> - The message received from the deprecation call. </li>
-      <li> <code>options</code> - An object passed in with the deprecation call containing additional information including:</li>
-        <ul>
-          <li> <code>id</code> - an id of the deprecation in the form of <code>package-name.specific-deprecation</code>.</li>
-          <li> <code>until</code> - is the version number Ember the feature and deprecation will be removed in.</li>
-        </ul>
-      <li> <code>next</code> - a function that calls into the previously registered handler.</li>
-    </ul>
-     @public
-    @static
-    @method registerDeprecationHandler
-    @param handler {Function} a function to handle deprecation calls
-  */
-  _emberMetalCore.default.Debug.registerDeprecationHandler = _emberDebugDeprecate.registerHandler;
-  /**
-    Allows for runtime registration of handler functions that override the default warning behavior.
-    Warnings are invoked by calls made to [Ember.warn](http://emberjs.com/api/classes/Ember.html#method_warn).
-    The following example demonstrates its usage by registering a handler that does nothing overriding Ember's
-    default warning behavior.
-     ```javascript
-    // next is not called, so no warnings get the default behavior
-    Ember.Debug.registerWarnHandler(() => {});
-    ```
-     The handler function takes the following arguments:
-     <ul>
-      <li> <code>message</code> - The message received from the warn call. </li>
-      <li> <code>options</code> - An object passed in with the warn call containing additional information including:</li>
-        <ul>
-          <li> <code>id</code> - an id of the warning in the form of <code>package-name.specific-warning</code>.</li>
-        </ul>
-      <li> <code>next</code> - a function that calls into the previously registered handler.</li>
-    </ul>
-     @public
-    @static
-    @method registerWarnHandler
-    @param handler {Function} a function to handle warnings
-  */
-  _emberMetalCore.default.Debug.registerWarnHandler = _emberDebugWarn.registerHandler;
-
-  /*
-    We are transitioning away from `ember.js` to `ember.debug.js` to make
-    it much clearer that it is only for local development purposes.
-  
-    This flag value is changed by the tooling (by a simple string replacement)
-    so that if `ember.js` (which must be output for backwards compat reasons) is
-    used a nice helpful warning message will be printed out.
-  */
-  var runningNonEmberDebugJS = false;
-  exports.runningNonEmberDebugJS = runningNonEmberDebugJS;
-  if (runningNonEmberDebugJS) {
-    _emberMetalCore.default.warn('Please use `ember.debug.js` instead of `ember.js` for development and debugging.');
-  }
-});
 enifed('ember-debug/deprecate', ['exports', 'ember-metal/core', 'ember-metal/error', 'ember-metal/logger', 'ember-debug/handlers'], function (exports, _emberMetalCore, _emberMetalError, _emberMetalLogger, _emberDebugHandlers) {
   /*global __fail__*/
 
@@ -487,20 +189,25 @@ enifed('ember-debug/deprecate', ['exports', 'ember-metal/core', 'ember-metal/err
 
   exports.missingOptionsUntilDeprecation = missingOptionsUntilDeprecation;
   /**
+  @module ember
+  @submodule ember-debug
+  */
+
+  /**
     Display a deprecation warning with the provided message and a stack trace
     (Chrome and Firefox only). Ember build tools will remove any calls to
     `Ember.deprecate()` when doing a production build.
   
     @method deprecate
     @param {String} message A description of the deprecation.
-    @param {Boolean|Function} test A boolean. If falsy, the deprecation
-      will be displayed. If this is a function, it will be executed and its return
-      value will be used as condition.
+    @param {Boolean} test A boolean. If falsy, the deprecation
+      will be displayed.
     @param {Object} options An object that can be used to pass
       in a `url` to the transition guide on the emberjs.com website, and a unique
       `id` for this deprecation. The `id` can be used by Ember debugging tools
       to change the behavior (raise, log or silence) for that specific deprecation.
       The `id` should be namespaced by dots, e.g. "view.helper.select".
+    @for Ember
     @public
   */
 
@@ -532,16 +239,28 @@ enifed('ember-debug/deprecate', ['exports', 'ember-metal/core', 'ember-metal/err
     _emberDebugHandlers.invoke.apply(undefined, ['deprecate'].concat(_slice.call(arguments)));
   }
 });
-enifed('ember-debug/handlers', ['exports', 'ember-debug/is-plain-function'], function (exports, _emberDebugIsPlainFunction) {
+enifed('ember-debug/handlers', ['exports', 'ember-debug/is-plain-function', 'ember-debug/deprecate'], function (exports, _emberDebugIsPlainFunction, _emberDebugDeprecate) {
   'use strict';
 
+  exports.generateTestAsFunctionDeprecation = generateTestAsFunctionDeprecation;
   exports.registerHandler = registerHandler;
   exports.invoke = invoke;
   var HANDLERS = {};
 
   exports.HANDLERS = HANDLERS;
-  function normalizeTest(test) {
-    return _emberDebugIsPlainFunction.default(test) ? test() : test;
+
+  function generateTestAsFunctionDeprecation(source) {
+    return 'Calling `' + source + '` with a function argument is deprecated. Please ' + 'use `!!Constructor` for constructors, or an `IIFE` to compute the test for deprecation. ' + 'In a future version functions will be treated as truthy values instead of being executed.';
+  }
+
+  function normalizeTest(test, source) {
+    if (_emberDebugIsPlainFunction.default(test)) {
+      _emberDebugDeprecate.default(generateTestAsFunctionDeprecation(source), false, { id: 'ember-debug.deprecate-test-as-function', until: '2.5.0' });
+
+      return test();
+    }
+
+    return test;
   }
 
   function registerHandler(type, callback) {
@@ -553,7 +272,7 @@ enifed('ember-debug/handlers', ['exports', 'ember-debug/is-plain-function'], fun
   }
 
   function invoke(type, message, test, options) {
-    if (normalizeTest(test)) {
+    if (normalizeTest(test, 'Ember.' + type)) {
       return;
     }
 
@@ -577,7 +296,7 @@ enifed('ember-debug/is-plain-function', ['exports'], function (exports) {
     return typeof test === 'function' && test.PrototypeMixin === undefined;
   }
 });
-enifed('ember-debug/warn', ['exports', 'ember-metal/core', 'ember-metal/logger', 'ember-debug/handlers'], function (exports, _emberMetalCore, _emberMetalLogger, _emberDebugHandlers) {
+enifed('ember-debug/warn', ['exports', 'ember-metal/logger', 'ember-metal/debug', 'ember-debug/handlers'], function (exports, _emberMetalLogger, _emberMetalDebug, _emberDebugHandlers) {
   'use strict';
 
   var _slice = Array.prototype.slice;
@@ -601,6 +320,11 @@ enifed('ember-debug/warn', ['exports', 'ember-metal/core', 'ember-metal/logger',
 
   exports.missingOptionsIdDeprecation = missingOptionsIdDeprecation;
   /**
+  @module ember
+  @submodule ember-debug
+  */
+
+  /**
     Display a warning with the provided message. Ember build tools will
     remove any calls to `Ember.warn()` when doing a production build.
   
@@ -608,12 +332,17 @@ enifed('ember-debug/warn', ['exports', 'ember-metal/core', 'ember-metal/logger',
     @param {String} message A warning to display.
     @param {Boolean} test An optional boolean. If falsy, the warning
       will be displayed.
+    @param {Object} options An ojbect that can be used to pass a unique
+      `id` for this warning.  The `id` can be used by Ember debugging tools
+      to change the behavior (raise, log, or silence) for that specific warning.
+      The `id` should be namespaced by dots, e.g. "ember-debug.feature-flag-with-features-stripped"
+    @for Ember
     @public
   */
 
   function warn(message, test, options) {
     if (!options) {
-      _emberMetalCore.default.deprecate(missingOptionsDeprecation, false, {
+      _emberMetalDebug.deprecate(missingOptionsDeprecation, false, {
         id: 'ember-debug.warn-options-missing',
         until: '3.0.0',
         url: 'http://emberjs.com/deprecations/v2.x/#toc_ember-debug-function-options'
@@ -621,7 +350,7 @@ enifed('ember-debug/warn', ['exports', 'ember-metal/core', 'ember-metal/logger',
     }
 
     if (options && !options.id) {
-      _emberMetalCore.default.deprecate(missingOptionsIdDeprecation, false, {
+      _emberMetalDebug.deprecate(missingOptionsIdDeprecation, false, {
         id: 'ember-debug.warn-id-missing',
         until: '3.0.0',
         url: 'http://emberjs.com/deprecations/v2.x/#toc_ember-debug-function-options'
@@ -631,23 +360,300 @@ enifed('ember-debug/warn', ['exports', 'ember-metal/core', 'ember-metal/logger',
     _emberDebugHandlers.invoke.apply(undefined, ['warn'].concat(_slice.call(arguments)));
   }
 });
-enifed('ember-testing', ['exports', 'ember-metal/core', 'ember-testing/initializers', 'ember-testing/support', 'ember-testing/setup_for_testing', 'ember-testing/test', 'ember-testing/adapters/adapter', 'ember-testing/adapters/qunit', 'ember-testing/helpers'], function (exports, _emberMetalCore, _emberTestingInitializers, _emberTestingSupport, _emberTestingSetup_for_testing, _emberTestingTest, _emberTestingAdaptersAdapter, _emberTestingAdaptersQunit, _emberTestingHelpers) {
+enifed('ember-debug', ['exports', 'ember-metal/core', 'ember-metal/debug', 'ember-metal/features', 'ember-metal/error', 'ember-metal/logger', 'ember-metal/environment', 'ember-debug/deprecate', 'ember-debug/warn', 'ember-debug/is-plain-function', 'ember-debug/handlers'], function (exports, _emberMetalCore, _emberMetalDebug, _emberMetalFeatures, _emberMetalError, _emberMetalLogger, _emberMetalEnvironment, _emberDebugDeprecate, _emberDebugWarn, _emberDebugIsPlainFunction, _emberDebugHandlers) {
   'use strict';
 
-  // adds helpers to helpers object in Test
+  exports._warnIfUsingStrippedFeatureFlags = _warnIfUsingStrippedFeatureFlags;
 
   /**
-    @module ember
-    @submodule ember-testing
+  @module ember
+  @submodule ember-debug
   */
 
-  _emberMetalCore.default.Test = _emberTestingTest.default;
-  _emberMetalCore.default.Test.Adapter = _emberTestingAdaptersAdapter.default;
-  _emberMetalCore.default.Test.QUnitAdapter = _emberTestingAdaptersQunit.default;
-  _emberMetalCore.default.setupForTesting = _emberTestingSetup_for_testing.default;
+  /**
+  @class Ember
+  @public
+  */
+
+  /**
+    Define an assertion that will throw an exception if the condition is not
+    met. Ember build tools will remove any calls to `Ember.assert()` when
+    doing a production build. Example:
+  
+    ```javascript
+    // Test for truthiness
+    Ember.assert('Must pass a valid object', obj);
+  
+    // Fail unconditionally
+    Ember.assert('This code path should never be run');
+    ```
+  
+    @method assert
+    @param {String} desc A description of the assertion. This will become
+      the text of the Error thrown if the assertion fails.
+    @param {Boolean} test Must be truthy for the assertion to pass. If
+      falsy, an exception will be thrown.
+    @public
+  */
+  _emberMetalDebug.setDebugFunction('assert', function assert(desc, test) {
+    var throwAssertion = undefined;
+
+    if (_emberDebugIsPlainFunction.default(test)) {
+      _emberMetalDebug.deprecate(_emberDebugHandlers.generateTestAsFunctionDeprecation('Ember.assert'), false, { id: 'ember-debug.deprecate-test-as-function', until: '2.5.0' });
+
+      throwAssertion = !test();
+    } else {
+      throwAssertion = !test;
+    }
+
+    if (throwAssertion) {
+      throw new _emberMetalError.default('Assertion Failed: ' + desc);
+    }
+  });
+
+  /**
+    Display a debug notice. Ember build tools will remove any calls to
+    `Ember.debug()` when doing a production build.
+  
+    ```javascript
+    Ember.debug('I\'m a debug notice!');
+    ```
+  
+    @method debug
+    @param {String} message A debug message to display.
+    @public
+  */
+  _emberMetalDebug.setDebugFunction('debug', function debug(message) {
+    _emberMetalLogger.default.debug('DEBUG: ' + message);
+  });
+
+  /**
+    Display an info notice.
+  
+    @method info
+    @private
+  */
+  _emberMetalDebug.setDebugFunction('info', function info() {
+    _emberMetalLogger.default.info.apply(undefined, arguments);
+  });
+
+  /**
+    Alias an old, deprecated method with its new counterpart.
+  
+    Display a deprecation warning with the provided message and a stack trace
+    (Chrome and Firefox only) when the assigned method is called.
+  
+    Ember build tools will not remove calls to `Ember.deprecateFunc()`, though
+    no warnings will be shown in production.
+  
+    ```javascript
+    Ember.oldMethod = Ember.deprecateFunc('Please use the new, updated method', Ember.newMethod);
+    ```
+  
+    @method deprecateFunc
+    @param {String} message A description of the deprecation.
+    @param {Object} [options] The options object for Ember.deprecate.
+    @param {Function} func The new function called to replace its deprecated counterpart.
+    @return {Function} a new function that wrapped the original function with a deprecation warning
+    @private
+  */
+  _emberMetalDebug.setDebugFunction('deprecateFunc', function deprecateFunc() {
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    if (args.length === 3) {
+      var _ret = (function () {
+        var message = args[0];
+        var options = args[1];
+        var func = args[2];
+
+        return {
+          v: function () {
+            _emberMetalDebug.deprecate(message, false, options);
+            return func.apply(this, arguments);
+          }
+        };
+      })();
+
+      if (typeof _ret === 'object') return _ret.v;
+    } else {
+      var _ret2 = (function () {
+        var message = args[0];
+        var func = args[1];
+
+        return {
+          v: function () {
+            _emberMetalDebug.deprecate(message);
+            return func.apply(this, arguments);
+          }
+        };
+      })();
+
+      if (typeof _ret2 === 'object') return _ret2.v;
+    }
+  });
+
+  /**
+    Run a function meant for debugging. Ember build tools will remove any calls to
+    `Ember.runInDebug()` when doing a production build.
+  
+    ```javascript
+    Ember.runInDebug(() => {
+      Ember.Component.reopen({
+        didInsertElement() {
+          console.log("I'm happy");
+        }
+      });
+    });
+    ```
+  
+    @method runInDebug
+    @param {Function} func The function to be executed.
+    @since 1.5.0
+    @public
+  */
+  _emberMetalDebug.setDebugFunction('runInDebug', function runInDebug(func) {
+    func();
+  });
+
+  _emberMetalDebug.setDebugFunction('debugSeal', function debugSeal(obj) {
+    Object.seal(obj);
+  });
+
+  _emberMetalDebug.setDebugFunction('deprecate', _emberDebugDeprecate.default);
+
+  _emberMetalDebug.setDebugFunction('warn', _emberDebugWarn.default);
+
+  /**
+    Will call `Ember.warn()` if ENABLE_OPTIONAL_FEATURES or
+    any specific FEATURES flag is truthy.
+  
+    This method is called automatically in debug canary builds.
+  
+    @private
+    @method _warnIfUsingStrippedFeatureFlags
+    @return {void}
+  */
+
+  function _warnIfUsingStrippedFeatureFlags(FEATURES, featuresWereStripped) {
+    if (featuresWereStripped) {
+      _emberMetalDebug.warn('Ember.ENV.ENABLE_OPTIONAL_FEATURES is only available in canary builds.', !_emberMetalCore.default.ENV.ENABLE_OPTIONAL_FEATURES, { id: 'ember-debug.feature-flag-with-features-stripped' });
+
+      for (var key in FEATURES) {
+        if (FEATURES.hasOwnProperty(key) && key !== 'isEnabled') {
+          _emberMetalDebug.warn('FEATURE["' + key + '"] is set as enabled, but FEATURE flags are only available in canary builds.', !FEATURES[key], { id: 'ember-debug.feature-flag-with-features-stripped' });
+        }
+      }
+    }
+  }
+
+  if (!_emberMetalCore.default.testing) {
+    // Complain if they're using FEATURE flags in builds other than canary
+    _emberMetalFeatures.FEATURES['features-stripped-test'] = true;
+    var featuresWereStripped = true;
+
+    delete _emberMetalFeatures.FEATURES['features-stripped-test'];
+    _warnIfUsingStrippedFeatureFlags(_emberMetalCore.default.ENV.FEATURES, featuresWereStripped);
+
+    // Inform the developer about the Ember Inspector if not installed.
+    var isFirefox = _emberMetalEnvironment.default.isFirefox;
+    var isChrome = _emberMetalEnvironment.default.isChrome;
+
+    if (typeof window !== 'undefined' && (isFirefox || isChrome) && window.addEventListener) {
+      window.addEventListener('load', function () {
+        if (document.documentElement && document.documentElement.dataset && !document.documentElement.dataset.emberExtension) {
+          var downloadURL;
+
+          if (isChrome) {
+            downloadURL = 'https://chrome.google.com/webstore/detail/ember-inspector/bmdblncegkenkacieihfhpjfppoconhi';
+          } else if (isFirefox) {
+            downloadURL = 'https://addons.mozilla.org/en-US/firefox/addon/ember-inspector/';
+          }
+
+          _emberMetalDebug.debug('For more advanced debugging, install the Ember Inspector from ' + downloadURL);
+        }
+      }, false);
+    }
+  }
+  /**
+    @public
+    @class Ember.Debug
+  */
+  _emberMetalCore.default.Debug = {};
+
+  /**
+    Allows for runtime registration of handler functions that override the default deprecation behavior.
+    Deprecations are invoked by calls to [Ember.deprecate](http://emberjs.com/api/classes/Ember.html#method_deprecate).
+    The following example demonstrates its usage by registering a handler that throws an error if the
+    message contains the word "should", otherwise defers to the default handler.
+     ```javascript
+    Ember.Debug.registerDeprecationHandler((message, options, next) => {
+      if (message.indexOf('should') !== -1) {
+        throw new Error(`Deprecation message with should: ${message}`);
+      } else {
+        // defer to whatever handler was registered before this one
+        next(message, options);
+      }
+    }
+    ```
+     The handler function takes the following arguments:
+     <ul>
+      <li> <code>message</code> - The message received from the deprecation call. </li>
+      <li> <code>options</code> - An object passed in with the deprecation call containing additional information including:</li>
+        <ul>
+          <li> <code>id</code> - an id of the deprecation in the form of <code>package-name.specific-deprecation</code>.</li>
+          <li> <code>until</code> - is the version number Ember the feature and deprecation will be removed in.</li>
+        </ul>
+      <li> <code>next</code> - a function that calls into the previously registered handler.</li>
+    </ul>
+     @public
+    @static
+    @method registerDeprecationHandler
+    @param handler {Function} a function to handle deprecation calls
+    @since 2.1.0
+  */
+  _emberMetalCore.default.Debug.registerDeprecationHandler = _emberDebugDeprecate.registerHandler;
+  /**
+    Allows for runtime registration of handler functions that override the default warning behavior.
+    Warnings are invoked by calls made to [Ember.warn](http://emberjs.com/api/classes/Ember.html#method_warn).
+    The following example demonstrates its usage by registering a handler that does nothing overriding Ember's
+    default warning behavior.
+     ```javascript
+    // next is not called, so no warnings get the default behavior
+    Ember.Debug.registerWarnHandler(() => {});
+    ```
+     The handler function takes the following arguments:
+     <ul>
+      <li> <code>message</code> - The message received from the warn call. </li>
+      <li> <code>options</code> - An object passed in with the warn call containing additional information including:</li>
+        <ul>
+          <li> <code>id</code> - an id of the warning in the form of <code>package-name.specific-warning</code>.</li>
+        </ul>
+      <li> <code>next</code> - a function that calls into the previously registered handler.</li>
+    </ul>
+     @public
+    @static
+    @method registerWarnHandler
+    @param handler {Function} a function to handle warnings
+    @since 2.1.0
+  */
+  _emberMetalCore.default.Debug.registerWarnHandler = _emberDebugWarn.registerHandler;
+
+  /*
+    We are transitioning away from `ember.js` to `ember.debug.js` to make
+    it much clearer that it is only for local development purposes.
+  
+    This flag value is changed by the tooling (by a simple string replacement)
+    so that if `ember.js` (which must be output for backwards compat reasons) is
+    used a nice helpful warning message will be printed out.
+  */
+  var runningNonEmberDebugJS = false;
+  exports.runningNonEmberDebugJS = runningNonEmberDebugJS;
+  if (runningNonEmberDebugJS) {
+    _emberMetalDebug.warn('Please use `ember.debug.js` instead of `ember.js` for development and debugging.');
+  }
 });
-// to setup initializer
-// to handle various edge cases
 enifed('ember-testing/adapters/adapter', ['exports', 'ember-runtime/system/object'], function (exports, _emberRuntimeSystemObject) {
   'use strict';
 
@@ -730,7 +736,7 @@ enifed('ember-testing/adapters/qunit', ['exports', 'ember-testing/adapters/adapt
     }
   });
 });
-enifed('ember-testing/helpers', ['exports', 'ember-metal/core', 'ember-metal/features', 'ember-metal/property_get', 'ember-metal/error', 'ember-metal/run_loop', 'ember-views/system/jquery', 'ember-testing/test', 'ember-runtime/ext/rsvp'], function (exports, _emberMetalCore, _emberMetalFeatures, _emberMetalProperty_get, _emberMetalError, _emberMetalRun_loop, _emberViewsSystemJquery, _emberTestingTest, _emberRuntimeExtRsvp) {
+enifed('ember-testing/helpers', ['exports', 'ember-metal/property_get', 'ember-metal/error', 'ember-metal/run_loop', 'ember-views/system/jquery', 'ember-testing/test', 'ember-runtime/ext/rsvp'], function (exports, _emberMetalProperty_get, _emberMetalError, _emberMetalRun_loop, _emberViewsSystemJquery, _emberTestingTest, _emberRuntimeExtRsvp) {
   'use strict';
 
   /**
@@ -761,7 +767,7 @@ enifed('ember-testing/helpers', ['exports', 'ember-metal/core', 'ember-metal/fea
 
   function pauseTest() {
     _emberTestingTest.default.adapter.asyncStart();
-    return new _emberMetalCore.default.RSVP.Promise(function () {}, 'TestAdapter paused promise');
+    return new _emberRuntimeExtRsvp.default.Promise(function () {}, 'TestAdapter paused promise');
   }
 
   function focus(el) {
@@ -813,32 +819,6 @@ enifed('ember-testing/helpers', ['exports', 'ember-metal/core', 'ember-metal/fea
 
     _emberMetalRun_loop.default($el, 'mouseup');
     _emberMetalRun_loop.default($el, 'click');
-
-    return app.testHelpers.wait();
-  }
-
-  function check(app, selector, context) {
-    var $el = app.testHelpers.findWithAssert(selector, context);
-    var type = $el.prop('type');
-
-    _emberMetalCore.default.assert('To check \'' + selector + '\', the input must be a checkbox', type === 'checkbox');
-
-    if (!$el.prop('checked')) {
-      app.testHelpers.click(selector, context);
-    }
-
-    return app.testHelpers.wait();
-  }
-
-  function uncheck(app, selector, context) {
-    var $el = app.testHelpers.findWithAssert(selector, context);
-    var type = $el.prop('type');
-
-    _emberMetalCore.default.assert('To uncheck \'' + selector + '\', the input must be a checkbox', type === 'checkbox');
-
-    if ($el.prop('checked')) {
-      app.testHelpers.click(selector, context);
-    }
 
     return app.testHelpers.wait();
   }
@@ -1221,36 +1201,6 @@ enifed('ember-testing/helpers', ['exports', 'ember-metal/core', 'ember-metal/fea
   */
   asyncHelper('triggerEvent', triggerEvent);
 });
-
-/**
-  Checks a checkbox. Ensures the presence of the `checked` attribute
-   Example:
-   ```javascript
-  check('#remember-me').then(function() {
-    // assert something
-  });
-  ```
-   @method check
-  @param {String} selector jQuery selector finding an `input[type="checkbox"]`
-  element on the DOM to check
-  @return {RSVP.Promise}
-  @private
-*/
-
-/**
-  Unchecks a checkbox. Ensures the absence of the `checked` attribute
-   Example:
-   ```javascript
-  uncheck('#remember-me').then(function() {
-   // assert something
-  });
-  ```
-   @method check
-  @param {String} selector jQuery selector finding an `input[type="checkbox"]`
-  element on the DOM to uncheck
-  @return {RSVP.Promise}
-  @private
-*/
 enifed('ember-testing/initializers', ['exports', 'ember-runtime/system/lazy_load'], function (exports, _emberRuntimeSystemLazy_load) {
   'use strict';
 
@@ -1327,7 +1277,7 @@ enifed('ember-testing/setup_for_testing', ['exports', 'ember-metal/core', 'ember
 });
 
 // import Test from "ember-testing/test";  // ES6TODO: fix when cycles are supported
-enifed('ember-testing/support', ['exports', 'ember-metal/core', 'ember-views/system/jquery', 'ember-metal/environment'], function (exports, _emberMetalCore, _emberViewsSystemJquery, _emberMetalEnvironment) {
+enifed('ember-testing/support', ['exports', 'ember-metal/debug', 'ember-views/system/jquery', 'ember-metal/environment'], function (exports, _emberMetalDebug, _emberViewsSystemJquery, _emberMetalEnvironment) {
   'use strict';
 
   /**
@@ -1374,12 +1324,12 @@ enifed('ember-testing/support', ['exports', 'ember-metal/core', 'ember-views/sys
 
       // Try again to verify that the patch took effect or blow up.
       testCheckboxClick(function () {
-        _emberMetalCore.default.warn('clicked checkboxes should be checked! the jQuery patch didn\'t work', this.checked, { id: 'ember-testing.test-checkbox-click' });
+        _emberMetalDebug.warn('clicked checkboxes should be checked! the jQuery patch didn\'t work', this.checked, { id: 'ember-testing.test-checkbox-click' });
       });
     });
   }
 });
-enifed('ember-testing/test', ['exports', 'ember-metal/core', 'ember-metal/run_loop', 'ember-runtime/ext/rsvp', 'ember-testing/setup_for_testing', 'ember-application/system/application'], function (exports, _emberMetalCore, _emberMetalRun_loop, _emberRuntimeExtRsvp, _emberTestingSetup_for_testing, _emberApplicationSystemApplication) {
+enifed('ember-testing/test', ['exports', 'ember-metal/run_loop', 'ember-runtime/ext/rsvp', 'ember-testing/setup_for_testing', 'ember-application/system/application', 'ember-runtime/system/native_array'], function (exports, _emberMetalRun_loop, _emberRuntimeExtRsvp, _emberTestingSetup_for_testing, _emberApplicationSystemApplication, _emberRuntimeSystemNative_array) {
   'use strict';
 
   /**
@@ -1591,7 +1541,7 @@ enifed('ember-testing/test', ['exports', 'ember-metal/core', 'ember-metal/run_lo
         context = null;
       }
       if (!this.waiters) {
-        this.waiters = _emberMetalCore.default.A();
+        this.waiters = _emberRuntimeSystemNative_array.A();
       }
       this.waiters.push([context, callback]);
     },
@@ -1612,7 +1562,7 @@ enifed('ember-testing/test', ['exports', 'ember-metal/core', 'ember-metal/run_lo
         callback = context;
         context = null;
       }
-      this.waiters = _emberMetalCore.default.A(this.waiters.filter(function (elt) {
+      this.waiters = _emberRuntimeSystemNative_array.A(this.waiters.filter(function (elt) {
         return !(elt[0] === context && elt[1] === callback);
       }));
     }
@@ -1870,995 +1820,27 @@ enifed('ember-testing/test', ['exports', 'ember-metal/core', 'ember-metal/run_lo
 
   exports.default = Test;
 });
+enifed('ember-testing', ['exports', 'ember-metal/core', 'ember-testing/initializers', 'ember-testing/support', 'ember-testing/setup_for_testing', 'ember-testing/test', 'ember-testing/adapters/adapter', 'ember-testing/adapters/qunit', 'ember-testing/helpers'], function (exports, _emberMetalCore, _emberTestingInitializers, _emberTestingSupport, _emberTestingSetup_for_testing, _emberTestingTest, _emberTestingAdaptersAdapter, _emberTestingAdaptersQunit, _emberTestingHelpers) {
+  'use strict';
+
+  // adds helpers to helpers object in Test
+
+  /**
+    @module ember
+    @submodule ember-testing
+  */
+
+  _emberMetalCore.default.Test = _emberTestingTest.default;
+  _emberMetalCore.default.Test.Adapter = _emberTestingAdaptersAdapter.default;
+  _emberMetalCore.default.Test.QUnitAdapter = _emberTestingAdaptersQunit.default;
+  _emberMetalCore.default.setupForTesting = _emberTestingSetup_for_testing.default;
+});
+// to setup initializer
+// to handle various edge cases
 requireModule("ember-testing");
 
-})();
-define('ember-qunit', ['exports', 'ember-qunit/module-for', 'ember-qunit/module-for-component', 'ember-qunit/module-for-model', 'ember-qunit/test', 'ember-test-helpers'], function (exports, moduleFor, moduleForComponent, moduleForModel, test, ember_test_helpers) {
+}());
 
-  'use strict';
-
-
-
-  exports.moduleFor = moduleFor['default'];
-  exports.moduleForComponent = moduleForComponent['default'];
-  exports.moduleForModel = moduleForModel['default'];
-  exports.test = test['default'];
-  exports.setResolver = ember_test_helpers.setResolver;
-
-});
-define('ember-qunit/module-for-component', ['exports', 'ember-qunit/qunit-module', 'ember-test-helpers'], function (exports, qunit_module, ember_test_helpers) {
-
-  'use strict';
-
-  function moduleForComponent(name, description, callbacks) {
-    qunit_module.createModule(ember_test_helpers.TestModuleForComponent, name, description, callbacks);
-  }
-  exports['default'] = moduleForComponent;
-
-});
-define('ember-qunit/module-for-model', ['exports', 'ember-qunit/qunit-module', 'ember-test-helpers'], function (exports, qunit_module, ember_test_helpers) {
-
-  'use strict';
-
-  function moduleForModel(name, description, callbacks) {
-    qunit_module.createModule(ember_test_helpers.TestModuleForModel, name, description, callbacks);
-  }
-  exports['default'] = moduleForModel;
-
-});
-define('ember-qunit/module-for', ['exports', 'ember-qunit/qunit-module', 'ember-test-helpers'], function (exports, qunit_module, ember_test_helpers) {
-
-  'use strict';
-
-  function moduleFor(name, description, callbacks) {
-    qunit_module.createModule(ember_test_helpers.TestModule, name, description, callbacks);
-  }
-  exports['default'] = moduleFor;
-
-});
-define('ember-qunit/qunit-module', ['exports', 'qunit'], function (exports, qunit) {
-
-  'use strict';
-
-  exports.createModule = createModule;
-
-  function beforeEachCallback(callbacks) {
-    if (typeof callbacks !== 'object') { return; }
-    if (!callbacks) { return; }
-
-    var beforeEach;
-    
-    if (callbacks.setup) {
-      beforeEach = callbacks.setup;
-      delete callbacks.setup;
-    }
-
-    if (callbacks.beforeEach) {
-      beforeEach = callbacks.beforeEach;
-      delete callbacks.beforeEach;
-    }
-
-    return beforeEach;
-  }
-
-  function afterEachCallback(callbacks) {
-    if (typeof callbacks !== 'object') { return; }
-    if (!callbacks) { return; }
-
-    var afterEach;
-
-    if (callbacks.teardown) {
-      afterEach = callbacks.teardown;
-      delete callbacks.teardown;
-    }
-
-    if (callbacks.afterEach) {
-      afterEach = callbacks.afterEach;
-      delete callbacks.afterEach;
-    }
-
-    return afterEach;
-  }
-
-  function createModule(Constructor, name, description, callbacks) {
-    var beforeEach = beforeEachCallback(callbacks || description);
-    var afterEach  = afterEachCallback(callbacks || description);
-
-    var module = new Constructor(name, description, callbacks);
-
-    qunit.module(module.name, {
-      setup: function(assert) {
-        var done = assert.async();
-        module.setup().then(function() {
-          if (beforeEach) {
-            beforeEach.call(module.context, assert);
-          }
-        })['finally'](done);
-      },
-
-      teardown: function(assert) {
-        if (afterEach) {
-          afterEach.call(module.context, assert);
-        }
-        var done = assert.async();
-        module.teardown()['finally'](done);
-      }
-    });
-  }
-
-});
-define('ember-qunit/test', ['exports', 'ember', 'ember-test-helpers', 'qunit'], function (exports, Ember, ember_test_helpers, qunit) {
-
-  'use strict';
-
-  function test(testName, callback) {
-    function wrapper(assert) {
-      var context = ember_test_helpers.getContext();
-
-      var result = callback.call(context, assert);
-
-      function failTestOnPromiseRejection(reason) {
-        var message;
-        if (reason instanceof Error) {
-          message = reason.stack;
-        } else {
-          message = Ember['default'].inspect(reason);
-        }
-        ok(false, message);
-      }
-
-      Ember['default'].run(function(){
-        QUnit.stop();
-        Ember['default'].RSVP.Promise.resolve(result)['catch'](failTestOnPromiseRejection)['finally'](QUnit.start);
-      });
-    }
-
-    qunit.test(testName, wrapper);
-  }
-  exports['default'] = test;
-
-});
-define('ember-test-helpers', ['exports', 'ember', 'ember-test-helpers/test-module', 'ember-test-helpers/test-module-for-component', 'ember-test-helpers/test-module-for-model', 'ember-test-helpers/test-context', 'ember-test-helpers/test-resolver'], function (exports, Ember, TestModule, TestModuleForComponent, TestModuleForModel, test_context, test_resolver) {
-
-  'use strict';
-
-  Ember['default'].testing = true;
-
-  exports.TestModule = TestModule['default'];
-  exports.TestModuleForComponent = TestModuleForComponent['default'];
-  exports.TestModuleForModel = TestModuleForModel['default'];
-  exports.getContext = test_context.getContext;
-  exports.setContext = test_context.setContext;
-  exports.setResolver = test_resolver.setResolver;
-
-});
-define('ember-test-helpers/build-registry', ['exports'], function (exports) {
-
-  'use strict';
-
-  function exposeRegistryMethodsWithoutDeprecations(container) {
-    var methods = [
-      'register',
-      'unregister',
-      'resolve',
-      'normalize',
-      'typeInjection',
-      'injection',
-      'factoryInjection',
-      'factoryTypeInjection',
-      'has',
-      'options',
-      'optionsForType'
-    ];
-
-    function exposeRegistryMethod(container, method) {
-      if (method in container) {
-        container[method] = function() {
-          return container._registry[method].apply(container._registry, arguments);
-        };
-      }
-    }
-
-    for (var i = 0, l = methods.length; i < l; i++) {
-      exposeRegistryMethod(container, methods[i]);
-    }
-  }
-
-  exports['default'] = function(resolver) {
-    var registry, container;
-    var namespace = Ember.Object.create({
-      Resolver: { create: function() { return resolver; } }
-    });
-
-    function register(name, factory) {
-      var thingToRegisterWith = registry || container;
-
-      if (!container.lookupFactory(name)) {
-        thingToRegisterWith.register(name, factory);
-      }
-    }
-
-    if (Ember.Application.buildRegistry) {
-      registry = Ember.Application.buildRegistry(namespace);
-      registry.register('component-lookup:main', Ember.ComponentLookup);
-
-      registry = registry;
-      container = registry.container();
-      exposeRegistryMethodsWithoutDeprecations(container);
-    } else {
-      container = Ember.Application.buildContainer(namespace);
-      container.register('component-lookup:main', Ember.ComponentLookup);
-    }
-
-    // Ember 1.10.0 did not properly add `view:toplevel` or `view:default`
-    // to the registry in Ember.Application.buildRegistry :(
-    //
-    // Ember 2.0.0 removed Ember.View as public API, so only do this when
-    // Ember.View is present
-    if (Ember.View) {
-      register('view:toplevel', Ember.View.extend());
-    }
-
-    // Ember 2.0.0 removed Ember._MetamorphView from the Ember global, so only
-    // do this when present
-    if (Ember._MetamorphView) {
-      register('view:default', Ember._MetamorphView);
-    }
-
-    var globalContext = typeof global === 'object' && global || self;
-    if (globalContext.DS) {
-      var DS = globalContext.DS;
-      if (DS._setupContainer) {
-        DS._setupContainer(registry || container);
-      } else {
-        register('transform:boolean', DS.BooleanTransform);
-        register('transform:date', DS.DateTransform);
-        register('transform:number', DS.NumberTransform);
-        register('transform:string', DS.StringTransform);
-        register('serializer:-default', DS.JSONSerializer);
-        register('serializer:-rest', DS.RESTSerializer);
-        register('adapter:-rest', DS.RESTAdapter);
-      }
-    }
-
-    return {
-      registry: registry,
-      container: container
-    };
-  }
-
-});
-define('ember-test-helpers/isolated-container', function () {
-
-	'use strict';
-
-});
-define('ember-test-helpers/test-context', ['exports'], function (exports) {
-
-  'use strict';
-
-  exports.setContext = setContext;
-  exports.getContext = getContext;
-  exports.unsetContext = unsetContext;
-
-  var __test_context__;
-
-  function setContext(context) {
-    __test_context__ = context;
-  }
-
-  function getContext() {
-    return __test_context__;
-  }
-
-  function unsetContext() {
-    __test_context__ = undefined;
-  }
-
-});
-define('ember-test-helpers/test-module-for-component', ['exports', 'ember-test-helpers/test-module', 'ember', 'ember-test-helpers/test-resolver'], function (exports, TestModule, Ember, test_resolver) {
-
-  'use strict';
-
-  exports['default'] = TestModule['default'].extend({
-    init: function(componentName, description, callbacks) {
-      // Allow `description` to be omitted
-      if (!callbacks && typeof description === 'object') {
-        callbacks = description;
-        description = null;
-      } else if (!callbacks) {
-        callbacks = {};
-      }
-
-      this.componentName = componentName;
-
-      if (callbacks.needs || callbacks.unit || callbacks.integration === false) {
-        this.isUnitTest = true;
-      } else if (callbacks.integration) {
-        this.isUnitTest = false;
-      } else {
-        Ember['default'].deprecate("the component:" + componentName + " test module is implicitly running in unit test mode, which will change to integration test mode by default in an upcoming version of ember-test-helpers. Add `unit: true` or a `needs:[]` list to explicitly opt in to unit test mode.");
-        this.isUnitTest = true;
-      }
-
-      if (!this.isUnitTest) {
-        callbacks.integration = true;
-      }
-
-      if (description) {
-        this._super.call(this, 'component:' + componentName, description, callbacks);
-      } else {
-        this._super.call(this, 'component:' + componentName, callbacks);
-      }
-
-      if (this.isUnitTest) {
-        this.setupSteps.push(this.setupComponentUnitTest);
-      } else {
-        this.callbacks.subject = function() {
-          throw new Error("component integration tests do not support `subject()`.");
-        };
-        this.setupSteps.push(this.setupComponentIntegrationTest);
-        this.teardownSteps.push(this.teardownComponent);
-      }
-
-      if (Ember['default'].View && Ember['default'].View.views) {
-        this.setupSteps.push(this._aliasViewRegistry);
-        this.teardownSteps.push(this._resetViewRegistry);
-      }
-    },
-
-    _aliasViewRegistry: function() {
-      this._originalGlobalViewRegistry = Ember['default'].View.views;
-      var viewRegistry = this.container.lookup('-view-registry:main');
-
-      if (viewRegistry) {
-        Ember['default'].View.views = viewRegistry;
-      }
-    },
-
-    _resetViewRegistry: function() {
-      Ember['default'].View.views = this._originalGlobalViewRegistry;
-    },
-
-    setupComponentUnitTest: function() {
-      var _this = this;
-      var resolver = test_resolver.getResolver();
-      var context = this.context;
-
-      var layoutName = 'template:components/' + this.componentName;
-
-      var layout = resolver.resolve(layoutName);
-
-      var thingToRegisterWith = this.registry || this.container;
-      if (layout) {
-        thingToRegisterWith.register(layoutName, layout);
-        thingToRegisterWith.injection(this.subjectName, 'layout', layoutName);
-      }
-
-      context.dispatcher = this.container.lookup('event_dispatcher:main') || Ember['default'].EventDispatcher.create();
-      context.dispatcher.setup({}, '#ember-testing');
-
-      this.callbacks.render = function() {
-        var subject;
-
-        Ember['default'].run(function(){
-          subject = context.subject();
-          subject.appendTo('#ember-testing');
-        });
-
-        _this.teardownSteps.unshift(function() {
-          Ember['default'].run(function() {
-            Ember['default'].tryInvoke(subject, 'destroy');
-          });
-        });
-      };
-
-      this.callbacks.append = function() {
-        Ember['default'].deprecate('this.append() is deprecated. Please use this.render() or this.$() instead.');
-        return context.$();
-      };
-
-      context.$ = function() {
-        this.render();
-        var subject = this.subject();
-
-        return subject.$.apply(subject, arguments);
-      };
-    },
-
-    setupComponentIntegrationTest: function() {
-      var module = this;
-      var context = this.context;
-
-      this.actionHooks = {};
-
-      context.dispatcher = this.container.lookup('event_dispatcher:main') || Ember['default'].EventDispatcher.create();
-      context.dispatcher.setup({}, '#ember-testing');
-      context.actions = module.actionHooks;
-
-      (this.registry || this.container).register('component:-test-holder', Ember['default'].Component.extend());
-
-      context.render = function(template) {
-        if (!template) {
-          throw new Error("in a component integration test you must pass a template to `render()`");
-        }
-        if (Ember['default'].isArray(template)) {
-          template = template.join('');
-        }
-        if (typeof template === 'string') {
-          template = Ember['default'].Handlebars.compile(template);
-        }
-        module.component = module.container.lookupFactory('component:-test-holder').create({
-          layout: template
-        });
-
-        module.component.set('context' ,context);
-        module.component.set('controller', module);
-
-        Ember['default'].run(function() {
-          module.component.appendTo('#ember-testing');
-        });
-      };
-
-      context.$ = function() {
-        return module.component.$.apply(module.component, arguments);
-      };
-
-      context.set = function(key, value) {
-        Ember['default'].run(function() {
-          Ember['default'].set(context, key, value);
-        });
-      };
-
-      context.setProperties = function(hash) {
-        Ember['default'].run(function() {
-          Ember['default'].setProperties(context, hash);
-        });
-      };
-
-      context.get = function(key) {
-        return Ember['default'].get(context, key);
-      };
-
-      context.getProperties = function() {
-        var args = Array.prototype.slice.call(arguments);
-        return Ember['default'].getProperties(context, args);
-      };
-
-      context.on = function(actionName, handler) {
-        module.actionHooks[actionName] = handler;
-      };
-
-    },
-
-    setupContext: function() {
-      this._super.call(this);
-
-      // only setup the injection if we are running against a version
-      // of Ember that has `-view-registry:main` (Ember >= 1.12)
-      if (this.container.lookupFactory('-view-registry:main')) {
-        (this.registry || this.container).injection('component', '_viewRegistry', '-view-registry:main');
-      }
-
-      if (!this.isUnitTest) {
-        this.context.factory = function() {};
-      }
-    },
-
-    send: function(actionName) {
-      var hook = this.actionHooks[actionName];
-      if (!hook) {
-        throw new Error("integration testing template received unexpected action " + actionName);
-      }
-      hook.apply(this, Array.prototype.slice.call(arguments, 1));
-    },
-
-    teardownComponent: function() {
-      var component = this.component;
-      if (component) {
-        Ember['default'].run(function() {
-          component.destroy();
-        });
-      }
-    }
-  });
-
-});
-define('ember-test-helpers/test-module-for-model', ['exports', 'ember-test-helpers/test-module', 'ember'], function (exports, TestModule, Ember) {
-
-  'use strict';
-
-  exports['default'] = TestModule['default'].extend({
-    init: function(modelName, description, callbacks) {
-      this.modelName = modelName;
-
-      this._super.call(this, 'model:' + modelName, description, callbacks);
-
-      this.setupSteps.push(this.setupModel);
-    },
-
-    setupModel: function() {
-      var container = this.container;
-      var defaultSubject = this.defaultSubject;
-      var callbacks = this.callbacks;
-      var modelName = this.modelName;
-
-      var adapterFactory = container.lookupFactory('adapter:application');
-      if (!adapterFactory) {
-        adapterFactory = DS.JSONAPIAdapter || DS.FixtureAdapter;
-
-        var thingToRegisterWith = this.registry || this.container;
-        thingToRegisterWith.register('adapter:application', adapterFactory);
-      }
-
-      callbacks.store = function(){
-        var container = this.container;
-        var store = container.lookup('service:store') || container.lookup('store:main');
-        return store;
-      };
-
-      if (callbacks.subject === defaultSubject) {
-        callbacks.subject = function(options) {
-          var container = this.container;
-
-          return Ember['default'].run(function() {
-            var store = container.lookup('service:store') || container.lookup('store:main');
-            return store.createRecord(modelName, options);
-          });
-        };
-      }
-    }
-  });
-
-});
-define('ember-test-helpers/test-module', ['exports', 'ember', 'ember-test-helpers/test-context', 'klassy', 'ember-test-helpers/test-resolver', 'ember-test-helpers/build-registry'], function (exports, Ember, test_context, klassy, test_resolver, buildRegistry) {
-
-  'use strict';
-
-  exports['default'] = klassy.Klass.extend({
-    init: function(subjectName, description, callbacks) {
-      // Allow `description` to be omitted, in which case it should
-      // default to `subjectName`
-      if (!callbacks && typeof description === 'object') {
-        callbacks = description;
-        description = subjectName;
-      }
-
-      this.subjectName = subjectName;
-      this.description = description || subjectName;
-      this.name = description || subjectName;
-      this.callbacks = callbacks || {};
-
-      if (this.callbacks.integration) {
-        this.isIntegration = callbacks.integration;
-        delete callbacks.integration;
-      }
-
-      this.initSubject();
-      this.initNeeds();
-      this.initSetupSteps();
-      this.initTeardownSteps();
-    },
-
-    initSubject: function() {
-      this.callbacks.subject = this.callbacks.subject || this.defaultSubject;
-    },
-
-    initNeeds: function() {
-      this.needs = [this.subjectName];
-      if (this.callbacks.needs) {
-        this.needs = this.needs.concat(this.callbacks.needs);
-        delete this.callbacks.needs;
-      }
-    },
-
-    initSetupSteps: function() {
-      this.setupSteps = [];
-      this.contextualizedSetupSteps = [];
-
-      if (this.callbacks.beforeSetup) {
-        this.setupSteps.push( this.callbacks.beforeSetup );
-        delete this.callbacks.beforeSetup;
-      }
-
-      this.setupSteps.push(this.setupContainer);
-      this.setupSteps.push(this.setupContext);
-      this.setupSteps.push(this.setupTestElements);
-
-      if (this.callbacks.setup) {
-        this.contextualizedSetupSteps.push( this.callbacks.setup );
-        delete this.callbacks.setup;
-      }
-    },
-
-    initTeardownSteps: function() {
-      this.teardownSteps = [];
-      this.contextualizedTeardownSteps = [];
-
-      if (this.callbacks.teardown) {
-        this.contextualizedTeardownSteps.push( this.callbacks.teardown );
-        delete this.callbacks.teardown;
-      }
-
-      this.teardownSteps.push(this.teardownSubject);
-      this.teardownSteps.push(this.teardownContainer);
-      this.teardownSteps.push(this.teardownContext);
-      this.teardownSteps.push(this.teardownTestElements);
-
-      if (this.callbacks.afterTeardown) {
-        this.teardownSteps.push( this.callbacks.afterTeardown );
-        delete this.callbacks.afterTeardown;
-      }
-    },
-
-    setup: function() {
-      var self = this;
-      return self.invokeSteps(self.setupSteps).then(function() {
-        self.contextualizeCallbacks();
-        return self.invokeSteps(self.contextualizedSetupSteps, self.context);
-      });
-    },
-
-    teardown: function() {
-      var self = this;
-      return self.invokeSteps(self.contextualizedTeardownSteps, self.context).then(function() {
-        return self.invokeSteps(self.teardownSteps);
-      }).then(function() {
-        self.cache = null;
-        self.cachedCalls = null;
-      });
-    },
-
-    invokeSteps: function(steps, _context) {
-      var context = _context;
-      if (!context) {
-        context = this;
-      }
-      steps = steps.slice();
-      function nextStep() {
-        var step = steps.shift();
-        if (step) {
-          // guard against exceptions, for example missing components referenced from needs.
-          return new Ember['default'].RSVP.Promise(function(ok) {
-            ok(step.call(context));
-          }).then(nextStep);
-        } else {
-          return Ember['default'].RSVP.resolve();
-        }
-      }
-      return nextStep();
-    },
-
-    setupContainer: function() {
-      if (this.isIntegration) {
-        this._setupIntegratedContainer();
-      } else {
-        this._setupIsolatedContainer();
-      }
-    },
-
-    setupContext: function() {
-      var subjectName = this.subjectName;
-      var container = this.container;
-
-      var factory = function() {
-        return container.lookupFactory(subjectName);
-      };
-
-      test_context.setContext({
-        container:  this.container,
-        registry: this.registry,
-        factory:    factory,
-        dispatcher: null
-      });
-
-      this.context = test_context.getContext();
-    },
-
-    setupTestElements: function() {
-      if (Ember['default'].$('#ember-testing').length === 0) {
-        Ember['default'].$('<div id="ember-testing"/>').appendTo(document.body);
-      }
-    },
-
-    teardownSubject: function() {
-      var subject = this.cache.subject;
-
-      if (subject) {
-        Ember['default'].run(function() {
-          Ember['default'].tryInvoke(subject, 'destroy');
-        });
-      }
-    },
-
-    teardownContainer: function() {
-      var container = this.container;
-      Ember['default'].run(function() {
-        container.destroy();
-      });
-    },
-
-    teardownContext: function() {
-      var context = this.context;
-      this.context = undefined;
-      test_context.unsetContext();
-
-      if (context.dispatcher && !context.dispatcher.isDestroyed) {
-        Ember['default'].run(function() {
-          context.dispatcher.destroy();
-        });
-      }
-    },
-
-    teardownTestElements: function() {
-      Ember['default'].$('#ember-testing').empty();
-
-      // Ember 2.0.0 removed Ember.View as public API, so only do this when
-      // Ember.View is present
-      if (Ember['default'].View && Ember['default'].View.views) {
-        Ember['default'].View.views = {};
-      }
-    },
-
-    defaultSubject: function(options, factory) {
-      return factory.create(options);
-    },
-
-    // allow arbitrary named factories, like rspec let
-    contextualizeCallbacks: function() {
-      var _this     = this;
-      var callbacks = this.callbacks;
-      var context   = this.context;
-      var factory   = context.factory;
-
-      this.cache = this.cache || {};
-      this.cachedCalls = this.cachedCalls || {};
-
-      var keys = (Object.keys || Ember['default'].keys)(callbacks);
-
-      for (var i = 0, l = keys.length; i < l; i++) {
-        (function(key) {
-
-          context[key] = function(options) {
-            if (_this.cachedCalls[key]) { return _this.cache[key]; }
-
-            var result = callbacks[key].call(_this, options, factory());
-
-            _this.cache[key] = result;
-            _this.cachedCalls[key] = true;
-
-            return result;
-          };
-
-        })(keys[i]);
-      }
-    },
-
-    _setupContainer: function() {
-      var resolver = test_resolver.getResolver();
-      var items = buildRegistry['default'](resolver);
-
-      this.container = items.container;
-      this.registry = items.registry;
-
-
-      var thingToRegisterWith = this.registry || this.container;
-      var router = resolver.resolve('router:main');
-      router = router || Ember['default'].Router.extend();
-      thingToRegisterWith.register('router:main', router);
-    },
-
-    _setupIsolatedContainer: function() {
-      var resolver = test_resolver.getResolver();
-      this._setupContainer();
-
-      var thingToRegisterWith = this.registry || this.container;
-
-      for (var i = this.needs.length; i > 0; i--) {
-        var fullName = this.needs[i - 1];
-        var normalizedFullName = resolver.normalize(fullName);
-        thingToRegisterWith.register(fullName, resolver.resolve(normalizedFullName));
-      }
-
-      thingToRegisterWith.resolver = function() { };
-    },
-
-    _setupIntegratedContainer: function() {
-      this._setupContainer();
-    }
-
-  });
-
-});
-define('ember-test-helpers/test-resolver', ['exports'], function (exports) {
-
-  'use strict';
-
-  exports.setResolver = setResolver;
-  exports.getResolver = getResolver;
-
-  var __resolver__;
-
-  function setResolver(resolver) {
-    __resolver__ = resolver;
-  }
-
-  function getResolver() {
-    if (__resolver__ == null) throw new Error('you must set a resolver with `testResolver.set(resolver)`');
-    return __resolver__;
-  }
-
-});
-define('klassy', ['exports'], function (exports) {
-
-  'use strict';
-
-  /**
-   Extend a class with the properties and methods of one or more other classes.
-
-   When a method is replaced with another method, it will be wrapped in a
-   function that makes the replaced method accessible via `this._super`.
-
-   @method extendClass
-   @param {Object} destination The class to merge into
-   @param {Object} source One or more source classes
-   */
-  var extendClass = function(destination) {
-    var sources = Array.prototype.slice.call(arguments, 1);
-    var source;
-
-    for (var i = 0, l = sources.length; i < l; i++) {
-      source = sources[i];
-
-      for (var p in source) {
-        if (source.hasOwnProperty(p) &&
-          destination[p] &&
-          typeof destination[p] === 'function' &&
-          typeof source[p] === 'function') {
-
-          /* jshint loopfunc:true */
-          destination[p] =
-            (function(destinationFn, sourceFn) {
-              var wrapper = function() {
-                var prevSuper = this._super;
-                this._super = destinationFn;
-
-                var ret = sourceFn.apply(this, arguments);
-
-                this._super = prevSuper;
-
-                return ret;
-              };
-              wrapper.wrappedFunction = sourceFn;
-              return wrapper;
-            })(destination[p], source[p]);
-
-        } else {
-          destination[p] = source[p];
-        }
-      }
-    }
-  };
-
-  // `subclassing` is a state flag used by `defineClass` to track when a class is
-  // being subclassed. It allows constructors to avoid calling `init`, which can
-  // be expensive and cause undesirable side effects.
-  var subclassing = false;
-
-  /**
-   Define a new class with the properties and methods of one or more other classes.
-
-   The new class can be based on a `SuperClass`, which will be inserted into its
-   prototype chain.
-
-   Furthermore, one or more mixins (object that contain properties and/or methods)
-   may be specified, which will be applied in order. When a method is replaced
-   with another method, it will be wrapped in a function that makes the previous
-   method accessible via `this._super`.
-
-   @method defineClass
-   @param {Object} SuperClass A base class to extend. If `mixins` are to be included
-   without a `SuperClass`, pass `null` for SuperClass.
-   @param {Object} mixins One or more objects that contain properties and methods
-   to apply to the new class.
-   */
-  var defineClass = function(SuperClass) {
-    var Klass = function() {
-      if (!subclassing && this.init) {
-        this.init.apply(this, arguments);
-      }
-    };
-
-    if (SuperClass) {
-      subclassing = true;
-      Klass.prototype = new SuperClass();
-      subclassing = false;
-    }
-
-    if (arguments.length > 1) {
-      var extendArgs = Array.prototype.slice.call(arguments, 1);
-      extendArgs.unshift(Klass.prototype);
-      extendClass.apply(Klass.prototype, extendArgs);
-    }
-
-    Klass.constructor = Klass;
-
-    Klass.extend = function() {
-      var args = Array.prototype.slice.call(arguments, 0);
-      args.unshift(Klass);
-      return defineClass.apply(Klass, args);
-    };
-
-    return Klass;
-  };
-
-  /**
-   A base class that can be extended.
-
-   @example
-
-   ```javascript
-   var CelestialObject = Klass.extend({
-     init: function(name) {
-       this._super();
-       this.name = name;
-       this.isCelestialObject = true;
-     },
-     greeting: function() {
-       return 'Hello from ' + this.name;
-     }
-   });
-
-   var Planet = CelestialObject.extend({
-     init: function(name) {
-       this._super.apply(this, arguments);
-       this.isPlanet = true;
-     },
-     greeting: function() {
-       return this._super() + '!';
-     },
-   });
-
-   var earth = new Planet('Earth');
-
-   console.log(earth instanceof Klass);           // true
-   console.log(earth instanceof CelestialObject); // true
-   console.log(earth instanceof Planet);          // true
-
-   console.log(earth.isCelestialObject);          // true
-   console.log(earth.isPlanet);                   // true
-
-   console.log(earth.greeting());                 // 'Hello from Earth!'
-   ```
-
-   @class Klass
-   */
-  var Klass = defineClass(null, {
-    init: function() {}
-  });
-
-  exports.Klass = Klass;
-  exports.defineClass = defineClass;
-  exports.extendClass = extendClass;
-
-});
-define('qunit', ['exports'], function (exports) {
-
-	'use strict';
-
-	/* globals test:true */
-
-	var module = QUnit.module;
-	var test = QUnit.test;
-	var skip = QUnit.skip;
-
-	exports['default'] = QUnit;
-
-	exports.module = module;
-	exports.test = test;
-	exports.skip = skip;
-
-});
 /*!
  * QUnit 1.18.0
  * http://qunitjs.com/
@@ -6854,6 +5836,1582 @@ jQuery(document).ready(function() {
   }, 250);
 });
 
+define('ember-qunit/module-for-component', ['exports', './qunit-module', 'ember-test-helpers'], function (exports, _qunitModule, _emberTestHelpers) {
+  'use strict';
+
+  exports['default'] = moduleForComponent;
+
+  function moduleForComponent(name, description, callbacks) {
+    _qunitModule.createModule(_emberTestHelpers.TestModuleForComponent, name, description, callbacks);
+  }
+});
+define('ember-qunit/module-for-model', ['exports', './qunit-module', 'ember-test-helpers'], function (exports, _qunitModule, _emberTestHelpers) {
+  'use strict';
+
+  exports['default'] = moduleForModel;
+
+  function moduleForModel(name, description, callbacks) {
+    _qunitModule.createModule(_emberTestHelpers.TestModuleForModel, name, description, callbacks);
+  }
+});
+define('ember-qunit/module-for', ['exports', './qunit-module', 'ember-test-helpers'], function (exports, _qunitModule, _emberTestHelpers) {
+  'use strict';
+
+  exports['default'] = moduleFor;
+
+  function moduleFor(name, description, callbacks) {
+    _qunitModule.createModule(_emberTestHelpers.TestModule, name, description, callbacks);
+  }
+});
+define('ember-qunit/only', ['exports', 'ember-qunit/test-wrapper', 'qunit'], function (exports, _emberQunitTestWrapper, _qunit) {
+  'use strict';
+
+  exports['default'] = only;
+
+  function only() /* testName, expected, callback, async */{
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; ++_key) {
+      args[_key] = arguments[_key];
+    }
+    args.unshift(_qunit.only);
+    _emberQunitTestWrapper['default'].apply(null, args);
+  }
+});
+define('ember-qunit/qunit-module', ['exports', 'qunit'], function (exports, _qunit) {
+  'use strict';
+
+  exports.createModule = createModule;
+
+  function beforeEachCallback(callbacks) {
+    if (typeof callbacks !== 'object') {
+      return;
+    }
+    if (!callbacks) {
+      return;
+    }
+
+    var beforeEach;
+
+    if (callbacks.setup) {
+      beforeEach = callbacks.setup;
+      delete callbacks.setup;
+    }
+
+    if (callbacks.beforeEach) {
+      beforeEach = callbacks.beforeEach;
+      delete callbacks.beforeEach;
+    }
+
+    return beforeEach;
+  }
+
+  function afterEachCallback(callbacks) {
+    if (typeof callbacks !== 'object') {
+      return;
+    }
+    if (!callbacks) {
+      return;
+    }
+
+    var afterEach;
+
+    if (callbacks.teardown) {
+      afterEach = callbacks.teardown;
+      delete callbacks.teardown;
+    }
+
+    if (callbacks.afterEach) {
+      afterEach = callbacks.afterEach;
+      delete callbacks.afterEach;
+    }
+
+    return afterEach;
+  }
+
+  function createModule(Constructor, name, description, callbacks) {
+    var beforeEach = beforeEachCallback(callbacks || description);
+    var afterEach = afterEachCallback(callbacks || description);
+
+    var module = new Constructor(name, description, callbacks);
+
+    _qunit.module(module.name, {
+      setup: function setup(assert) {
+        var done = assert.async();
+        return module.setup().then(function () {
+          if (beforeEach) {
+            beforeEach.call(module.context, assert);
+          }
+        })['finally'](done);
+      },
+
+      teardown: function teardown(assert) {
+        if (afterEach) {
+          afterEach.call(module.context, assert);
+        }
+        var done = assert.async();
+        return module.teardown()['finally'](done);
+      }
+    });
+  }
+});
+define('ember-qunit/test-wrapper', ['exports', 'ember', 'ember-test-helpers'], function (exports, _ember, _emberTestHelpers) {
+  'use strict';
+
+  exports['default'] = testWrapper;
+
+  function testWrapper(qunit /*, testName, expected, callback, async */) {
+    var callback;
+    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; ++_key) {
+      args[_key - 1] = arguments[_key];
+    }
+
+    function wrapper() {
+      var context = _emberTestHelpers.getContext();
+
+      var result = callback.apply(context, arguments);
+
+      function failTestOnPromiseRejection(reason) {
+        var message;
+        if (reason instanceof Error) {
+          message = reason.stack;
+          if (reason.message && message.indexOf(reason.message) < 0) {
+            // PhantomJS has a `stack` that does not contain the actual
+            // exception message.
+            message = _ember['default'].inspect(reason) + "\n" + message;
+          }
+        } else {
+          message = _ember['default'].inspect(reason);
+        }
+        ok(false, message);
+      }
+
+      _ember['default'].run(function () {
+        QUnit.stop();
+        _ember['default'].RSVP.Promise.resolve(result)['catch'](failTestOnPromiseRejection)['finally'](QUnit.start);
+      });
+    }
+
+    if (args.length === 2) {
+      callback = args.splice(1, 1, wrapper)[0];
+    } else {
+      callback = args.splice(2, 1, wrapper)[0];
+    }
+
+    qunit.apply(null, args);
+  }
+});
+define('ember-qunit/test', ['exports', 'ember-qunit/test-wrapper', 'qunit'], function (exports, _emberQunitTestWrapper, _qunit) {
+  'use strict';
+
+  exports['default'] = test;
+
+  function test() /* testName, expected, callback, async */{
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; ++_key) {
+      args[_key] = arguments[_key];
+    }
+    args.unshift(_qunit.test);
+    _emberQunitTestWrapper['default'].apply(null, args);
+  }
+});
+define('ember-qunit', ['exports', 'ember-qunit/module-for', 'ember-qunit/module-for-component', 'ember-qunit/module-for-model', 'ember-qunit/test', 'ember-qunit/only', 'ember-test-helpers'], function (exports, _emberQunitModuleFor, _emberQunitModuleForComponent, _emberQunitModuleForModel, _emberQunitTest, _emberQunitOnly, _emberTestHelpers) {
+  'use strict';
+
+  exports.moduleFor = _emberQunitModuleFor['default'];
+  exports.moduleForComponent = _emberQunitModuleForComponent['default'];
+  exports.moduleForModel = _emberQunitModuleForModel['default'];
+  exports.test = _emberQunitTest['default'];
+  exports.only = _emberQunitOnly['default'];
+  exports.setResolver = _emberTestHelpers.setResolver;
+});
+define('ember-test-helpers/abstract-test-module', ['exports', 'klassy', './wait', './test-context', 'ember'], function (exports, _klassy, _wait, _testContext, _ember) {
+  'use strict';
+
+  exports['default'] = _klassy.Klass.extend({
+    init: function init(name, options) {
+      this.name = name;
+      this.callbacks = options || {};
+
+      this.initSetupSteps();
+      this.initTeardownSteps();
+    },
+
+    setup: function setup(assert) {
+      var _this = this;
+
+      return this.invokeSteps(this.setupSteps, this, assert).then(function () {
+        _this.contextualizeCallbacks();
+        return _this.invokeSteps(_this.contextualizedSetupSteps, _this.context, assert);
+      });
+    },
+
+    teardown: function teardown(assert) {
+      var _this2 = this;
+
+      return this.invokeSteps(this.contextualizedTeardownSteps, this.context, assert).then(function () {
+        return _this2.invokeSteps(_this2.teardownSteps, _this2, assert);
+      }).then(function () {
+        _this2.cache = null;
+        _this2.cachedCalls = null;
+      });
+    },
+
+    initSetupSteps: function initSetupSteps() {
+      this.setupSteps = [];
+      this.contextualizedSetupSteps = [];
+
+      if (this.callbacks.beforeSetup) {
+        this.setupSteps.push(this.callbacks.beforeSetup);
+        delete this.callbacks.beforeSetup;
+      }
+
+      this.setupSteps.push(this.setupContext);
+      this.setupSteps.push(this.setupTestElements);
+      this.setupSteps.push(this.setupAJAXListeners);
+
+      if (this.callbacks.setup) {
+        this.contextualizedSetupSteps.push(this.callbacks.setup);
+        delete this.callbacks.setup;
+      }
+    },
+
+    invokeSteps: function invokeSteps(steps, context, assert) {
+      steps = steps.slice();
+
+      function nextStep() {
+        var step = steps.shift();
+        if (step) {
+          // guard against exceptions, for example missing components referenced from needs.
+          return new _ember['default'].RSVP.Promise(function (resolve) {
+            resolve(step.call(context, assert));
+          }).then(nextStep);
+        } else {
+          return _ember['default'].RSVP.resolve();
+        }
+      }
+      return nextStep();
+    },
+
+    contextualizeCallbacks: function contextualizeCallbacks() {},
+
+    initTeardownSteps: function initTeardownSteps() {
+      this.teardownSteps = [];
+      this.contextualizedTeardownSteps = [];
+
+      if (this.callbacks.teardown) {
+        this.contextualizedTeardownSteps.push(this.callbacks.teardown);
+        delete this.callbacks.teardown;
+      }
+
+      this.teardownSteps.push(this.teardownContext);
+      this.teardownSteps.push(this.teardownTestElements);
+      this.teardownSteps.push(this.teardownAJAXListeners);
+
+      if (this.callbacks.afterTeardown) {
+        this.teardownSteps.push(this.callbacks.afterTeardown);
+        delete this.callbacks.afterTeardown;
+      }
+    },
+
+    setupTestElements: function setupTestElements() {
+      if (_ember['default'].$('#ember-testing').length === 0) {
+        _ember['default'].$('<div id="ember-testing"/>').appendTo(document.body);
+      }
+    },
+
+    setupContext: function setupContext(options) {
+      var config = _ember['default'].merge({
+        dispatcher: null,
+        inject: {}
+      }, options);
+
+      _testContext.setContext(config);
+    },
+
+    setupAJAXListeners: function setupAJAXListeners() {
+      _wait._setupAJAXHooks();
+    },
+
+    teardownAJAXListeners: function teardownAJAXListeners() {
+      _wait._teardownAJAXHooks();
+    },
+
+    teardownTestElements: function teardownTestElements() {
+      _ember['default'].$('#ember-testing').empty();
+
+      // Ember 2.0.0 removed Ember.View as public API, so only do this when
+      // Ember.View is present
+      if (_ember['default'].View && _ember['default'].View.views) {
+        _ember['default'].View.views = {};
+      }
+    },
+
+    teardownContext: function teardownContext() {
+      var context = this.context;
+      this.context = undefined;
+      _testContext.unsetContext();
+
+      if (context && context.dispatcher && !context.dispatcher.isDestroyed) {
+        _ember['default'].run(function () {
+          context.dispatcher.destroy();
+        });
+      }
+    }
+  });
+});
+define('ember-test-helpers/build-registry', ['exports', 'ember'], function (exports, _ember) {
+  /* globals global, self, requirejs, require */
+
+  'use strict';
+
+  function exposeRegistryMethodsWithoutDeprecations(container) {
+    var methods = ['register', 'unregister', 'resolve', 'normalize', 'typeInjection', 'injection', 'factoryInjection', 'factoryTypeInjection', 'has', 'options', 'optionsForType'];
+
+    function exposeRegistryMethod(container, method) {
+      if (method in container) {
+        container[method] = function () {
+          return container._registry[method].apply(container._registry, arguments);
+        };
+      }
+    }
+
+    for (var i = 0, l = methods.length; i < l; i++) {
+      exposeRegistryMethod(container, methods[i]);
+    }
+  }
+
+  var Owner = (function () {
+    if (_ember['default']._RegistryProxyMixin && _ember['default']._ContainerProxyMixin) {
+      return _ember['default'].Object.extend(_ember['default']._RegistryProxyMixin, _ember['default']._ContainerProxyMixin);
+    }
+
+    return _ember['default'].Object.extend();
+  })();
+
+  exports['default'] = function (resolver) {
+    var fallbackRegistry, registry, container;
+    var namespace = _ember['default'].Object.create({
+      Resolver: { create: function create() {
+          return resolver;
+        } }
+    });
+
+    function register(name, factory) {
+      var thingToRegisterWith = registry || container;
+
+      if (!container.lookupFactory(name)) {
+        thingToRegisterWith.register(name, factory);
+      }
+    }
+
+    if (_ember['default'].Application.buildRegistry) {
+      fallbackRegistry = _ember['default'].Application.buildRegistry(namespace);
+      fallbackRegistry.register('component-lookup:main', _ember['default'].ComponentLookup);
+
+      registry = new _ember['default'].Registry({
+        fallback: fallbackRegistry
+      });
+
+      // these properties are set on the fallback registry by `buildRegistry`
+      // and on the primary registry within the ApplicationInstance constructor
+      // but we need to manually recreate them since ApplicationInstance's are not
+      // exposed externally
+      registry.normalizeFullName = fallbackRegistry.normalizeFullName;
+      registry.makeToString = fallbackRegistry.makeToString;
+      registry.describe = fallbackRegistry.describe;
+
+      var owner = Owner.create({
+        __registry__: registry,
+        __container__: null
+      });
+
+      container = registry.container({ owner: owner });
+      owner.__container__ = container;
+
+      exposeRegistryMethodsWithoutDeprecations(container);
+    } else {
+      container = _ember['default'].Application.buildContainer(namespace);
+      container.register('component-lookup:main', _ember['default'].ComponentLookup);
+    }
+
+    // Ember 1.10.0 did not properly add `view:toplevel` or `view:default`
+    // to the registry in Ember.Application.buildRegistry :(
+    //
+    // Ember 2.0.0 removed Ember.View as public API, so only do this when
+    // Ember.View is present
+    if (_ember['default'].View) {
+      register('view:toplevel', _ember['default'].View.extend());
+    }
+
+    // Ember 2.0.0 removed Ember._MetamorphView from the Ember global, so only
+    // do this when present
+    if (_ember['default']._MetamorphView) {
+      register('view:default', _ember['default']._MetamorphView);
+    }
+
+    var globalContext = typeof global === 'object' && global || self;
+    if (requirejs.entries['ember-data/setup-container']) {
+      // ember-data is a proper ember-cli addon since 2.3; if no 'import
+      // 'ember-data'' is present somewhere in the tests, there is also no `DS`
+      // available on the globalContext and hence ember-data wouldn't be setup
+      // correctly for the tests; that's why we import and call setupContainer
+      // here; also see https://github.com/emberjs/data/issues/4071 for context
+      var setupContainer = require('ember-data/setup-container')['default'];
+      setupContainer(registry || container);
+    } else if (globalContext.DS) {
+      var DS = globalContext.DS;
+      if (DS._setupContainer) {
+        DS._setupContainer(registry || container);
+      } else {
+        register('transform:boolean', DS.BooleanTransform);
+        register('transform:date', DS.DateTransform);
+        register('transform:number', DS.NumberTransform);
+        register('transform:string', DS.StringTransform);
+        register('serializer:-default', DS.JSONSerializer);
+        register('serializer:-rest', DS.RESTSerializer);
+        register('adapter:-rest', DS.RESTAdapter);
+      }
+    }
+
+    return {
+      registry: registry,
+      container: container
+    };
+  };
+});
+define('ember-test-helpers/has-ember-version', ['exports', 'ember'], function (exports, _ember) {
+  'use strict';
+
+  exports['default'] = hasEmberVersion;
+
+  function hasEmberVersion(major, minor) {
+    var numbers = _ember['default'].VERSION.split('-')[0].split('.');
+    var actualMajor = parseInt(numbers[0], 10);
+    var actualMinor = parseInt(numbers[1], 10);
+    return actualMajor > major || actualMajor === major && actualMinor >= minor;
+  }
+});
+define("ember-test-helpers/test-context", ["exports"], function (exports) {
+  "use strict";
+
+  exports.setContext = setContext;
+  exports.getContext = getContext;
+  exports.unsetContext = unsetContext;
+  var __test_context__;
+
+  function setContext(context) {
+    __test_context__ = context;
+  }
+
+  function getContext() {
+    return __test_context__;
+  }
+
+  function unsetContext() {
+    __test_context__ = undefined;
+  }
+});
+define('ember-test-helpers/test-module-for-acceptance', ['exports', './abstract-test-module', 'ember', './test-context'], function (exports, _abstractTestModule, _ember, _testContext) {
+  'use strict';
+
+  exports['default'] = _abstractTestModule['default'].extend({
+    setupContext: function setupContext() {
+      this._super({ application: this.createApplication() });
+    },
+
+    teardownContext: function teardownContext() {
+      _ember['default'].run(function () {
+        _testContext.getContext().application.destroy();
+      });
+
+      this._super();
+    },
+
+    createApplication: function createApplication() {
+      var _callbacks = this.callbacks;
+      var Application = _callbacks.Application;
+      var config = _callbacks.config;
+
+      var application = undefined;
+
+      _ember['default'].run(function () {
+        application = Application.create(config);
+        application.setupForTesting();
+        application.injectTestHelpers();
+      });
+
+      return application;
+    }
+  });
+});
+define('ember-test-helpers/test-module-for-component', ['exports', './test-module', 'ember', './test-resolver', './has-ember-version'], function (exports, _testModule, _ember, _testResolver, _hasEmberVersion) {
+  'use strict';
+
+  exports['default'] = _testModule['default'].extend({
+    isComponentTestModule: true,
+
+    init: function init(componentName, description, callbacks) {
+      // Allow `description` to be omitted
+      if (!callbacks && typeof description === 'object') {
+        callbacks = description;
+        description = null;
+      } else if (!callbacks) {
+        callbacks = {};
+      }
+
+      this.componentName = componentName;
+
+      if (callbacks.needs || callbacks.unit || callbacks.integration === false) {
+        this.isUnitTest = true;
+      } else if (callbacks.integration) {
+        this.isUnitTest = false;
+      } else {
+        _ember['default'].deprecate("the component:" + componentName + " test module is implicitly running in unit test mode, " + "which will change to integration test mode by default in an upcoming version of " + "ember-test-helpers. Add `unit: true` or a `needs:[]` list to explicitly opt in to unit " + "test mode.", false, { id: 'ember-test-helpers.test-module-for-component.test-type', until: '0.6.0' });
+        this.isUnitTest = true;
+      }
+
+      if (description) {
+        this._super.call(this, 'component:' + componentName, description, callbacks);
+      } else {
+        this._super.call(this, 'component:' + componentName, callbacks);
+      }
+
+      if (!this.isUnitTest && !this.isLegacy) {
+        callbacks.integration = true;
+      }
+
+      if (this.isUnitTest || this.isLegacy) {
+        this.setupSteps.push(this.setupComponentUnitTest);
+      } else {
+        this.callbacks.subject = function () {
+          throw new Error("component integration tests do not support `subject()`. Instead, render the component as if it were HTML: `this.render('<my-component foo=true>');`. For more information, read: http://guides.emberjs.com/v2.2.0/testing/testing-components/");
+        };
+        this.setupSteps.push(this.setupComponentIntegrationTest);
+        this.teardownSteps.unshift(this.teardownComponent);
+      }
+
+      if (_ember['default'].View && _ember['default'].View.views) {
+        this.setupSteps.push(this._aliasViewRegistry);
+        this.teardownSteps.unshift(this._resetViewRegistry);
+      }
+    },
+
+    _aliasViewRegistry: function _aliasViewRegistry() {
+      this._originalGlobalViewRegistry = _ember['default'].View.views;
+      var viewRegistry = this.container.lookup('-view-registry:main');
+
+      if (viewRegistry) {
+        _ember['default'].View.views = viewRegistry;
+      }
+    },
+
+    _resetViewRegistry: function _resetViewRegistry() {
+      _ember['default'].View.views = this._originalGlobalViewRegistry;
+    },
+
+    setupComponentUnitTest: function setupComponentUnitTest() {
+      var _this = this;
+      var resolver = _testResolver.getResolver();
+      var context = this.context;
+
+      var layoutName = 'template:components/' + this.componentName;
+
+      var layout = resolver.resolve(layoutName);
+
+      var thingToRegisterWith = this.registry || this.container;
+      if (layout) {
+        thingToRegisterWith.register(layoutName, layout);
+        thingToRegisterWith.injection(this.subjectName, 'layout', layoutName);
+      }
+
+      context.dispatcher = this.container.lookup('event_dispatcher:main') || _ember['default'].EventDispatcher.create();
+      context.dispatcher.setup({}, '#ember-testing');
+
+      this.callbacks.render = function () {
+        var subject;
+
+        _ember['default'].run(function () {
+          subject = context.subject();
+          subject.appendTo('#ember-testing');
+        });
+
+        _this.teardownSteps.unshift(function () {
+          _ember['default'].run(function () {
+            _ember['default'].tryInvoke(subject, 'destroy');
+          });
+        });
+      };
+
+      this.callbacks.append = function () {
+        _ember['default'].deprecate('this.append() is deprecated. Please use this.render() or this.$() instead.', false, { id: 'ember-test-helpers.test-module-for-component.append', until: '0.6.0' });
+        return context.$();
+      };
+
+      context.$ = function () {
+        this.render();
+        var subject = this.subject();
+
+        return subject.$.apply(subject, arguments);
+      };
+    },
+
+    setupComponentIntegrationTest: function setupComponentIntegrationTest() {
+      var module = this;
+      var context = this.context;
+
+      this.actionHooks = {};
+
+      context.dispatcher = this.container.lookup('event_dispatcher:main') || _ember['default'].EventDispatcher.create();
+      context.dispatcher.setup({}, '#ember-testing');
+      context.actions = module.actionHooks;
+
+      (this.registry || this.container).register('component:-test-holder', _ember['default'].Component.extend());
+
+      context.render = function (template) {
+        if (!template) {
+          throw new Error("in a component integration test you must pass a template to `render()`");
+        }
+        if (_ember['default'].isArray(template)) {
+          template = template.join('');
+        }
+        if (typeof template === 'string') {
+          template = _ember['default'].Handlebars.compile(template);
+        }
+        module.component = module.container.lookupFactory('component:-test-holder').create({
+          layout: template
+        });
+
+        module.component.set('context', context);
+        module.component.set('controller', context);
+
+        _ember['default'].run(function () {
+          module.component.appendTo('#ember-testing');
+        });
+      };
+
+      context.$ = function () {
+        return module.component.$.apply(module.component, arguments);
+      };
+
+      context.set = function (key, value) {
+        var ret = _ember['default'].run(function () {
+          return _ember['default'].set(context, key, value);
+        });
+
+        if (_hasEmberVersion['default'](2, 0)) {
+          return ret;
+        }
+      };
+
+      context.setProperties = function (hash) {
+        var ret = _ember['default'].run(function () {
+          return _ember['default'].setProperties(context, hash);
+        });
+
+        if (_hasEmberVersion['default'](2, 0)) {
+          return ret;
+        }
+      };
+
+      context.get = function (key) {
+        return _ember['default'].get(context, key);
+      };
+
+      context.getProperties = function () {
+        var args = Array.prototype.slice.call(arguments);
+        return _ember['default'].getProperties(context, args);
+      };
+
+      context.on = function (actionName, handler) {
+        module.actionHooks[actionName] = handler;
+      };
+
+      context.send = function (actionName) {
+        var hook = module.actionHooks[actionName];
+        if (!hook) {
+          throw new Error("integration testing template received unexpected action " + actionName);
+        }
+        hook.apply(module, Array.prototype.slice.call(arguments, 1));
+      };
+
+      context.clearRender = function () {
+        module.teardownComponent();
+      };
+    },
+
+    setupContext: function setupContext() {
+      this._super.call(this);
+
+      // only setup the injection if we are running against a version
+      // of Ember that has `-view-registry:main` (Ember >= 1.12)
+      if (this.container.lookupFactory('-view-registry:main')) {
+        (this.registry || this.container).injection('component', '_viewRegistry', '-view-registry:main');
+      }
+
+      if (!this.isUnitTest && !this.isLegacy) {
+        this.context.factory = function () {};
+      }
+    },
+
+    teardownComponent: function teardownComponent() {
+      var component = this.component;
+      if (component) {
+        _ember['default'].run(function () {
+          component.destroy();
+        });
+      }
+    }
+  });
+});
+define('ember-test-helpers/test-module-for-integration', ['exports', 'ember', './test-context', './abstract-test-module', './test-resolver', './build-registry', './has-ember-version'], function (exports, _ember, _testContext, _abstractTestModule, _testResolver, _buildRegistry, _hasEmberVersion) {
+  'use strict';
+
+  exports['default'] = _abstractTestModule['default'].extend({
+    initSetupSteps: function initSetupSteps() {
+      this.setupSteps = [];
+      this.contextualizedSetupSteps = [];
+
+      if (this.callbacks.beforeSetup) {
+        this.setupSteps.push(this.callbacks.beforeSetup);
+        delete this.callbacks.beforeSetup;
+      }
+
+      this.setupSteps.push(this.setupContainer);
+      this.setupSteps.push(this.setupContext);
+      this.setupSteps.push(this.setupTestElements);
+      this.setupSteps.push(this.setupAJAXListeners);
+      this.setupSteps.push(this.setupComponentIntegrationTest);
+
+      if (_ember['default'].View && _ember['default'].View.views) {
+        this.setupSteps.push(this._aliasViewRegistry);
+      }
+
+      if (this.callbacks.setup) {
+        this.contextualizedSetupSteps.push(this.callbacks.setup);
+        delete this.callbacks.setup;
+      }
+    },
+
+    initTeardownSteps: function initTeardownSteps() {
+      this.teardownSteps = [];
+      this.contextualizedTeardownSteps = [];
+
+      if (this.callbacks.teardown) {
+        this.contextualizedTeardownSteps.push(this.callbacks.teardown);
+        delete this.callbacks.teardown;
+      }
+
+      this.teardownSteps.push(this.teardownContainer);
+      this.teardownSteps.push(this.teardownContext);
+      this.teardownSteps.push(this.teardownAJAXListeners);
+      this.teardownSteps.push(this.teardownComponent);
+
+      if (_ember['default'].View && _ember['default'].View.views) {
+        this.teardownSteps.push(this._resetViewRegistry);
+      }
+
+      this.teardownSteps.push(this.teardownTestElements);
+
+      if (this.callbacks.afterTeardown) {
+        this.teardownSteps.push(this.callbacks.afterTeardown);
+        delete this.callbacks.afterTeardown;
+      }
+    },
+
+    setupContainer: function setupContainer() {
+      var resolver = _testResolver.getResolver();
+      var items = _buildRegistry['default'](resolver);
+
+      this.container = items.container;
+      this.registry = items.registry;
+
+      if (_hasEmberVersion['default'](1, 13)) {
+        var thingToRegisterWith = this.registry || this.container;
+        var router = resolver.resolve('router:main');
+        router = router || _ember['default'].Router.extend();
+        thingToRegisterWith.register('router:main', router);
+      }
+    },
+
+    setupContext: function setupContext() {
+      var subjectName = this.subjectName;
+      var container = this.container;
+
+      var factory = function factory() {
+        return container.lookupFactory(subjectName);
+      };
+
+      this._super({
+        container: this.container,
+        registry: this.registry,
+        factory: factory,
+        register: function register() {
+          var target = this.registry || this.container;
+          return target.register.apply(target, arguments);
+        }
+      });
+
+      var context = this.context = _testContext.getContext();
+
+      if (_ember['default'].setOwner) {
+        _ember['default'].setOwner(context, this.container.owner);
+      }
+
+      if (_ember['default'].inject) {
+        var keys = (Object.keys || _ember['default'].keys)(_ember['default'].inject);
+        keys.forEach(function (typeName) {
+          context.inject[typeName] = function (name, opts) {
+            var alias = opts && opts.as || name;
+            _ember['default'].set(context, alias, context.container.lookup(typeName + ':' + name));
+          };
+        });
+      }
+
+      // only setup the injection if we are running against a version
+      // of Ember that has `-view-registry:main` (Ember >= 1.12)
+      if (this.container.lookupFactory('-view-registry:main')) {
+        (this.registry || this.container).injection('component', '_viewRegistry', '-view-registry:main');
+      }
+    },
+
+    setupComponentIntegrationTest: function setupComponentIntegrationTest() {
+      var module = this;
+      var context = this.context;
+
+      this.actionHooks = {};
+
+      context.dispatcher = this.container.lookup('event_dispatcher:main') || _ember['default'].EventDispatcher.create();
+      context.dispatcher.setup({}, '#ember-testing');
+      context.actions = module.actionHooks;
+
+      (this.registry || this.container).register('component:-test-holder', _ember['default'].Component.extend());
+
+      context.render = function (template) {
+        if (!template) {
+          throw new Error("in a component integration test you must pass a template to `render()`");
+        }
+        if (_ember['default'].isArray(template)) {
+          template = template.join('');
+        }
+        if (typeof template === 'string') {
+          template = _ember['default'].Handlebars.compile(template);
+        }
+        module.component = module.container.lookupFactory('component:-test-holder').create({
+          layout: template
+        });
+
+        module.component.set('context', context);
+        module.component.set('controller', context);
+
+        _ember['default'].run(function () {
+          module.component.appendTo('#ember-testing');
+        });
+      };
+
+      context.$ = function () {
+        return module.component.$.apply(module.component, arguments);
+      };
+
+      context.set = function (key, value) {
+        var ret = _ember['default'].run(function () {
+          return _ember['default'].set(context, key, value);
+        });
+
+        if (_hasEmberVersion['default'](2, 0)) {
+          return ret;
+        }
+      };
+
+      context.setProperties = function (hash) {
+        var ret = _ember['default'].run(function () {
+          return _ember['default'].setProperties(context, hash);
+        });
+
+        if (_hasEmberVersion['default'](2, 0)) {
+          return ret;
+        }
+      };
+
+      context.get = function (key) {
+        return _ember['default'].get(context, key);
+      };
+
+      context.getProperties = function () {
+        var args = Array.prototype.slice.call(arguments);
+        return _ember['default'].getProperties(context, args);
+      };
+
+      context.on = function (actionName, handler) {
+        module.actionHooks[actionName] = handler;
+      };
+
+      context.send = function (actionName) {
+        var hook = module.actionHooks[actionName];
+        if (!hook) {
+          throw new Error("integration testing template received unexpected action " + actionName);
+        }
+        hook.apply(module, Array.prototype.slice.call(arguments, 1));
+      };
+
+      context.clearRender = function () {
+        module.teardownComponent();
+      };
+    },
+
+    teardownComponent: function teardownComponent() {
+      var component = this.component;
+      if (component) {
+        _ember['default'].run(function () {
+          component.destroy();
+        });
+      }
+    },
+
+    teardownContainer: function teardownContainer() {
+      var container = this.container;
+      _ember['default'].run(function () {
+        container.destroy();
+      });
+    },
+
+    // allow arbitrary named factories, like rspec let
+    contextualizeCallbacks: function contextualizeCallbacks() {
+      var callbacks = this.callbacks;
+      var context = this.context;
+
+      this.cache = this.cache || {};
+      this.cachedCalls = this.cachedCalls || {};
+
+      var keys = (Object.keys || _ember['default'].keys)(callbacks);
+      var keysLength = keys.length;
+
+      if (keysLength) {
+        for (var i = 0; i < keysLength; i++) {
+          this._contextualizeCallback(context, keys[i], context);
+        }
+      }
+    },
+
+    _contextualizeCallback: function _contextualizeCallback(context, key, callbackContext) {
+      var _this = this;
+      var callbacks = this.callbacks;
+      var factory = context.factory;
+
+      context[key] = function (options) {
+        if (_this.cachedCalls[key]) {
+          return _this.cache[key];
+        }
+
+        var result = callbacks[key].call(callbackContext, options, factory());
+
+        _this.cache[key] = result;
+        _this.cachedCalls[key] = true;
+
+        return result;
+      };
+    },
+
+    _aliasViewRegistry: function _aliasViewRegistry() {
+      this._originalGlobalViewRegistry = _ember['default'].View.views;
+      var viewRegistry = this.container.lookup('-view-registry:main');
+
+      if (viewRegistry) {
+        _ember['default'].View.views = viewRegistry;
+      }
+    },
+
+    _resetViewRegistry: function _resetViewRegistry() {
+      _ember['default'].View.views = this._originalGlobalViewRegistry;
+    }
+  });
+});
+define('ember-test-helpers/test-module-for-model', ['exports', './test-module', 'ember'], function (exports, _testModule, _ember) {
+  /* global DS, require, requirejs */ // added here to prevent an import from erroring when ED is not present
+
+  'use strict';
+
+  exports['default'] = _testModule['default'].extend({
+    init: function init(modelName, description, callbacks) {
+      this.modelName = modelName;
+
+      this._super.call(this, 'model:' + modelName, description, callbacks);
+
+      this.setupSteps.push(this.setupModel);
+    },
+
+    setupModel: function setupModel() {
+      var container = this.container;
+      var defaultSubject = this.defaultSubject;
+      var callbacks = this.callbacks;
+      var modelName = this.modelName;
+
+      var adapterFactory = container.lookupFactory('adapter:application');
+      if (!adapterFactory) {
+        if (requirejs.entries['ember-data/adapters/json-api']) {
+          adapterFactory = require('ember-data/adapters/json-api')['default'];
+        }
+
+        // when ember-data/adapters/json-api is provided via ember-cli shims
+        // using Ember Data 1.x the actual JSONAPIAdapter isn't found, but the
+        // above require statement returns a bizzaro object with only a `default`
+        // property (circular reference actually)
+        if (!adapterFactory || !adapterFactory.create) {
+          adapterFactory = DS.JSONAPIAdapter || DS.FixtureAdapter;
+        }
+
+        var thingToRegisterWith = this.registry || this.container;
+        thingToRegisterWith.register('adapter:application', adapterFactory);
+      }
+
+      callbacks.store = function () {
+        var container = this.container;
+        var store = container.lookup('service:store') || container.lookup('store:main');
+        return store;
+      };
+
+      if (callbacks.subject === defaultSubject) {
+        callbacks.subject = function (options) {
+          var container = this.container;
+
+          return _ember['default'].run(function () {
+            var store = container.lookup('service:store') || container.lookup('store:main');
+            return store.createRecord(modelName, options);
+          });
+        };
+      }
+    }
+  });
+});
+define('ember-test-helpers/test-module', ['exports', 'ember', './test-context', './abstract-test-module', './test-resolver', './build-registry', './has-ember-version'], function (exports, _ember, _testContext, _abstractTestModule, _testResolver, _buildRegistry, _hasEmberVersion) {
+  'use strict';
+
+  exports['default'] = _abstractTestModule['default'].extend({
+    init: function init(subjectName, description, callbacks) {
+      // Allow `description` to be omitted, in which case it should
+      // default to `subjectName`
+      if (!callbacks && typeof description === 'object') {
+        callbacks = description;
+        description = subjectName;
+      }
+
+      this.subjectName = subjectName;
+      this.description = description || subjectName;
+      this.name = description || subjectName;
+      this.callbacks = callbacks || {};
+
+      if (this.callbacks.integration && this.callbacks.needs) {
+        throw new Error("cannot declare 'integration: true' and 'needs' in the same module");
+      }
+
+      if (this.callbacks.integration) {
+        if (this.isComponentTestModule) {
+          this.isLegacy = callbacks.integration === 'legacy';
+          this.isIntegration = callbacks.integration !== 'legacy';
+        } else {
+          if (callbacks.integration === 'legacy') {
+            throw new Error('`integration: \'legacy\'` is only valid for component tests.');
+          }
+          this.isIntegration = true;
+        }
+
+        delete callbacks.integration;
+      }
+
+      this.initSubject();
+      this.initNeeds();
+      this.initSetupSteps();
+      this.initTeardownSteps();
+    },
+
+    initSubject: function initSubject() {
+      this.callbacks.subject = this.callbacks.subject || this.defaultSubject;
+    },
+
+    initNeeds: function initNeeds() {
+      this.needs = [this.subjectName];
+      if (this.callbacks.needs) {
+        this.needs = this.needs.concat(this.callbacks.needs);
+        delete this.callbacks.needs;
+      }
+    },
+
+    initSetupSteps: function initSetupSteps() {
+      this.setupSteps = [];
+      this.contextualizedSetupSteps = [];
+
+      if (this.callbacks.beforeSetup) {
+        this.setupSteps.push(this.callbacks.beforeSetup);
+        delete this.callbacks.beforeSetup;
+      }
+
+      this.setupSteps.push(this.setupContainer);
+      this.setupSteps.push(this.setupContext);
+      this.setupSteps.push(this.setupTestElements);
+      this.setupSteps.push(this.setupAJAXListeners);
+
+      if (this.callbacks.setup) {
+        this.contextualizedSetupSteps.push(this.callbacks.setup);
+        delete this.callbacks.setup;
+      }
+    },
+
+    initTeardownSteps: function initTeardownSteps() {
+      this.teardownSteps = [];
+      this.contextualizedTeardownSteps = [];
+
+      if (this.callbacks.teardown) {
+        this.contextualizedTeardownSteps.push(this.callbacks.teardown);
+        delete this.callbacks.teardown;
+      }
+
+      this.teardownSteps.push(this.teardownSubject);
+      this.teardownSteps.push(this.teardownContainer);
+      this.teardownSteps.push(this.teardownContext);
+      this.teardownSteps.push(this.teardownTestElements);
+      this.teardownSteps.push(this.teardownAJAXListeners);
+
+      if (this.callbacks.afterTeardown) {
+        this.teardownSteps.push(this.callbacks.afterTeardown);
+        delete this.callbacks.afterTeardown;
+      }
+    },
+
+    setupContainer: function setupContainer() {
+      if (this.isIntegration || this.isLegacy) {
+        this._setupIntegratedContainer();
+      } else {
+        this._setupIsolatedContainer();
+      }
+    },
+
+    setupContext: function setupContext() {
+      var subjectName = this.subjectName;
+      var container = this.container;
+
+      var factory = function factory() {
+        return container.lookupFactory(subjectName);
+      };
+
+      this._super({
+        container: this.container,
+        registry: this.registry,
+        factory: factory,
+        register: function register() {
+          var target = this.registry || this.container;
+          return target.register.apply(target, arguments);
+        }
+      });
+
+      var context = this.context = _testContext.getContext();
+
+      if (_ember['default'].setOwner) {
+        _ember['default'].setOwner(context, this.container.owner);
+      }
+
+      if (_ember['default'].inject) {
+        var keys = (Object.keys || _ember['default'].keys)(_ember['default'].inject);
+        keys.forEach(function (typeName) {
+          context.inject[typeName] = function (name, opts) {
+            var alias = opts && opts.as || name;
+            _ember['default'].set(context, alias, context.container.lookup(typeName + ':' + name));
+          };
+        });
+      }
+    },
+
+    teardownSubject: function teardownSubject() {
+      var subject = this.cache.subject;
+
+      if (subject) {
+        _ember['default'].run(function () {
+          _ember['default'].tryInvoke(subject, 'destroy');
+        });
+      }
+    },
+
+    teardownContainer: function teardownContainer() {
+      var container = this.container;
+      _ember['default'].run(function () {
+        container.destroy();
+      });
+    },
+
+    defaultSubject: function defaultSubject(options, factory) {
+      return factory.create(options);
+    },
+
+    // allow arbitrary named factories, like rspec let
+    contextualizeCallbacks: function contextualizeCallbacks() {
+      var callbacks = this.callbacks;
+      var context = this.context;
+
+      this.cache = this.cache || {};
+      this.cachedCalls = this.cachedCalls || {};
+
+      var keys = (Object.keys || _ember['default'].keys)(callbacks);
+      var keysLength = keys.length;
+
+      if (keysLength) {
+        var deprecatedContext = this._buildDeprecatedContext(this, context);
+        for (var i = 0; i < keysLength; i++) {
+          this._contextualizeCallback(context, keys[i], deprecatedContext);
+        }
+      }
+    },
+
+    _contextualizeCallback: function _contextualizeCallback(context, key, callbackContext) {
+      var _this = this;
+      var callbacks = this.callbacks;
+      var factory = context.factory;
+
+      context[key] = function (options) {
+        if (_this.cachedCalls[key]) {
+          return _this.cache[key];
+        }
+
+        var result = callbacks[key].call(callbackContext, options, factory());
+
+        _this.cache[key] = result;
+        _this.cachedCalls[key] = true;
+
+        return result;
+      };
+    },
+
+    /*
+      Builds a version of the passed in context that contains deprecation warnings
+      for accessing properties that exist on the module.
+    */
+    _buildDeprecatedContext: function _buildDeprecatedContext(module, context) {
+      var deprecatedContext = Object.create(context);
+
+      var keysForDeprecation = Object.keys(module);
+
+      for (var i = 0, l = keysForDeprecation.length; i < l; i++) {
+        this._proxyDeprecation(module, deprecatedContext, keysForDeprecation[i]);
+      }
+
+      return deprecatedContext;
+    },
+
+    /*
+      Defines a key on an object to act as a proxy for deprecating the original.
+    */
+    _proxyDeprecation: function _proxyDeprecation(obj, proxy, key) {
+      if (typeof proxy[key] === 'undefined') {
+        Object.defineProperty(proxy, key, {
+          get: function get() {
+            _ember['default'].deprecate('Accessing the test module property "' + key + '" from a callback is deprecated.', false, { id: 'ember-test-helpers.test-module.callback-context', until: '0.6.0' });
+            return obj[key];
+          }
+        });
+      }
+    },
+
+    _setupContainer: function _setupContainer(isolated) {
+      var resolver = _testResolver.getResolver();
+
+      var items = _buildRegistry['default'](!isolated ? resolver : Object.create(resolver, {
+        resolve: {
+          value: function value() {}
+        }
+      }));
+
+      this.container = items.container;
+      this.registry = items.registry;
+
+      if (_hasEmberVersion['default'](1, 13)) {
+        var thingToRegisterWith = this.registry || this.container;
+        var router = resolver.resolve('router:main');
+        router = router || _ember['default'].Router.extend();
+        thingToRegisterWith.register('router:main', router);
+      }
+    },
+
+    _setupIsolatedContainer: function _setupIsolatedContainer() {
+      var resolver = _testResolver.getResolver();
+      this._setupContainer(true);
+
+      var thingToRegisterWith = this.registry || this.container;
+
+      for (var i = this.needs.length; i > 0; i--) {
+        var fullName = this.needs[i - 1];
+        var normalizedFullName = resolver.normalize(fullName);
+        thingToRegisterWith.register(fullName, resolver.resolve(normalizedFullName));
+      }
+
+      if (!this.registry) {
+        this.container.resolver = function () {};
+      }
+    },
+
+    _setupIntegratedContainer: function _setupIntegratedContainer() {
+      this._setupContainer();
+    }
+
+  });
+});
+define('ember-test-helpers/test-resolver', ['exports'], function (exports) {
+  'use strict';
+
+  exports.setResolver = setResolver;
+  exports.getResolver = getResolver;
+  var __resolver__;
+
+  function setResolver(resolver) {
+    __resolver__ = resolver;
+  }
+
+  function getResolver() {
+    if (__resolver__ == null) {
+      throw new Error('you must set a resolver with `testResolver.set(resolver)`');
+    }
+
+    return __resolver__;
+  }
+});
+define('ember-test-helpers/wait', ['exports', 'ember'], function (exports, _ember) {
+  /* globals jQuery, self */
+
+  'use strict';
+
+  exports._teardownAJAXHooks = _teardownAJAXHooks;
+  exports._setupAJAXHooks = _setupAJAXHooks;
+  exports['default'] = wait;
+
+  var requests;
+  function incrementAjaxPendingRequests(_, xhr) {
+    requests.push(xhr);
+  }
+
+  function decrementAjaxPendingRequests(_, xhr) {
+    for (var i = 0; i < requests.length; i++) {
+      if (xhr === requests[i]) {
+        requests.splice(i, 1);
+      }
+    }
+  }
+
+  function _teardownAJAXHooks() {
+    jQuery(document).off('ajaxSend', incrementAjaxPendingRequests);
+    jQuery(document).off('ajaxComplete', decrementAjaxPendingRequests);
+  }
+
+  function _setupAJAXHooks() {
+    requests = [];
+
+    jQuery(document).on('ajaxSend', incrementAjaxPendingRequests);
+    jQuery(document).on('ajaxComplete', decrementAjaxPendingRequests);
+  }
+
+  function wait(_options) {
+    var options = _options || {};
+    var waitForTimers = options.hasOwnProperty('waitForTimers') ? options.waitForTimers : true;
+    var waitForAJAX = options.hasOwnProperty('waitForAJAX') ? options.waitForAJAX : true;
+    var waitForWaiters = options.hasOwnProperty('waitForWaiters') ? options.waitForWaiters : true;
+
+    return new _ember['default'].RSVP.Promise(function (resolve) {
+      var watcher = self.setInterval(function () {
+        if (waitForTimers && (_ember['default'].run.hasScheduledTimers() || _ember['default'].run.currentRunLoop)) {
+          return;
+        }
+
+        if (waitForAJAX && requests && requests.length > 0) {
+          return;
+        }
+
+        if (waitForWaiters && _ember['default'].Test.waiters && _ember['default'].Test.waiters.any(function (_ref) {
+          var context = _ref[0];
+          var callback = _ref[1];
+
+          return !callback.call(context);
+        })) {
+          return;
+        }
+
+        // Stop polling
+        self.clearInterval(watcher);
+
+        // Synchronously resolve the promise
+        _ember['default'].run(null, resolve);
+      }, 10);
+    });
+  }
+});
+define('ember-test-helpers', ['exports', 'ember', 'ember-test-helpers/test-module', 'ember-test-helpers/test-module-for-acceptance', 'ember-test-helpers/test-module-for-integration', 'ember-test-helpers/test-module-for-component', 'ember-test-helpers/test-module-for-model', 'ember-test-helpers/test-context', 'ember-test-helpers/test-resolver'], function (exports, _ember, _emberTestHelpersTestModule, _emberTestHelpersTestModuleForAcceptance, _emberTestHelpersTestModuleForIntegration, _emberTestHelpersTestModuleForComponent, _emberTestHelpersTestModuleForModel, _emberTestHelpersTestContext, _emberTestHelpersTestResolver) {
+  'use strict';
+
+  _ember['default'].testing = true;
+
+  exports.TestModule = _emberTestHelpersTestModule['default'];
+  exports.TestModuleForAcceptance = _emberTestHelpersTestModuleForAcceptance['default'];
+  exports.TestModuleForIntegration = _emberTestHelpersTestModuleForIntegration['default'];
+  exports.TestModuleForComponent = _emberTestHelpersTestModuleForComponent['default'];
+  exports.TestModuleForModel = _emberTestHelpersTestModuleForModel['default'];
+  exports.getContext = _emberTestHelpersTestContext.getContext;
+  exports.setContext = _emberTestHelpersTestContext.setContext;
+  exports.setResolver = _emberTestHelpersTestResolver.setResolver;
+});
+define('klassy', ['exports'], function (exports) {
+  /**
+   Extend a class with the properties and methods of one or more other classes.
+  
+   When a method is replaced with another method, it will be wrapped in a
+   function that makes the replaced method accessible via `this._super`.
+  
+   @method extendClass
+   @param {Object} destination The class to merge into
+   @param {Object} source One or more source classes
+   */
+  'use strict';
+
+  var extendClass = function extendClass(destination) {
+    var sources = Array.prototype.slice.call(arguments, 1);
+    var source;
+
+    for (var i = 0, l = sources.length; i < l; i++) {
+      source = sources[i];
+
+      for (var p in source) {
+        if (source.hasOwnProperty(p) && destination[p] && typeof destination[p] === 'function' && typeof source[p] === 'function') {
+
+          /* jshint loopfunc:true */
+          destination[p] = (function (destinationFn, sourceFn) {
+            var wrapper = function wrapper() {
+              var prevSuper = this._super;
+              this._super = destinationFn;
+
+              var ret = sourceFn.apply(this, arguments);
+
+              this._super = prevSuper;
+
+              return ret;
+            };
+            wrapper.wrappedFunction = sourceFn;
+            return wrapper;
+          })(destination[p], source[p]);
+        } else {
+          destination[p] = source[p];
+        }
+      }
+    }
+  };
+
+  // `subclassing` is a state flag used by `defineClass` to track when a class is
+  // being subclassed. It allows constructors to avoid calling `init`, which can
+  // be expensive and cause undesirable side effects.
+  var subclassing = false;
+
+  /**
+   Define a new class with the properties and methods of one or more other classes.
+  
+   The new class can be based on a `SuperClass`, which will be inserted into its
+   prototype chain.
+  
+   Furthermore, one or more mixins (object that contain properties and/or methods)
+   may be specified, which will be applied in order. When a method is replaced
+   with another method, it will be wrapped in a function that makes the previous
+   method accessible via `this._super`.
+  
+   @method defineClass
+   @param {Object} SuperClass A base class to extend. If `mixins` are to be included
+   without a `SuperClass`, pass `null` for SuperClass.
+   @param {Object} mixins One or more objects that contain properties and methods
+   to apply to the new class.
+   */
+  var defineClass = function defineClass(SuperClass) {
+    var Klass = function Klass() {
+      if (!subclassing && this.init) {
+        this.init.apply(this, arguments);
+      }
+    };
+
+    if (SuperClass) {
+      subclassing = true;
+      Klass.prototype = new SuperClass();
+      subclassing = false;
+    }
+
+    if (arguments.length > 1) {
+      var extendArgs = Array.prototype.slice.call(arguments, 1);
+      extendArgs.unshift(Klass.prototype);
+      extendClass.apply(Klass.prototype, extendArgs);
+    }
+
+    Klass.constructor = Klass;
+
+    Klass.extend = function () {
+      var args = Array.prototype.slice.call(arguments, 0);
+      args.unshift(Klass);
+      return defineClass.apply(Klass, args);
+    };
+
+    return Klass;
+  };
+
+  /**
+   A base class that can be extended.
+  
+   @example
+  
+   ```javascript
+   var CelestialObject = Klass.extend({
+     init: function(name) {
+       this._super();
+       this.name = name;
+       this.isCelestialObject = true;
+     },
+     greeting: function() {
+       return 'Hello from ' + this.name;
+     }
+   });
+  
+   var Planet = CelestialObject.extend({
+     init: function(name) {
+       this._super.apply(this, arguments);
+       this.isPlanet = true;
+     },
+     greeting: function() {
+       return this._super() + '!';
+     },
+   });
+  
+   var earth = new Planet('Earth');
+  
+   console.log(earth instanceof Klass);           // true
+   console.log(earth instanceof CelestialObject); // true
+   console.log(earth instanceof Planet);          // true
+  
+   console.log(earth.isCelestialObject);          // true
+   console.log(earth.isPlanet);                   // true
+  
+   console.log(earth.greeting());                 // 'Hello from Earth!'
+   ```
+  
+   @class Klass
+   */
+  var Klass = defineClass(null, {
+    init: function init() {}
+  });
+
+  exports.Klass = Klass;
+  exports.defineClass = defineClass;
+  exports.extendClass = extendClass;
+});
+define("qunit", ["exports"], function (exports) {
+  /* globals test:true */
+
+  "use strict";
+
+  var _module = QUnit.module;
+  exports.module = _module;
+  var test = QUnit.test;
+  exports.test = test;
+  var skip = QUnit.skip;
+  exports.skip = skip;
+  var only = QUnit.only;
+
+  exports.only = only;
+  exports["default"] = QUnit;
+});
 /* jshint ignore:start */
 
 runningTests = true;

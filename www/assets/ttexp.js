@@ -625,8 +625,8 @@ define('ttexp/controllers/help', ['exports', 'ember'], function (exports, _ember
 });
 define('ttexp/controllers/index', ['exports', 'ember'], function (exports, _ember) {
 	exports['default'] = _ember['default'].Controller.extend({
-		firstName: 'Andrea',
-		lastName: 'Mauro'
+		firstName: 'Nome',
+		lastName: 'Cognome'
 	});
 });
 define('ttexp/controllers/object', ['exports', 'ember'], function (exports, _ember) {
@@ -638,6 +638,15 @@ define('ttexp/controllers/page-not-found', ['exports', 'ember'], function (expor
 define('ttexp/controllers/play', ['exports', 'ember'], function (exports, _ember) {
 	exports['default'] = _ember['default'].Controller.extend({});
 });
+define('ttexp/controllers/scores', ['exports', 'ember'], function (exports, _ember) {
+	exports['default'] = _ember['default'].Controller.extend({});
+});
+define('ttexp/helpers/pluralize', ['exports', 'ember-inflector/lib/helpers/pluralize'], function (exports, _emberInflectorLibHelpersPluralize) {
+  exports['default'] = _emberInflectorLibHelpersPluralize['default'];
+});
+define('ttexp/helpers/singularize', ['exports', 'ember-inflector/lib/helpers/singularize'], function (exports, _emberInflectorLibHelpersSingularize) {
+  exports['default'] = _emberInflectorLibHelpersSingularize['default'];
+});
 define('ttexp/initializers/app-version', ['exports', 'ember-cli-app-version/initializer-factory', 'ttexp/config/environment'], function (exports, _emberCliAppVersionInitializerFactory, _ttexpConfigEnvironment) {
   var _config$APP = _ttexpConfigEnvironment['default'].APP;
   var name = _config$APP.name;
@@ -645,6 +654,60 @@ define('ttexp/initializers/app-version', ['exports', 'ember-cli-app-version/init
   exports['default'] = {
     name: 'App Version',
     initialize: (0, _emberCliAppVersionInitializerFactory['default'])(name, version)
+  };
+});
+define('ttexp/initializers/data-adapter', ['exports', 'ember'], function (exports, _ember) {
+
+  /*
+    This initializer is here to keep backwards compatibility with code depending
+    on the `data-adapter` initializer (before Ember Data was an addon).
+  
+    Should be removed for Ember Data 3.x
+  */
+
+  exports['default'] = {
+    name: 'data-adapter',
+    before: 'store',
+    initialize: _ember['default'].K
+  };
+});
+define('ttexp/initializers/ember-data', ['exports', 'ember-data/setup-container', 'ember-data/-private/core'], function (exports, _emberDataSetupContainer, _emberDataPrivateCore) {
+
+  /*
+  
+    This code initializes Ember-Data onto an Ember application.
+  
+    If an Ember.js developer defines a subclass of DS.Store on their application,
+    as `App.StoreService` (or via a module system that resolves to `service:store`)
+    this code will automatically instantiate it and make it available on the
+    router.
+  
+    Additionally, after an application's controllers have been injected, they will
+    each have the store made available to them.
+  
+    For example, imagine an Ember.js application with the following classes:
+  
+    App.StoreService = DS.Store.extend({
+      adapter: 'custom'
+    });
+  
+    App.PostsController = Ember.ArrayController.extend({
+      // ...
+    });
+  
+    When the application is initialized, `App.ApplicationStore` will automatically be
+    instantiated, and the instance of `App.PostsController` will have its `store`
+    property set to that instance.
+  
+    Note that this code will only be run if the `ember-application` package is
+    loaded. If Ember Data is being used in an environment other than a
+    typical application (e.g., node.js where only `ember-runtime` is available),
+    this code will be ignored.
+  */
+
+  exports['default'] = {
+    name: 'ember-data',
+    initialize: _emberDataSetupContainer['default']
   };
 });
 define('ttexp/initializers/export-application-global', ['exports', 'ember', 'ttexp/config/environment'], function (exports, _ember, _ttexpConfigEnvironment) {
@@ -700,6 +763,21 @@ define('ttexp/initializers/in-app-livereload', ['exports', 'ttexp/config/environ
   };
 });
 /* globals cordova */
+define('ttexp/initializers/injectStore', ['exports', 'ember'], function (exports, _ember) {
+
+  /*
+    This initializer is here to keep backwards compatibility with code depending
+    on the `injectStore` initializer (before Ember Data was an addon).
+  
+    Should be removed for Ember Data 3.x
+  */
+
+  exports['default'] = {
+    name: 'injectStore',
+    before: 'store',
+    initialize: _ember['default'].K
+  };
+});
 define("ttexp/initializers/liquid-fire", ["exports", "liquid-fire/router-dsl-ext", "liquid-fire/ember-internals"], function (exports, _liquidFireRouterDslExt, _liquidFireEmberInternals) {
   (0, _liquidFireEmberInternals.registerKeywords)();
 
@@ -710,141 +788,200 @@ define("ttexp/initializers/liquid-fire", ["exports", "liquid-fire/router-dsl-ext
 });
 // This initializer exists only to make sure that the following
 // imports happen before the app boots.
+define('ttexp/initializers/store', ['exports', 'ember'], function (exports, _ember) {
+
+  /*
+    This initializer is here to keep backwards compatibility with code depending
+    on the `store` initializer (before Ember Data was an addon).
+  
+    Should be removed for Ember Data 3.x
+  */
+
+  exports['default'] = {
+    name: 'store',
+    after: 'ember-data',
+    initialize: _ember['default'].K
+  };
+});
+define('ttexp/initializers/transforms', ['exports', 'ember'], function (exports, _ember) {
+
+  /*
+    This initializer is here to keep backwards compatibility with code depending
+    on the `transforms` initializer (before Ember Data was an addon).
+  
+    Should be removed for Ember Data 3.x
+  */
+
+  exports['default'] = {
+    name: 'transforms',
+    before: 'store',
+    initialize: _ember['default'].K
+  };
+});
+define("ttexp/instance-initializers/ember-data", ["exports", "ember-data/-private/instance-initializers/initialize-store-service"], function (exports, _emberDataPrivateInstanceInitializersInitializeStoreService) {
+  exports["default"] = {
+    name: "ember-data",
+    initialize: _emberDataPrivateInstanceInitializersInitializeStoreService["default"]
+  };
+});
 define('ttexp/liquid-fire/tests/modules/liquid-fire/action.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/action.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/action.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/animate.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/animate.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/animate.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/components/liquid-measured.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire/components');
   QUnit.test('modules/liquid-fire/components/liquid-measured.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/components/liquid-measured.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/components/liquid-spacer.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire/components');
   QUnit.test('modules/liquid-fire/components/liquid-spacer.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/components/liquid-spacer.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/constrainables.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/constrainables.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/constrainables.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/constraint.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/constraint.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/constraint.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/constraints.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/constraints.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/constraints.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/dsl.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/dsl.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/dsl.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/ember-internals.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/ember-internals.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/ember-internals.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/growable.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/growable.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/growable.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/index.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/index.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/index.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/internal-rules.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/internal-rules.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/internal-rules.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/modal.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/modal.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/modal.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/modals.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/modals.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/modals.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/mutation-observer.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/mutation-observer.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/mutation-observer.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/promise.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/promise.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/promise.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/router-dsl-ext.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/router-dsl-ext.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/router-dsl-ext.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/rule.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/rule.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/rule.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/running-transition.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/running-transition.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/running-transition.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/tabbable.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/tabbable.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/tabbable.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/transition-map.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/transition-map.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/transition-map.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/velocity-ext.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/velocity-ext.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/velocity-ext.js should pass jshint.');
   });
 });
 define('ttexp/liquid-fire/tests/modules/liquid-fire/version-warnings.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - modules/liquid-fire');
   QUnit.test('modules/liquid-fire/version-warnings.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'modules/liquid-fire/version-warnings.js should pass jshint.');
   });
 });
@@ -857,7 +994,8 @@ define('ttexp/router', ['exports', 'ember', 'ttexp/config/environment'], functio
 	Router.map(function () {
 		this.route('index', { path: '/' });
 		this.route('help');
-		this.route('play', { path: '/play' });
+		this.route('play', { path: '/play/:video_id' });
+		this.route('scores', { path: '/scores/:session_id' });
 		this.route('page-not-found', { path: '/*wildcard' });
 	});
 
@@ -888,8 +1026,314 @@ define("ttexp/routes/index", ["exports", "ember"], function (exports, _ember) {
 define("ttexp/routes/page-not-found", ["exports", "ember"], function (exports, _ember) {
 	exports["default"] = _ember["default"].Route.extend({});
 });
-define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
-	exports["default"] = _ember["default"].Route.extend({});
+define('ttexp/routes/play', ['exports', 'ember'], function (exports, _ember) {
+	exports['default'] = _ember['default'].Route.extend({
+		model: function model(params) {
+
+			var steps = {};
+
+			steps['start'] = {
+				'dialog': '*risponde al telefono*',
+				'items': [{
+					'text': 'Pronto, Giovanni Borini?',
+					'link': '1'
+				}, {
+					'text': 'Giovanni Borini?',
+					'link': '#'
+				}, {
+					'text': 'Pronto? Buongiorno.',
+					'link': '2'
+				}]
+			};
+
+			steps['1'] = {
+				'dialog': 'Sì… Chi parla scusi?',
+				'items': [{
+					'text': 'Buongiorno Giovanni, sono Francesco Mariani, di Generali: suo cugino Filippo la ha avvisata della mia chiamata?',
+					'link': '1-A'
+				}, {
+					'text': 'Buongiorno, sono Francesco Mariani, di Generali. Possiamo parlare o la disturbo?',
+					'link': '#'
+				}, {
+					'text': 'La chiamo da Generali. Mi dica, la disturbo, adesso?',
+					'link': '#'
+				}]
+			};
+			steps['1-A'] = {
+				'dialog': 'Ehm… Penso di sì… Di preciso di cosa aveva bisogno?',
+				'items': [{
+					'text': 'Vorrei proporle un incontro per parlare di previdenza, come ho fatto con Filippo.',
+					'link': '1-B'
+				}, {
+					'text': 'La chiamo per fissare un incontro e parlare come abbiamo fatto con suo cugino. Lei ha un negozio di ottica, vero? Ottica Borini?',
+					'link': '#'
+				}, {
+					'text': 'Le rubo qualche minuto. La disturbo, adesso?',
+					'link': '#'
+				}]
+			};
+			steps['1-B'] = {
+				'dialog': 'Mmm… Quindi per quella cosa della pensione...',
+				'items': [{
+					'text': 'Abbiamo parlato con lui anche di questo, certo. Poi mi diceva che ha un negozio: ottica Borini, giusto?',
+					'link': '1-C'
+				}, {
+					'text': 'Si può dire di sì… Va bene se passo da lei questa sera, alle 18,30?',
+					'link': '#'
+				}, {
+					'text': 'Sì: ora vorrei parlarne anche con lei. Quando possiamo vederci?',
+					'link': '#'
+				}]
+			};
+			steps['1-C'] = {
+				'dialog': 'Sì… ',
+				'items': [{
+					'text': 'È un negozio storico della città, mi sembra. Siete aperti da molti anni, giusto?',
+					'link': '1-D'
+				}, {
+					'text': 'Beh, il vostro negozio deve avere un gran giro di affari, visto che siete aperti da tanto tempo.',
+					'link': '#'
+				}, {
+					'text': 'E gli affari andranno bene, giusto?',
+					'link': '#'
+				}]
+			};
+			steps['1-D'] = {
+				'dialog': 'Mah, sì… Diciamo che lo gestiamo da un po\' di anni.',
+				'items': [{
+					'text': 'Complimenti! Giovanni, Filippo ci teneva che parlassi anche con lei e la sua famiglia del programma che ho discusso con lui: io stasera posso passare per le sei e mezza oppure per le otto e mezza.',
+					'link': '1-E'
+				}, {
+					'text': 'Ottimo. Allora io passerei da lei questa sera. Che ne dice?',
+					'link': '#'
+				}, {
+					'text': 'Ottimo. Mi dica, quando pensa che potremmo vederci?',
+					'link': '#'
+				}]
+			};
+			steps['1-E'] = {
+				'dialog': 'No, stasera no… Portiamo i bambini dalla nonna per qualche giorno.',
+				'items': [{
+					'text': 'Allora domani: io sono già a Monza. Facciamo alle 20,30.',
+					'link': '1-F'
+				}, {
+					'text': 'E quando preferirebbe?',
+					'link': '#'
+				}, {
+					'text': 'Capisco, certo. Quanti anni hanno i bambini?',
+					'link': '#'
+				}]
+			};
+			steps['1-F'] = {
+				'dialog': 'Sì... Ma guardi che noi siamo a posto… Non faccia un viaggio per niente.',
+				'items': [{
+					'text': 'Io comunque domani sono in zona, poi Filippo mi ha chiesto espressamente di passare. Lei abita in via Falcone, al 10?',
+					'link': '1-G'
+				}, {
+					'text': 'Ma ci mancherebbe. Se vuole possiamo fare sabato mattina: per me non ci sono problemi.',
+					'link': '#'
+				}, {
+					'text': 'Ma non le interessa parlare del suo futuro?',
+					'link': '#'
+				}]
+			};
+			steps['1-G'] = {
+				'dialog': 'Beh, se è in zona… L\'indirizzo è quello.',
+				'items': [{
+					'text': 'Va benissimo: allora a domani, alle 20,30.',
+					'link': '1-H'
+				}, {
+					'text': 'Certo. Allora ci vediamo domani.',
+					'link': '#'
+				}, {
+					'text': 'Allora ci vediamo domani. Ci sarà anche la moglie, immagino.',
+					'link': '#'
+				}]
+			};
+			steps['1-H'] = {
+				'dialog': 'Senta, però… Mi lasci un numero per confermare… Sa, non si sa mai in negozio…',
+				'items': [{
+					'text': 'Fissiamo adesso. Se preferisce facciamo un quarto d\'ora dopo, così vi organizzate con calma.',
+					'link': '1-I'
+				}, {
+					'text': 'Può chiamare in agenzia, d\'accordo?',
+					'link': '#'
+				}, {
+					'text': 'Ma non ce n\'è bisogno. La chiamo io nel pomeriggio di domani.',
+					'link': '#'
+				}]
+			};
+			steps['1-I'] = {
+				'dialog': 'Ah… Va bene… nove meno un quarto?',
+				'items': [{
+					'text': 'Perfetto: allora a domani, alle 20,45 Giovanni. Buona serata (CHIUDI)',
+					'link': 'end-1'
+				}, {
+					'text': 'Esatto. A domani. (CHIUDI)',
+					'link': '#'
+				}, {
+					'text': 'Se per lei va bene… Sì.',
+					'link': '#'
+				}]
+			};
+			steps['end-1'] = {
+				'dialog': 'A domani… *aggancia*',
+				'items': [],
+				'scores': 'a1'
+			};
+
+			steps['2'] = {
+				'dialog': 'Sì… Chi parla scusi?',
+				'items': [{
+					'text': 'Buongiorno Giovanni, sono Francesco Mariani, di Generali: suo cugino Filippo la ha avvisata della mia chiamata?',
+					'link': '2-A'
+				}, {
+					'text': 'Buongiorno, sono Francesco Mariani, di Generali. Possiamo parlare o la disturbo?',
+					'link': '#'
+				}, {
+					'text': 'La chiamo da Generali. Mi dica, la disturbo, adesso?',
+					'link': '#'
+				}]
+			};
+			steps['2-A'] = {
+				'dialog': 'Ehm… Penso di sì… Di preciso di cosa aveva bisogno?',
+				'items': [{
+					'text': 'Le rubo qualche minuto. La disturbo, adesso?',
+					'link': '2-B'
+				}, {
+					'text': 'La chiamo per fissare un incontro e parlare come abbiamo fatto con suo cugino. Lei ha un negozio di ottica, vero? Ottica Borini?',
+					'link': '#'
+				}, {
+					'text': 'Vorrei proporle un incontro per parlare di previdenza, come ho fatto con Filippo.',
+					'link': '#'
+				}]
+			};
+			steps['2-B'] = {
+				'dialog': 'Guardi, sì… ma tanto è sempre così. Mi dica. Cosa voleva?',
+				'items': [{
+					'text': 'Dovrei parlarle della sua polizza pensionistica.',
+					'link': '2-C'
+				}, {
+					'text': 'Solo proporle un incontro per parlare della sua polizza. Cosa ne dice?',
+					'link': '#'
+				}, {
+					'text': 'Proporle un incontro, come quello fatto con Filippo.',
+					'link': '#'
+				}]
+			};
+			steps['2-C'] = {
+				'dialog': 'Sarà un discorso breve perché io non ho una polizza…',
+				'items': [{
+					'text': 'Infatti: come Generali possiamo offrirle però una serie di soluzioni molto intriganti. Io penso che potremmo parlarne, no?',
+					'link': '2-D'
+				}, {
+					'text': 'Lo so, e per questo la chiamo: Filippo ci tiene che anche lei abbia la possibilità di capire come funzionano queste polizze.',
+					'link': '#'
+				}, {
+					'text': 'Me lo ha detto Filippo. Ed è per questo che ci teneva la chiamassi. Vogliamo vederci stasera per parlarne?',
+					'link': '#'
+				}]
+			};
+			steps['2-D'] = {
+				'dialog': 'No. Mi scusi, non capisco cosa vuole…',
+				'items': [{
+					'text': 'Le sto proponendo un investimento vantaggioso per lei e la sua famiglia.',
+					'link': '2-E'
+				}, {
+					'text': 'Ha ragione: vediamoci per parlarne con calma. Stasera preferisce che passi alle 18,30 o alle 19,30?',
+					'link': '#'
+				}, {
+					'text': 'Solo vederla, Giovanni.',
+					'link': '#'
+				}]
+			};
+			steps['2-E'] = {
+				'dialog': 'Mmmm… Ma di che cifre stiamo parlando?',
+				'items': [{
+					'text': 'L\'ammontare del premio dipende da quanto vuole guadagnare, ovviamente... Ma 5mila, 6mila come minimo.',
+					'link': '2-F'
+				}, {
+					'text': 'Preferisco palarne a voce: quando posso venire da lei?',
+					'link': '#'
+				}, {
+					'text': 'La cifra dipende soprattutto dalle sue esigenze: stasera potremmo parlarne con calma. Passo alle 19,30 o più tardi, verso le 20?',
+					'link': '#'
+				}]
+			};
+			steps['2-F'] = {
+				'dialog': 'Mah, no. Sono numeri troppo grossi, adesso… Mi scusi, ma io ho già gli investimenti che mi servono… ',
+				'items': [{
+					'text': 'Capisco. Lei ha un negozio di ottica… Ottica Borini, giusto?',
+					'link': '2-G'
+				}, {
+					'text': 'E di cosa si tratta?',
+					'link': '#'
+				}, {
+					'text': 'Però tenga presente che il nostro prodotto è unico, diverso da tuti gli altri.',
+					'link': '#'
+				}]
+			};
+			steps['2-G'] = {
+				'dialog': 'Sì, ma se pensa che avere un negozio significhi aver soldi a palate, devo dirle che non è così…',
+				'items': [{
+					'text': 'Lo so, lo so. Ma proprio per questo dovremmo parlare di come gestire i suoi fondi per il futuro, non crede?',
+					'link': '2-H'
+				}, {
+					'text': 'Il vostro è uno dei negozi storici della città, giusto?',
+					'link': '#'
+				}, {
+					'text': 'Senta, io sono già in città, domani: possiamo vederci alle 19,30.',
+					'link': '#'
+				}]
+			};
+			steps['2-H'] = {
+				'dialog': 'Guardi, davvero, non stia a perdere tempo. Abbiamo altre cose in ballo che sono più pressanti.',
+				'items': [{
+					'text': 'Certo… Ma mi lasci provare a convincerla. Se vuole io posso venire da lei anche la mattina, nel fine settimana.',
+					'link': '2-I'
+				}, {
+					'text': 'Posso chiederle di cosa si tratta?',
+					'link': '#'
+				}, {
+					'text': 'Mi sta dicendo che non vuole parlare del suo futuro?',
+					'link': '#'
+				}]
+			};
+			steps['2-I'] = {
+				'dialog': 'Ma no, a questo punto facciamo la sera… Verso le 19,30, appena torno dall\'ufficio.',
+				'items': [{
+					'text': 'Ottimo: che giorno potrebbe?',
+					'link': 'end-2'
+				}, {
+					'text': 'Però così forse la disturbo. Posso venire più tardi, che ne dice?',
+					'link': '#'
+				}, {
+					'text': 'Allora fisso per stasera?',
+					'link': '#'
+				}]
+			};
+			steps['end-2'] = {
+				'dialog': 'Senta, ora non so dirle, facciamo che la chiamo io, va bene? *aggancia*',
+				'items': [],
+				'scores': 'b1'
+			};
+
+			if (typeof steps[params.video_id] !== undefined) {
+				return steps[params.video_id];
+			} else {
+				return false;
+			}
+
+			//return this.store.findRecord('video', params.video_id);
+		}
+	});
+});
+define("ttexp/routes/scores", ["exports", "ember"], function (exports, _ember) {
+	exports["default"] = _ember["default"].Route.extend({
+		model: function model(params) {
+			return params.session_id;
+		}
+	});
 });
 define("ttexp/services/liquid-fire-modals", ["exports", "liquid-fire/modals"], function (exports, _liquidFireModals) {
   exports["default"] = _liquidFireModals["default"];
@@ -901,8 +1345,11 @@ define("ttexp/templates/application", ["exports"], function (exports) {
   exports["default"] = Ember.HTMLBars.template((function () {
     return {
       meta: {
-        "topLevel": false,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type", "multiple-nodes"]
+        },
+        "revision": "Ember@2.3.1",
         "loc": {
           "source": null,
           "start": {
@@ -948,8 +1395,8 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
       var child0 = (function () {
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.1",
             "loc": {
               "source": null,
               "start": {
@@ -990,8 +1437,11 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": {
+            "name": "modifiers",
+            "modifiers": ["action"]
+          },
+          "revision": "Ember@2.3.1",
           "loc": {
             "source": null,
             "start": {
@@ -1045,8 +1495,8 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
     var child1 = (function () {
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.1",
           "loc": {
             "source": null,
             "start": {
@@ -1094,8 +1544,8 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
       var child0 = (function () {
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.1",
             "loc": {
               "source": null,
               "start": {
@@ -1136,8 +1586,8 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.1",
           "loc": {
             "source": null,
             "start": {
@@ -1190,8 +1640,11 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
     })();
     return {
       meta: {
-        "topLevel": false,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type", "multiple-nodes"]
+        },
+        "revision": "Ember@2.3.1",
         "loc": {
           "source": null,
           "start": {
@@ -1242,8 +1695,11 @@ define("ttexp/templates/components/cdv-nav-bar", ["exports"], function (exports)
   exports["default"] = Ember.HTMLBars.template((function () {
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.1",
         "loc": {
           "source": null,
           "start": {
@@ -1288,8 +1744,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
         var child0 = (function () {
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.1",
               "loc": {
                 "source": null,
                 "start": {
@@ -1328,8 +1784,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
         var child1 = (function () {
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.1",
               "loc": {
                 "source": null,
                 "start": {
@@ -1367,8 +1823,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
         })();
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.1",
             "loc": {
               "source": null,
               "start": {
@@ -1406,8 +1862,11 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": {
+            "name": "missing-wrapper",
+            "problems": ["wrong-type"]
+          },
+          "revision": "Ember@2.3.1",
           "loc": {
             "source": null,
             "start": {
@@ -1449,8 +1908,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
           var child0 = (function () {
             return {
               meta: {
-                "topLevel": null,
-                "revision": "Ember@2.1.0",
+                "fragmentReason": false,
+                "revision": "Ember@2.3.1",
                 "loc": {
                   "source": null,
                   "start": {
@@ -1489,8 +1948,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
           var child1 = (function () {
             return {
               meta: {
-                "topLevel": null,
-                "revision": "Ember@2.1.0",
+                "fragmentReason": false,
+                "revision": "Ember@2.3.1",
                 "loc": {
                   "source": null,
                   "start": {
@@ -1528,8 +1987,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
           })();
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.1",
               "loc": {
                 "source": null,
                 "start": {
@@ -1567,8 +2026,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
         })();
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.1",
             "loc": {
               "source": null,
               "start": {
@@ -1606,8 +2065,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.1",
           "loc": {
             "source": null,
             "start": {
@@ -1645,8 +2104,11 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
     })();
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.1",
         "loc": {
           "source": null,
           "start": {
@@ -1687,8 +2149,11 @@ define("ttexp/templates/components/liquid-container", ["exports"], function (exp
   exports["default"] = Ember.HTMLBars.template((function () {
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.1",
         "loc": {
           "source": null,
           "start": {
@@ -1732,8 +2197,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
         var child0 = (function () {
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.1",
               "loc": {
                 "source": null,
                 "start": {
@@ -1774,8 +2239,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
         var child1 = (function () {
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.1",
               "loc": {
                 "source": null,
                 "start": {
@@ -1815,8 +2280,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
         })();
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.1",
             "loc": {
               "source": null,
               "start": {
@@ -1854,8 +2319,11 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": {
+            "name": "missing-wrapper",
+            "problems": ["wrong-type"]
+          },
+          "revision": "Ember@2.3.1",
           "loc": {
             "source": null,
             "start": {
@@ -1897,8 +2365,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
           var child0 = (function () {
             return {
               meta: {
-                "topLevel": null,
-                "revision": "Ember@2.1.0",
+                "fragmentReason": false,
+                "revision": "Ember@2.3.1",
                 "loc": {
                   "source": null,
                   "start": {
@@ -1939,8 +2407,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
           var child1 = (function () {
             return {
               meta: {
-                "topLevel": null,
-                "revision": "Ember@2.1.0",
+                "fragmentReason": false,
+                "revision": "Ember@2.3.1",
                 "loc": {
                   "source": null,
                   "start": {
@@ -1980,8 +2448,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
           })();
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.1",
               "loc": {
                 "source": null,
                 "start": {
@@ -2019,8 +2487,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
         })();
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.1",
             "loc": {
               "source": null,
               "start": {
@@ -2058,8 +2526,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.1",
           "loc": {
             "source": null,
             "start": {
@@ -2097,8 +2565,11 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
     })();
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.1",
         "loc": {
           "source": null,
           "start": {
@@ -2141,8 +2612,8 @@ define("ttexp/templates/components/liquid-modal", ["exports"], function (exports
       var child0 = (function () {
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.1",
             "loc": {
               "source": null,
               "start": {
@@ -2193,8 +2664,11 @@ define("ttexp/templates/components/liquid-modal", ["exports"], function (exports
       })();
       return {
         meta: {
-          "topLevel": false,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": {
+            "name": "missing-wrapper",
+            "problems": ["wrong-type", "multiple-nodes"]
+          },
+          "revision": "Ember@2.3.1",
           "loc": {
             "source": null,
             "start": {
@@ -2238,8 +2712,11 @@ define("ttexp/templates/components/liquid-modal", ["exports"], function (exports
     })();
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.1",
         "loc": {
           "source": null,
           "start": {
@@ -2283,8 +2760,8 @@ define("ttexp/templates/components/liquid-outlet", ["exports"], function (export
         var child0 = (function () {
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.1",
               "loc": {
                 "source": null,
                 "start": {
@@ -2322,8 +2799,8 @@ define("ttexp/templates/components/liquid-outlet", ["exports"], function (export
         })();
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.1",
             "loc": {
               "source": null,
               "start": {
@@ -2361,8 +2838,11 @@ define("ttexp/templates/components/liquid-outlet", ["exports"], function (export
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": {
+            "name": "missing-wrapper",
+            "problems": ["wrong-type"]
+          },
+          "revision": "Ember@2.3.1",
           "loc": {
             "source": null,
             "start": {
@@ -2400,8 +2880,11 @@ define("ttexp/templates/components/liquid-outlet", ["exports"], function (export
     })();
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.1",
         "loc": {
           "source": null,
           "start": {
@@ -2445,8 +2928,8 @@ define("ttexp/templates/components/liquid-versions", ["exports"], function (expo
         var child0 = (function () {
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.1",
               "loc": {
                 "source": null,
                 "start": {
@@ -2484,8 +2967,8 @@ define("ttexp/templates/components/liquid-versions", ["exports"], function (expo
         })();
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.1",
             "loc": {
               "source": null,
               "start": {
@@ -2523,8 +3006,11 @@ define("ttexp/templates/components/liquid-versions", ["exports"], function (expo
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": {
+            "name": "missing-wrapper",
+            "problems": ["wrong-type"]
+          },
+          "revision": "Ember@2.3.1",
           "loc": {
             "source": null,
             "start": {
@@ -2562,8 +3048,11 @@ define("ttexp/templates/components/liquid-versions", ["exports"], function (expo
     })();
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.1",
         "loc": {
           "source": null,
           "start": {
@@ -2606,8 +3095,8 @@ define("ttexp/templates/components/liquid-with", ["exports"], function (exports)
       var child0 = (function () {
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.1",
             "loc": {
               "source": null,
               "start": {
@@ -2645,8 +3134,11 @@ define("ttexp/templates/components/liquid-with", ["exports"], function (exports)
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": {
+            "name": "missing-wrapper",
+            "problems": ["wrong-type"]
+          },
+          "revision": "Ember@2.3.1",
           "loc": {
             "source": null,
             "start": {
@@ -2687,8 +3179,8 @@ define("ttexp/templates/components/liquid-with", ["exports"], function (exports)
         var child0 = (function () {
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.1",
               "loc": {
                 "source": null,
                 "start": {
@@ -2726,8 +3218,8 @@ define("ttexp/templates/components/liquid-with", ["exports"], function (exports)
         })();
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.1",
             "loc": {
               "source": null,
               "start": {
@@ -2765,8 +3257,8 @@ define("ttexp/templates/components/liquid-with", ["exports"], function (exports)
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.1",
           "loc": {
             "source": null,
             "start": {
@@ -2804,8 +3296,11 @@ define("ttexp/templates/components/liquid-with", ["exports"], function (exports)
     })();
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.1",
         "loc": {
           "source": null,
           "start": {
@@ -2846,8 +3341,11 @@ define("ttexp/templates/help", ["exports"], function (exports) {
   exports["default"] = Ember.HTMLBars.template((function () {
     return {
       meta: {
-        "topLevel": false,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["multiple-nodes", "wrong-type"]
+        },
+        "revision": "Ember@2.3.1",
         "loc": {
           "source": null,
           "start": {
@@ -2894,17 +3392,17 @@ define("ttexp/templates/index", ["exports"], function (exports) {
     var child0 = (function () {
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.1",
           "loc": {
             "source": null,
             "start": {
-              "line": 13,
-              "column": 29
+              "line": 14,
+              "column": 1
             },
             "end": {
-              "line": 13,
-              "column": 52
+              "line": 14,
+              "column": 56
             }
           },
           "moduleName": "ttexp/templates/index.hbs"
@@ -2927,46 +3425,13 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         templates: []
       };
     })();
-    var child1 = (function () {
-      return {
-        meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
-          "loc": {
-            "source": null,
-            "start": {
-              "line": 17,
-              "column": 29
-            },
-            "end": {
-              "line": 17,
-              "column": 52
-            }
-          },
-          "moduleName": "ttexp/templates/index.hbs"
-        },
-        isEmpty: false,
-        arity: 0,
-        cachedFragment: null,
-        hasRendered: false,
-        buildFragment: function buildFragment(dom) {
-          var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("Help");
-          dom.appendChild(el0, el1);
-          return el0;
-        },
-        buildRenderNodes: function buildRenderNodes() {
-          return [];
-        },
-        statements: [],
-        locals: [],
-        templates: []
-      };
-    })();
     return {
       meta: {
-        "topLevel": false,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["multiple-nodes", "wrong-type"]
+        },
+        "revision": "Ember@2.3.1",
         "loc": {
           "source": null,
           "start": {
@@ -2975,7 +3440,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
           },
           "end": {
             "line": 21,
-            "column": 0
+            "column": 10
           }
         },
         "moduleName": "ttexp/templates/index.hbs"
@@ -2995,6 +3460,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         var el1 = dom.createTextNode("\n\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("div");
+        dom.setAttribute(el1, "id", "main-header");
         dom.setAttribute(el1, "class", "panel panel-default");
         var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
@@ -3024,7 +3490,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el1, el2);
         var el2 = dom.createElement("div");
         dom.setAttribute(el2, "class", "panel-body");
-        var el3 = dom.createTextNode("\n		The next version of ember will continue to improve the way we create web applications\n	");
+        var el3 = dom.createTextNode("\n		Welcome to the TTExp simulator\n	");
         dom.appendChild(el2, el3);
         dom.appendChild(el1, el2);
         var el2 = dom.createTextNode("\n");
@@ -3032,42 +3498,43 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el0, el1);
         var el1 = dom.createTextNode("\n\n");
         dom.appendChild(el0, el1);
-        var el1 = dom.createElement("ul");
+        var el1 = dom.createComment("<ul id=\"main-menu\" class=\"list-group ttexp-vertical-menu\">");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createElement("div");
         dom.setAttribute(el1, "id", "main-menu");
-        dom.setAttribute(el1, "class", "list-group ttexp-vertical-menu");
+        dom.setAttribute(el1, "class", "list-group");
         var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
-        var el2 = dom.createElement("li");
-        dom.setAttribute(el2, "class", "list-group-item");
-        var el3 = dom.createComment("");
-        dom.appendChild(el2, el3);
+        var el2 = dom.createComment("");
         dom.appendChild(el1, el2);
         var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
-        var el2 = dom.createElement("li");
+        var el2 = dom.createElement("a");
         dom.setAttribute(el2, "class", "list-group-item");
         var el3 = dom.createTextNode("History");
         dom.appendChild(el2, el3);
         dom.appendChild(el1, el2);
         var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
-        var el2 = dom.createElement("li");
+        var el2 = dom.createElement("a");
         dom.setAttribute(el2, "class", "list-group-item");
         var el3 = dom.createTextNode("Messages");
         dom.appendChild(el2, el3);
         dom.appendChild(el1, el2);
         var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
-        var el2 = dom.createElement("li");
+        var el2 = dom.createElement("a");
         dom.setAttribute(el2, "class", "list-group-item");
         var el3 = dom.createTextNode("User Profile");
         dom.appendChild(el2, el3);
         dom.appendChild(el1, el2);
         var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
-        var el2 = dom.createElement("li");
+        var el2 = dom.createElement("a");
         dom.setAttribute(el2, "class", "list-group-item");
-        var el3 = dom.createComment("");
+        var el3 = dom.createTextNode("Help");
         dom.appendChild(el2, el3);
         dom.appendChild(el1, el2);
         var el2 = dom.createTextNode("\n");
@@ -3077,24 +3544,21 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el0, el1);
         var el1 = dom.createComment("");
         dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
-        dom.appendChild(el0, el1);
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
         var element0 = dom.childAt(fragment, [2, 1, 1, 1]);
-        var element1 = dom.childAt(fragment, [4]);
-        var morphs = new Array(5);
+        var morphs = new Array(4);
         morphs[0] = dom.createMorphAt(element0, 0, 0);
         morphs[1] = dom.createMorphAt(element0, 2, 2);
-        morphs[2] = dom.createMorphAt(dom.childAt(element1, [1]), 0, 0);
-        morphs[3] = dom.createMorphAt(dom.childAt(element1, [9]), 0, 0);
-        morphs[4] = dom.createMorphAt(fragment, 6, 6, contextualElement);
+        morphs[2] = dom.createMorphAt(dom.childAt(fragment, [6]), 1, 1);
+        morphs[3] = dom.createMorphAt(fragment, 8, 8, contextualElement);
+        dom.insertBoundary(fragment, null);
         return morphs;
       },
-      statements: [["content", "firstName", ["loc", [null, [5, 41], [5, 54]]]], ["content", "lastName", ["loc", [null, [5, 55], [5, 67]]]], ["block", "link-to", ["play"], [], 0, null, ["loc", [null, [13, 29], [13, 64]]]], ["block", "link-to", ["help"], [], 1, null, ["loc", [null, [17, 29], [17, 64]]]], ["content", "outlet", ["loc", [null, [20, 0], [20, 10]]]]],
+      statements: [["content", "firstName", ["loc", [null, [5, 41], [5, 54]]]], ["content", "lastName", ["loc", [null, [5, 55], [5, 67]]]], ["block", "link-to", ["play", "start"], ["class", "list-group-item"], 0, null, ["loc", [null, [14, 1], [14, 68]]]], ["content", "outlet", ["loc", [null, [21, 0], [21, 10]]]]],
       locals: [],
-      templates: [child0, child1]
+      templates: [child0]
     };
   })());
 });
@@ -3102,8 +3566,11 @@ define("ttexp/templates/page-not-found", ["exports"], function (exports) {
   exports["default"] = Ember.HTMLBars.template((function () {
     return {
       meta: {
-        "topLevel": false,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["multiple-nodes", "wrong-type"]
+        },
+        "revision": "Ember@2.3.1",
         "loc": {
           "source": null,
           "start": {
@@ -3148,18 +3615,188 @@ define("ttexp/templates/page-not-found", ["exports"], function (exports) {
 define("ttexp/templates/play", ["exports"], function (exports) {
   exports["default"] = Ember.HTMLBars.template((function () {
     var child0 = (function () {
+      var child0 = (function () {
+        return {
+          meta: {
+            "fragmentReason": false,
+            "revision": "Ember@2.3.1",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 15,
+                "column": 4
+              },
+              "end": {
+                "line": 15,
+                "column": 71
+              }
+            },
+            "moduleName": "ttexp/templates/play.hbs"
+          },
+          isEmpty: false,
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("Risultati");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes() {
+            return [];
+          },
+          statements: [],
+          locals: [],
+          templates: []
+        };
+      })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.1",
           "loc": {
             "source": null,
             "start": {
-              "line": 17,
-              "column": 0
+              "line": 13,
+              "column": 2
             },
             "end": {
               "line": 17,
+              "column": 2
+            }
+          },
+          "moduleName": "ttexp/templates/play.hbs"
+        },
+        isEmpty: false,
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("			");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("div");
+          dom.setAttribute(el1, "id", "scores-button");
+          var el2 = dom.createTextNode("\n				");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n			");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]), 1, 1);
+          return morphs;
+        },
+        statements: [["block", "link-to", ["scores", ["get", "model.scores", ["loc", [null, [15, 24], [15, 36]]]]], ["class", "btn btn-primary"], 0, null, ["loc", [null, [15, 4], [15, 83]]]]],
+        locals: [],
+        templates: [child0]
+      };
+    })();
+    var child1 = (function () {
+      var child0 = (function () {
+        return {
+          meta: {
+            "fragmentReason": false,
+            "revision": "Ember@2.3.1",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 29,
+                "column": 31
+              },
+              "end": {
+                "line": 29,
+                "column": 73
+              }
+            },
+            "moduleName": "ttexp/templates/play.hbs"
+          },
+          isEmpty: false,
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createComment("");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+            var morphs = new Array(1);
+            morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
+            dom.insertBoundary(fragment, 0);
+            dom.insertBoundary(fragment, null);
+            return morphs;
+          },
+          statements: [["content", "item.text", ["loc", [null, [29, 60], [29, 73]]]]],
+          locals: [],
+          templates: []
+        };
+      })();
+      return {
+        meta: {
+          "fragmentReason": false,
+          "revision": "Ember@2.3.1",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 28,
+              "column": 2
+            },
+            "end": {
+              "line": 30,
+              "column": 2
+            }
+          },
+          "moduleName": "ttexp/templates/play.hbs"
+        },
+        isEmpty: false,
+        arity: 1,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("			");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("li");
+          dom.setAttribute(el1, "class", "list-group-item");
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]), 0, 0);
+          return morphs;
+        },
+        statements: [["block", "link-to", ["play", ["get", "item.link", ["loc", [null, [29, 49], [29, 58]]]]], [], 0, null, ["loc", [null, [29, 31], [29, 85]]]]],
+        locals: ["item"],
+        templates: [child0]
+      };
+    })();
+    var child2 = (function () {
+      return {
+        meta: {
+          "fragmentReason": false,
+          "revision": "Ember@2.3.1",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 40,
+              "column": 0
+            },
+            "end": {
+              "line": 40,
               "column": 167
             }
           },
@@ -3186,8 +3823,11 @@ define("ttexp/templates/play", ["exports"], function (exports) {
     })();
     return {
       meta: {
-        "topLevel": false,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["multiple-nodes", "wrong-type"]
+        },
+        "revision": "Ember@2.3.1",
         "loc": {
           "source": null,
           "start": {
@@ -3195,7 +3835,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 21,
+            "line": 44,
             "column": 0
           }
         },
@@ -3209,25 +3849,67 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         var el0 = dom.createDocumentFragment();
         var el1 = dom.createElement("div");
         dom.setAttribute(el1, "id", "video-container");
-        dom.setAttribute(el1, "class", "cinemaXXX");
+        dom.setAttribute(el1, "class", "cinemaOff hidden");
         var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
         var el2 = dom.createElement("video");
         dom.setAttribute(el2, "id", "video-player");
-        dom.setAttribute(el2, "autoplay", "");
         var el3 = dom.createTextNode("\n		");
         dom.appendChild(el2, el3);
         var el3 = dom.createElement("source");
         dom.setAttribute(el3, "src", "assets/media/video1.mp4");
         dom.setAttribute(el3, "type", "video/mp4");
         dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("\n		Your browser does not support the video tag.\n	");
+        var el3 = dom.createTextNode("\n		Your browser does not support the video element.\n	");
         dom.appendChild(el2, el3);
         dom.appendChild(el1, el2);
         var el2 = dom.createTextNode("\n");
         dom.appendChild(el1, el2);
         dom.appendChild(el0, el1);
         var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createElement("div");
+        dom.setAttribute(el1, "id", "text-container");
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("div");
+        dom.setAttribute(el2, "id", "text-dialog");
+        var el3 = dom.createTextNode("\n		");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("div");
+        dom.setAttribute(el3, "id", "text-baloon");
+        var el4 = dom.createTextNode("\n			");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createComment("");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("\n		");
+        dom.appendChild(el3, el4);
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n		\n");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createComment("");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("	");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n");
+        dom.appendChild(el1, el2);
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createElement("audio");
+        dom.setAttribute(el1, "autoplay", "");
+        dom.setAttribute(el1, "loop", "");
+        var el2 = dom.createTextNode("\n	 ");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("source");
+        dom.setAttribute(el2, "src", "assets/media/music.mp3");
+        dom.setAttribute(el2, "type", "audio/mpeg");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n	 Your browser does not support the audio element.\n");
+        dom.appendChild(el1, el2);
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode(" \n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("div");
         dom.setAttribute(el1, "id", "side-chat");
@@ -3257,26 +3939,13 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         var el2 = dom.createElement("ul");
         dom.setAttribute(el2, "id", "chat-options");
         dom.setAttribute(el2, "class", "list-group ");
-        var el3 = dom.createTextNode("\n		");
+        var el3 = dom.createTextNode("\n");
         dom.appendChild(el2, el3);
-        var el3 = dom.createElement("li");
-        dom.setAttribute(el3, "class", "list-group-item");
-        var el4 = dom.createTextNode("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenenan massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.");
-        dom.appendChild(el3, el4);
+        var el3 = dom.createComment("");
         dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("\n		");
+        var el3 = dom.createTextNode("		\n		");
         dom.appendChild(el2, el3);
-        var el3 = dom.createElement("li");
-        dom.setAttribute(el3, "class", "list-group-item");
-        var el4 = dom.createTextNode("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenenan massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.");
-        dom.appendChild(el3, el4);
-        dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("\n		");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createElement("li");
-        dom.setAttribute(el3, "class", "list-group-item");
-        var el4 = dom.createTextNode("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenenan massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.");
-        dom.appendChild(el3, el4);
+        var el3 = dom.createComment("\n		<li class=\"list-group-item\">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenenan massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.</li>\n		<li class=\"list-group-item\">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenenan massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.</li>\n		<li class=\"list-group-item\">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenenan massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.</li>\n		");
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n	");
         dom.appendChild(el2, el3);
@@ -3306,12 +3975,121 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var morphs = new Array(2);
-        morphs[0] = dom.createMorphAt(fragment, 4, 4, contextualElement);
-        morphs[1] = dom.createMorphAt(fragment, 8, 8, contextualElement);
+        var element0 = dom.childAt(fragment, [2, 1]);
+        var morphs = new Array(5);
+        morphs[0] = dom.createMorphAt(dom.childAt(element0, [1]), 1, 1);
+        morphs[1] = dom.createMorphAt(element0, 3, 3);
+        morphs[2] = dom.createMorphAt(dom.childAt(fragment, [6, 5]), 1, 1);
+        morphs[3] = dom.createMorphAt(fragment, 8, 8, contextualElement);
+        morphs[4] = dom.createMorphAt(fragment, 12, 12, contextualElement);
         return morphs;
       },
-      statements: [["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [17, 0], [17, 179]]]], ["content", "outlet", ["loc", [null, [20, 0], [20, 10]]]]],
+      statements: [["content", "model.dialog", ["loc", [null, [10, 3], [10, 19]]]], ["block", "if", [["get", "model.scores", ["loc", [null, [13, 8], [13, 20]]]]], [], 0, null, ["loc", [null, [13, 2], [17, 9]]]], ["block", "each", [["get", "model.items", ["loc", [null, [28, 10], [28, 21]]]]], [], 1, null, ["loc", [null, [28, 2], [30, 11]]]], ["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 2, null, ["loc", [null, [40, 0], [40, 179]]]], ["content", "outlet", ["loc", [null, [43, 0], [43, 10]]]]],
+      locals: [],
+      templates: [child0, child1, child2]
+    };
+  })());
+});
+define("ttexp/templates/scores", ["exports"], function (exports) {
+  exports["default"] = Ember.HTMLBars.template((function () {
+    var child0 = (function () {
+      return {
+        meta: {
+          "fragmentReason": false,
+          "revision": "Ember@2.3.1",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 3,
+              "column": 0
+            },
+            "end": {
+              "line": 3,
+              "column": 167
+            }
+          },
+          "moduleName": "ttexp/templates/scores.hbs"
+        },
+        isEmpty: false,
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createElement("span");
+          dom.setAttribute(el1, "class", "glyphicon glyphicon glyphicon-remove-circle");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes() {
+          return [];
+        },
+        statements: [],
+        locals: [],
+        templates: []
+      };
+    })();
+    return {
+      meta: {
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["multiple-nodes", "wrong-type"]
+        },
+        "revision": "Ember@2.3.1",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 7,
+            "column": 0
+          }
+        },
+        "moduleName": "ttexp/templates/scores.hbs"
+      },
+      isEmpty: false,
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createElement("div");
+        dom.setAttribute(el1, "id", "scores-container");
+        var el2 = dom.createTextNode("\n");
+        dom.appendChild(el1, el2);
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createElement("div");
+        dom.setAttribute(el1, "id", "customer-logo");
+        dom.setAttribute(el1, "class", "ttexp-position-absolute bottom-left");
+        var el2 = dom.createElement("img");
+        dom.setAttribute(el2, "src", "assets/images/logo-customer.png");
+        dom.appendChild(el1, el2);
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+        var element0 = dom.childAt(fragment, [0]);
+        var morphs = new Array(3);
+        morphs[0] = dom.createAttrMorph(element0, 'style');
+        morphs[1] = dom.createMorphAt(fragment, 2, 2, contextualElement);
+        morphs[2] = dom.createMorphAt(fragment, 6, 6, contextualElement);
+        return morphs;
+      },
+      statements: [["attribute", "style", ["concat", ["background-image: url('/assets/images/results-", ["get", "model", ["loc", [null, [1, 82], [1, 87]]]], ".png');"]]], ["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [3, 0], [3, 179]]]], ["content", "outlet", ["loc", [null, [6, 0], [6, 10]]]]],
       locals: [],
       templates: [child0]
     };
@@ -3765,7 +4543,7 @@ catch(err) {
 });
 
 if (!runningTests) {
-  require("ttexp/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+874764c4"});
+  require("ttexp/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+37dd1969"});
 }
 
 /* jshint ignore:end */

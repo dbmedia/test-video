@@ -3,6 +3,7 @@ define('ttexp/tests/app.jshint', ['exports'], function (exports) {
 
   QUnit.module('JSHint - .');
   QUnit.test('app.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'app.js should pass jshint.');
   });
 });
@@ -11,6 +12,7 @@ define('ttexp/tests/controllers/help.jshint', ['exports'], function (exports) {
 
   QUnit.module('JSHint - controllers');
   QUnit.test('controllers/help.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'controllers/help.js should pass jshint.');
   });
 });
@@ -19,6 +21,7 @@ define('ttexp/tests/controllers/index.jshint', ['exports'], function (exports) {
 
   QUnit.module('JSHint - controllers');
   QUnit.test('controllers/index.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'controllers/index.js should pass jshint.');
   });
 });
@@ -27,6 +30,7 @@ define('ttexp/tests/controllers/page-not-found.jshint', ['exports'], function (e
 
   QUnit.module('JSHint - controllers');
   QUnit.test('controllers/page-not-found.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'controllers/page-not-found.js should pass jshint.');
   });
 });
@@ -35,7 +39,17 @@ define('ttexp/tests/controllers/play.jshint', ['exports'], function (exports) {
 
   QUnit.module('JSHint - controllers');
   QUnit.test('controllers/play.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'controllers/play.js should pass jshint.');
+  });
+});
+define('ttexp/tests/controllers/scores.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - controllers');
+  QUnit.test('controllers/scores.js should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'controllers/scores.js should pass jshint.');
   });
 });
 define('ttexp/tests/helpers/resolver', ['exports', 'ember/resolver', 'ttexp/config/environment'], function (exports, _emberResolver, _ttexpConfigEnvironment) {
@@ -54,6 +68,7 @@ define('ttexp/tests/helpers/resolver.jshint', ['exports'], function (exports) {
 
   QUnit.module('JSHint - helpers');
   QUnit.test('helpers/resolver.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'helpers/resolver.js should pass jshint.');
   });
 });
@@ -80,6 +95,7 @@ define('ttexp/tests/helpers/start-app.jshint', ['exports'], function (exports) {
 
   QUnit.module('JSHint - helpers');
   QUnit.test('helpers/start-app.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'helpers/start-app.js should pass jshint.');
   });
 });
@@ -88,6 +104,7 @@ define('ttexp/tests/router.jshint', ['exports'], function (exports) {
 
   QUnit.module('JSHint - .');
   QUnit.test('router.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'router.js should pass jshint.');
   });
 });
@@ -96,6 +113,7 @@ define('ttexp/tests/routes/help.jshint', ['exports'], function (exports) {
 
   QUnit.module('JSHint - routes');
   QUnit.test('routes/help.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'routes/help.js should pass jshint.');
   });
 });
@@ -104,6 +122,7 @@ define('ttexp/tests/routes/index.jshint', ['exports'], function (exports) {
 
   QUnit.module('JSHint - routes');
   QUnit.test('routes/index.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'routes/index.js should pass jshint.');
   });
 });
@@ -112,6 +131,7 @@ define('ttexp/tests/routes/page-not-found.jshint', ['exports'], function (export
 
   QUnit.module('JSHint - routes');
   QUnit.test('routes/page-not-found.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'routes/page-not-found.js should pass jshint.');
   });
 });
@@ -120,7 +140,17 @@ define('ttexp/tests/routes/play.jshint', ['exports'], function (exports) {
 
   QUnit.module('JSHint - routes');
   QUnit.test('routes/play.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'routes/play.js should pass jshint.');
+  });
+});
+define('ttexp/tests/routes/scores.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - routes');
+  QUnit.test('routes/scores.js should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'routes/scores.js should pass jshint.');
   });
 });
 define('ttexp/tests/test-helper', ['exports', 'ttexp/tests/helpers/resolver', 'ember-qunit'], function (exports, _ttexpTestsHelpersResolver, _emberQunit) {
@@ -132,28 +162,8 @@ define('ttexp/tests/test-helper.jshint', ['exports'], function (exports) {
 
   QUnit.module('JSHint - .');
   QUnit.test('test-helper.js should pass jshint', function (assert) {
+    assert.expect(1);
     assert.ok(true, 'test-helper.js should pass jshint.');
-  });
-});
-define('ttexp/tests/unit/models/pippo-test', ['exports', 'ember-qunit'], function (exports, _emberQunit) {
-
-  (0, _emberQunit.moduleForModel)('pippo', 'Unit | Model | pippo', {
-    // Specify the other units that are required for this test.
-    needs: []
-  });
-
-  (0, _emberQunit.test)('it exists', function (assert) {
-    var model = this.subject();
-    // let store = this.store();
-    assert.ok(!!model);
-  });
-});
-define('ttexp/tests/unit/models/pippo-test.jshint', ['exports'], function (exports) {
-  'use strict';
-
-  QUnit.module('JSHint - unit/models');
-  QUnit.test('unit/models/pippo-test.js should pass jshint', function (assert) {
-    assert.ok(true, 'unit/models/pippo-test.js should pass jshint.');
   });
 });
 /* jshint ignore:start */

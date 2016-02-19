@@ -9,7 +9,16 @@
 
 html, body {
   font-family: 'Titillium Web', sans-serif;
-  font-size: 16px; }
+  font-size: 16px;
+  cursor: default; }
+
+a,
+a:link,
+a:visited,
+a:hover,
+a:active {
+  color: inherit;
+  text-decoration: none; }
 
 .ttexp-btn {
   padding: 0; }
@@ -72,8 +81,20 @@ html, body {
   /* 	overflow: hidden; */ }
 
 .page-index #logo-app {
-  width: 128px;
-  margin: 0 auto; }
+  text-align: center; }
+
+.page-index #main-header {
+  margin: 0 auto;
+  width: 90%;
+  max-width: 300px;
+  margin-bottom: 20px; }
+
+.page-index #main-menu {
+  margin: 0 auto;
+  width: 90%;
+  max-width: 300px;
+  text-align: center;
+  text-transform: uppercase; }
 
 .page-play {
   background-color: #000000; }
@@ -95,11 +116,58 @@ html, body {
       -webkit-transform: translateY(-50%);
       -ms-transform: translateY(-50%);
       transform: translateY(-50%); }
-  .page-play #video-container.cinema {
-    width: 100%; }
-    .page-play #video-container.cinema #video-player {
-      max-width: 100%;
+    .page-play #video-container.cinemaOn {
       width: 100%; }
+      .page-play #video-container.cinemaOn #video-player {
+        max-width: 100%;
+        width: 100%; }
+  .page-play #text-container {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 101;
+    -webkit-transform-style: preserve-3d;
+    -moz-transform-style: preserve-3d;
+    transform-style: preserve-3d; }
+    .page-play #text-container::after {
+      content: "";
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      position: absolute;
+      z-index: -1;
+      background-image: url("/assets/images/background-text-version.jpg");
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-position: left center;
+      background-size: cover;
+      opacity: 0.35; }
+    .page-play #text-container #text-dialog {
+      padding: 80px 40px;
+      color: #fff;
+      min-width: 70%;
+      width: calc(100% - 380px);
+      position: relative;
+      top: 50%;
+      -webkit-transform: translateY(-50%);
+      -ms-transform: translateY(-50%);
+      transform: translateY(-50%);
+      font-size: 2em;
+      text-align: center; }
+      .page-play #text-container #text-dialog #text-baloon {
+        display: inline-block;
+        margin: 0 auto;
+        max-width: 660px;
+        text-align: justify;
+        text-justify: inter-word; }
+      .page-play #text-container #text-dialog #scores-button {
+        padding-top: 1em; }
+        .page-play #text-container #text-dialog #scores-button .btn {
+          font-size: inherit; }
   .page-play #side-chat {
     position: absolute;
     right: 0;
@@ -118,6 +186,8 @@ html, body {
       width: 100%;
       overflow: auto; }
       .page-play #side-chat #chat-options li {
+        text-align: justify;
+        text-justify: inter-word;
         color: #ffffff;
         background-color: transparent;
         border: none;
@@ -153,6 +223,35 @@ html, body {
   .page-play #customer-logo {
     bottom: 32px;
     left: 32px; }
+
+.page-scores {
+  background-color: #000000; }
+  .page-scores #scores-container {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 100;
+    -webkit-transform-style: preserve-3d;
+    -moz-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+    background-image: url("/assets/images/results.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center center;
+    background-size: cover; }
+  .page-scores #button-close {
+    top: 32px;
+    left: 32px; }
+  .page-scores #button-audio {
+    top: 32px;
+    right: 32px; }
+  .page-scores #customer-logo {
+    bottom: 32px;
+    left: 32px;
+    alpha: 0.5; }
 
 @media all and (max-width: 1279px) {
   html, body {
