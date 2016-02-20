@@ -4089,7 +4089,7 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
         morphs[2] = dom.createMorphAt(fragment, 6, 6, contextualElement);
         return morphs;
       },
-      statements: [["attribute", "style", ["concat", ["background-image: url('./images/results-", ["get", "model", ["loc", [null, [1, 76], [1, 81]]]], ".png');"]]], ["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [3, 0], [3, 179]]]], ["content", "outlet", ["loc", [null, [6, 0], [6, 10]]]]],
+      statements: [["attribute", "style", ["concat", ["background-image: url('./assets/images/results-", ["get", "model", ["loc", [null, [1, 83], [1, 88]]]], ".png');"]]], ["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [3, 0], [3, 179]]]], ["content", "outlet", ["loc", [null, [6, 0], [6, 10]]]]],
       locals: [],
       templates: [child0]
     };
