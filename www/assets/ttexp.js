@@ -4070,7 +4070,7 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
         dom.setAttribute(el1, "id", "customer-logo");
         dom.setAttribute(el1, "class", "ttexp-position-absolute bottom-left");
         var el2 = dom.createElement("img");
-        dom.setAttribute(el2, "src", "assets/images/logo-customer.png");
+        dom.setAttribute(el2, "src", "./images/logo-customer.png");
         dom.appendChild(el1, el2);
         dom.appendChild(el0, el1);
         var el1 = dom.createTextNode("\n\n");
@@ -4089,7 +4089,7 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
         morphs[2] = dom.createMorphAt(fragment, 6, 6, contextualElement);
         return morphs;
       },
-      statements: [["attribute", "style", ["concat", ["background-image: url('/assets/images/results-", ["get", "model", ["loc", [null, [1, 82], [1, 87]]]], ".png');"]]], ["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [3, 0], [3, 179]]]], ["content", "outlet", ["loc", [null, [6, 0], [6, 10]]]]],
+      statements: [["attribute", "style", ["concat", ["background-image: url('./images/results-", ["get", "model", ["loc", [null, [1, 76], [1, 81]]]], ".png');"]]], ["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [3, 0], [3, 179]]]], ["content", "outlet", ["loc", [null, [6, 0], [6, 10]]]]],
       locals: [],
       templates: [child0]
     };
@@ -4543,7 +4543,7 @@ catch(err) {
 });
 
 if (!runningTests) {
-  require("ttexp/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+00706766"});
+  require("ttexp/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+9b59f2f4"});
 }
 
 /* jshint ignore:end */
