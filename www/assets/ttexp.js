@@ -4043,8 +4043,8 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 7,
-            "column": 0
+            "line": 6,
+            "column": 10
           }
         },
         "moduleName": "ttexp/templates/scores.hbs"
@@ -4070,14 +4070,12 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
         dom.setAttribute(el1, "id", "customer-logo");
         dom.setAttribute(el1, "class", "ttexp-position-absolute bottom-left");
         var el2 = dom.createElement("img");
-        dom.setAttribute(el2, "src", "./images/logo-customer.png");
+        dom.setAttribute(el2, "src", "assets/images/logo-customer.png");
         dom.appendChild(el1, el2);
         dom.appendChild(el0, el1);
         var el1 = dom.createTextNode("\n\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createComment("");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
         return el0;
       },
@@ -4087,6 +4085,7 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
         morphs[0] = dom.createAttrMorph(element0, 'style');
         morphs[1] = dom.createMorphAt(fragment, 2, 2, contextualElement);
         morphs[2] = dom.createMorphAt(fragment, 6, 6, contextualElement);
+        dom.insertBoundary(fragment, null);
         return morphs;
       },
       statements: [["attribute", "style", ["concat", ["background-image: url('./assets/images/results-", ["get", "model", ["loc", [null, [1, 83], [1, 88]]]], ".png');"]]], ["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [3, 0], [3, 179]]]], ["content", "outlet", ["loc", [null, [6, 0], [6, 10]]]]],
