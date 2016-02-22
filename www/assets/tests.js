@@ -6,14 +6,6 @@ define('ttexp/tests/app.jshint', ['exports'], function (exports) {
     assert.ok(true, 'app.js should pass jshint.');
   });
 });
-define('ttexp/tests/components/index.jshint', ['exports'], function (exports) {
-  'use strict';
-
-  QUnit.module('JSHint - components');
-  QUnit.test('components/index.js should pass jshint', function (assert) {
-    assert.ok(true, 'components/index.js should pass jshint.');
-  });
-});
 define('ttexp/tests/controllers/help.jshint', ['exports'], function (exports) {
   'use strict';
 

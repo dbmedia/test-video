@@ -33,16 +33,6 @@ define('ttexp/components/cdv-nav-bar', ['exports', 'ember'], function (exports, 
     tagName: 'header'
   });
 });
-define("ttexp/components/index", ["exports", "ember"], function (exports, _ember) {
-	exports["default"] = _ember["default"].Component.extend({
-		actions: {
-			closeApp: function closeApp() {
-				alert("closing app");
-				navigator.app.exitApp();
-			}
-		}
-	});
-});
 define("ttexp/components/lf-outlet", ["exports", "liquid-fire/ember-internals"], function (exports, _liquidFireEmberInternals) {
   exports["default"] = _liquidFireEmberInternals.StaticOutlet;
 });
@@ -636,7 +626,13 @@ define('ttexp/controllers/help', ['exports', 'ember'], function (exports, _ember
 define('ttexp/controllers/index', ['exports', 'ember'], function (exports, _ember) {
 	exports['default'] = _ember['default'].Controller.extend({
 		firstName: 'Nome',
-		lastName: 'Cognome'
+		lastName: 'Cognome',
+		actions: {
+			closeApp: function closeApp() {
+				alert("closing app");
+				navigator.app.exitApp();
+			}
+		}
 	});
 
 	/*
@@ -4801,7 +4797,7 @@ catch(err) {
 });
 
 if (!runningTests) {
-  require("ttexp/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+806227bd"});
+  require("ttexp/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+c32addd6"});
 }
 
 /* jshint ignore:end */

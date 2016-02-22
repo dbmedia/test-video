@@ -7056,7 +7056,7 @@ html, body {
   width: 128px; }
   #customer-logo img {
     width: 100%;
-    opacity: 0.1; }
+    opacity: 0.25; }
 
 /* http://willschenk.com/bootstrap-advanced-grid-tricks/ */
 .page-index #logo-app {
