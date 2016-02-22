@@ -674,7 +674,7 @@ define("ttexp/initializers/cordova", ["exports"], function (exports) {
 
 	function initialize(application) {
 		// application.inject('route', 'foo', 'service:foo');
-		if (navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry)/)) {
+		if (0 && navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry)/)) {
 
 			alert("CHECK CORDOVA");
 			application.deferReadiness();
