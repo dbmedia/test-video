@@ -6980,20 +6980,19 @@ body {
   white-space: nowrap;
   width: 1%; }
 
-.glyphicon.disabled,
-.disabled .glyphicon {
-  opacity: 0.5;
-  filter: alpha(opacity=50);
-  /* For IE8 and earlier */ }
-
 [data-ember-action]:not(:disabled) {
-  cursor: pointer; }
+  /* 	cursor: pointer; */ }
 
 .ttexp-btn {
   padding: 0; }
   .ttexp-btn span {
     color: #ffffff;
     font-size: 32px; }
+
+.btn-link {
+  margin: 0;
+  padding: 0;
+  border: 0; }
 
 ::-webkit-scrollbar {
   width: 14px; }
@@ -7049,6 +7048,16 @@ html, body {
   /* 	height: 100%; */
   /* 	overflow: hidden; */ }
 
+#customer-logo {
+  z-index: 1000;
+  position: absolute;
+  bottom: 32px;
+  left: 32px;
+  width: 128px; }
+  #customer-logo img {
+    width: 100%;
+    opacity: 0.1; }
+
 /* http://willschenk.com/bootstrap-advanced-grid-tricks/ */
 .page-index #logo-app {
   margin-top: 10px; }
@@ -7060,10 +7069,6 @@ html, body {
 
 .page-index #main-content {
   margin: 0 auto 10px; }
-
-.page-index #customer-logo {
-  bottom: 32px;
-  left: 32px; }
 
 .page-play {
   background-color: #000000; }
@@ -7189,9 +7194,6 @@ html, body {
   .page-play #button-audio {
     top: 32px;
     right: 32px; }
-  .page-play #customer-logo {
-    bottom: 32px;
-    left: 32px; }
 
 .page-scores {
   background-color: #000000; }
@@ -7217,16 +7219,16 @@ html, body {
   .page-scores #button-audio {
     top: 32px;
     right: 32px; }
-  .page-scores #customer-logo {
-    bottom: 32px;
-    left: 32px;
-    alpha: 0.5; }
 
 @media all and (max-width: 1279px) {
   html, body {
     font-size: 14px; }
   .ttexp-btn span {
     font-size: 28px; }
+  #customer-logo {
+    bottom: 28px;
+    left: 28px;
+    width: 96px; }
   .page-play #side-chat {
     padding-top: 84px; }
     .page-play #side-chat #chat-options li {
@@ -7242,16 +7244,17 @@ html, body {
     left: 28px; }
   .page-play #button-audio {
     top: 28px;
-    right: 28px; }
-  .page-play #customer-logo {
-    bottom: 28px;
-    left: 28px; } }
+    right: 28px; } }
 
 @media all and (max-width: 1023px) {
   html, body {
     font-size: 12px; }
   .ttexp-btn span {
     font-size: 18px; }
+  #customer-logo {
+    bottom: 18px;
+    left: 18px;
+    width: 64px; }
   .page-play #side-chat {
     padding-top: 54px; }
     .page-play #side-chat #chat-options li {
@@ -7267,16 +7270,17 @@ html, body {
     left: 18px; }
   .page-play #button-audio {
     top: 18px;
-    right: 18px; }
-  .page-play #customer-logo {
-    bottom: 18px;
-    left: 18px; } }
+    right: 18px; } }
 
 @media all and (max-width: 639px) {
   html, body {
     font-size: 10px; }
   .ttexp-btn span {
     font-size: 14px; }
+  #customer-logo {
+    bottom: 14px;
+    left: 14px;
+    width: 48px; }
   .page-play #side-chat {
     padding-top: 42px; }
     .page-play #side-chat #chat-options li {
@@ -7292,7 +7296,4 @@ html, body {
     left: 14px; }
   .page-play #button-audio {
     top: 14px;
-    right: 14px; }
-  .page-play #customer-logo {
-    bottom: 14px;
-    left: 14px; } }
+    right: 14px; } }

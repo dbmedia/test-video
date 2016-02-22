@@ -930,7 +930,7 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '1'
 				}, {
 					'text': 'Pronto? Buongiorno.',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Giovanni Borini?',
 					'link': '2'
@@ -944,10 +944,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '1-A'
 				}, {
 					'text': 'Buongiorno, sono Francesco Mariani, di Generali. Possiamo parlare o la disturbo?',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'La chiamo da Generali. Mi dica, la disturbo, adesso?',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['1-A'] = {
@@ -957,10 +957,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '1-B'
 				}, {
 					'text': 'La chiamo per fissare un incontro e parlare come abbiamo fatto con suo cugino. Lei ha un negozio di ottica, vero? Ottica Borini?',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Le rubo qualche minuto. La disturbo, adesso?',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['1-B'] = {
@@ -970,10 +970,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '1-C'
 				}, {
 					'text': 'Si può dire di sì… Va bene se passo da lei questa sera, alle 18,30?',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Sì: ora vorrei parlarne anche con lei. Quando possiamo vederci?',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['1-C'] = {
@@ -983,10 +983,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '1-D'
 				}, {
 					'text': 'Beh, il vostro negozio deve avere un gran giro di affari, visto che siete aperti da tanto tempo.',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'E gli affari andranno bene, giusto?',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['1-D'] = {
@@ -996,10 +996,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '1-E'
 				}, {
 					'text': 'Ottimo. Allora io passerei da lei questa sera. Che ne dice?',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Ottimo. Mi dica, quando pensa che potremmo vederci?',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['1-E'] = {
@@ -1009,10 +1009,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '1-F'
 				}, {
 					'text': 'E quando preferirebbe?',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Capisco, certo. Quanti anni hanno i bambini?',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['1-F'] = {
@@ -1022,10 +1022,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '1-G'
 				}, {
 					'text': 'Ma ci mancherebbe. Se vuole possiamo fare sabato mattina: per me non ci sono problemi.',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Ma non le interessa parlare del suo futuro?',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['1-G'] = {
@@ -1035,10 +1035,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '1-H'
 				}, {
 					'text': 'Certo. Allora ci vediamo domani.',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Allora ci vediamo domani. Ci sarà anche la moglie, immagino.',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['1-H'] = {
@@ -1048,10 +1048,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '1-I'
 				}, {
 					'text': 'Può chiamare in agenzia, d\'accordo?',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Ma non ce n\'è bisogno. La chiamo io nel pomeriggio di domani.',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['1-I'] = {
@@ -1061,10 +1061,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': 'end-1'
 				}, {
 					'text': 'Esatto. A domani. (CHIUDI)',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Se per lei va bene… Sì.',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['end-1'] = {
@@ -1080,10 +1080,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '2-A'
 				}, {
 					'text': 'Buongiorno, sono Francesco Mariani, di Generali. Possiamo parlare o la disturbo?',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'La chiamo da Generali. Mi dica, la disturbo, adesso?',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['2-A'] = {
@@ -1093,10 +1093,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '2-B'
 				}, {
 					'text': 'La chiamo per fissare un incontro e parlare come abbiamo fatto con suo cugino. Lei ha un negozio di ottica, vero? Ottica Borini?',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Vorrei proporle un incontro per parlare di previdenza, come ho fatto con Filippo.',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['2-B'] = {
@@ -1106,10 +1106,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '2-C'
 				}, {
 					'text': 'Solo proporle un incontro per parlare della sua polizza. Cosa ne dice?',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Proporle un incontro, come quello fatto con Filippo.',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['2-C'] = {
@@ -1119,10 +1119,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '2-D'
 				}, {
 					'text': 'Lo so, e per questo la chiamo: Filippo ci tiene che anche lei abbia la possibilità di capire come funzionano queste polizze.',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Me lo ha detto Filippo. Ed è per questo che ci teneva la chiamassi. Vogliamo vederci stasera per parlarne?',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['2-D'] = {
@@ -1132,10 +1132,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '2-E'
 				}, {
 					'text': 'Ha ragione: vediamoci per parlarne con calma. Stasera preferisce che passi alle 18,30 o alle 19,30?',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Solo vederla, Giovanni.',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['2-E'] = {
@@ -1145,10 +1145,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '2-F'
 				}, {
 					'text': 'Preferisco palarne a voce: quando posso venire da lei?',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'La cifra dipende soprattutto dalle sue esigenze: stasera potremmo parlarne con calma. Passo alle 19,30 o più tardi, verso le 20?',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['2-F'] = {
@@ -1158,10 +1158,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '2-G'
 				}, {
 					'text': 'E di cosa si tratta?',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Però tenga presente che il nostro prodotto è unico, diverso da tuti gli altri.',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['2-G'] = {
@@ -1171,10 +1171,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '2-H'
 				}, {
 					'text': 'Il vostro è uno dei negozi storici della città, giusto?',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Senta, io sono già in città, domani: possiamo vederci alle 19,30.',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['2-H'] = {
@@ -1184,10 +1184,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': '2-I'
 				}, {
 					'text': 'Posso chiederle di cosa si tratta?',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Mi sta dicendo che non vuole parlare del suo futuro?',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['2-I'] = {
@@ -1197,10 +1197,10 @@ define("ttexp/routes/play", ["exports", "ember"], function (exports, _ember) {
 					'link': 'end-2'
 				}, {
 					'text': 'Però così forse la disturbo. Posso venire più tardi, che ne dice?',
-					'link': '#'
+					'link': false
 				}, {
 					'text': 'Allora fisso per stasera?',
-					'link': '#'
+					'link': false
 				}]
 			};
 			steps['end-2'] = {
@@ -3239,7 +3239,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
             },
             "end": {
               "line": 37,
-              "column": 141
+              "column": 145
             }
           },
           "moduleName": "ttexp/templates/index.hbs"
@@ -3536,7 +3536,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el10, el11);
         var el11 = dom.createElement("a");
         dom.setAttribute(el11, "href", "#");
-        dom.setAttribute(el11, "class", "btn-link disabled");
+        dom.setAttribute(el11, "class", "btn btn-link disabled");
         var el12 = dom.createElement("span");
         dom.setAttribute(el12, "class", "glyphicon glyphicon-play-circle");
         dom.appendChild(el11, el12);
@@ -3576,7 +3576,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el10, el11);
         var el11 = dom.createElement("a");
         dom.setAttribute(el11, "href", "#");
-        dom.setAttribute(el11, "class", "btn-link disabled");
+        dom.setAttribute(el11, "class", "btn btn-link disabled");
         var el12 = dom.createElement("span");
         dom.setAttribute(el12, "class", "glyphicon glyphicon-play-circle");
         dom.appendChild(el11, el12);
@@ -3616,7 +3616,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el10, el11);
         var el11 = dom.createElement("a");
         dom.setAttribute(el11, "href", "#");
-        dom.setAttribute(el11, "class", "btn-link disabled");
+        dom.setAttribute(el11, "class", "btn btn-link disabled");
         var el12 = dom.createElement("span");
         dom.setAttribute(el12, "class", "glyphicon glyphicon-play-circle");
         dom.appendChild(el11, el12);
@@ -3656,7 +3656,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el10, el11);
         var el11 = dom.createElement("a");
         dom.setAttribute(el11, "href", "#");
-        dom.setAttribute(el11, "class", "btn-link disabled");
+        dom.setAttribute(el11, "class", "btn btn-link disabled");
         var el12 = dom.createElement("span");
         dom.setAttribute(el12, "class", "glyphicon glyphicon-play-circle");
         dom.appendChild(el11, el12);
@@ -3713,7 +3713,6 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("div");
         dom.setAttribute(el1, "id", "customer-logo");
-        dom.setAttribute(el1, "class", "ttexp-position-absolute bottom-left");
         var el2 = dom.createElement("img");
         dom.setAttribute(el2, "src", "assets/images/logo-customer.png");
         dom.appendChild(el1, el2);
@@ -3740,7 +3739,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.insertBoundary(fragment, null);
         return morphs;
       },
-      statements: [["element", "action", ["closeApp"], [], ["loc", [null, [16, 31], [16, 52]]]], ["content", "firstName", ["loc", [null, [22, 44], [22, 57]]]], ["content", "lastName", ["loc", [null, [22, 58], [22, 70]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-1", "class", "btn-link"], 0, null, ["loc", [null, [37, 25], [37, 153]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-1", "class", "btn-link"], 1, null, ["loc", [null, [38, 13], [38, 98]]]], ["content", "outlet", ["loc", [null, [85, 0], [85, 10]]]]],
+      statements: [["element", "action", ["closeApp"], [], ["loc", [null, [16, 31], [16, 52]]]], ["content", "firstName", ["loc", [null, [22, 44], [22, 57]]]], ["content", "lastName", ["loc", [null, [22, 58], [22, 70]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-1", "class", "btn btn-link"], 0, null, ["loc", [null, [37, 25], [37, 157]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-1", "class", "btn-link"], 1, null, ["loc", [null, [38, 13], [38, 98]]]], ["content", "outlet", ["loc", [null, [85, 0], [85, 10]]]]],
       locals: [],
       templates: [child0, child1]
     };
@@ -3882,6 +3881,46 @@ define("ttexp/templates/play", ["exports"], function (exports) {
     })();
     var child1 = (function () {
       var child0 = (function () {
+        var child0 = (function () {
+          return {
+            meta: {
+              "topLevel": null,
+              "revision": "Ember@2.1.0",
+              "loc": {
+                "source": null,
+                "start": {
+                  "line": 30,
+                  "column": 32
+                },
+                "end": {
+                  "line": 30,
+                  "column": 74
+                }
+              },
+              "moduleName": "ttexp/templates/play.hbs"
+            },
+            isEmpty: false,
+            arity: 0,
+            cachedFragment: null,
+            hasRendered: false,
+            buildFragment: function buildFragment(dom) {
+              var el0 = dom.createDocumentFragment();
+              var el1 = dom.createComment("");
+              dom.appendChild(el0, el1);
+              return el0;
+            },
+            buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+              var morphs = new Array(1);
+              morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
+              dom.insertBoundary(fragment, 0);
+              dom.insertBoundary(fragment, null);
+              return morphs;
+            },
+            statements: [["content", "item.text", ["loc", [null, [30, 61], [30, 74]]]]],
+            locals: [],
+            templates: []
+          };
+        })();
         return {
           meta: {
             "topLevel": null,
@@ -3890,11 +3929,11 @@ define("ttexp/templates/play", ["exports"], function (exports) {
               "source": null,
               "start": {
                 "line": 29,
-                "column": 31
+                "column": 3
               },
               "end": {
-                "line": 29,
-                "column": 73
+                "line": 31,
+                "column": 3
               }
             },
             "moduleName": "ttexp/templates/play.hbs"
@@ -3905,18 +3944,70 @@ define("ttexp/templates/play", ["exports"], function (exports) {
           hasRendered: false,
           buildFragment: function buildFragment(dom) {
             var el0 = dom.createDocumentFragment();
-            var el1 = dom.createComment("");
+            var el1 = dom.createTextNode("				");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createElement("li");
+            dom.setAttribute(el1, "class", "list-group-item");
+            var el2 = dom.createComment("");
+            dom.appendChild(el1, el2);
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n");
             dom.appendChild(el0, el1);
             return el0;
           },
           buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
             var morphs = new Array(1);
-            morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
-            dom.insertBoundary(fragment, 0);
-            dom.insertBoundary(fragment, null);
+            morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]), 0, 0);
             return morphs;
           },
-          statements: [["content", "item.text", ["loc", [null, [29, 60], [29, 73]]]]],
+          statements: [["block", "link-to", ["play", ["get", "item.link", ["loc", [null, [30, 50], [30, 59]]]]], [], 0, null, ["loc", [null, [30, 32], [30, 86]]]]],
+          locals: [],
+          templates: [child0]
+        };
+      })();
+      var child1 = (function () {
+        return {
+          meta: {
+            "topLevel": null,
+            "revision": "Ember@2.1.0",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 31,
+                "column": 3
+              },
+              "end": {
+                "line": 33,
+                "column": 3
+              }
+            },
+            "moduleName": "ttexp/templates/play.hbs"
+          },
+          isEmpty: false,
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("				");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createElement("li");
+            dom.setAttribute(el1, "class", "list-group-item");
+            var el2 = dom.createElement("a");
+            var el3 = dom.createComment("");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+            var morphs = new Array(1);
+            morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1, 0]), 0, 0);
+            return morphs;
+          },
+          statements: [["content", "item.text", ["loc", [null, [32, 35], [32, 48]]]]],
           locals: [],
           templates: []
         };
@@ -3932,7 +4023,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
               "column": 2
             },
             "end": {
-              "line": 30,
+              "line": 34,
               "column": 2
             }
           },
@@ -3944,25 +4035,20 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         hasRendered: false,
         buildFragment: function buildFragment(dom) {
           var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("			");
-          dom.appendChild(el0, el1);
-          var el1 = dom.createElement("li");
-          dom.setAttribute(el1, "class", "list-group-item");
-          var el2 = dom.createComment("");
-          dom.appendChild(el1, el2);
-          dom.appendChild(el0, el1);
-          var el1 = dom.createTextNode("\n");
+          var el1 = dom.createComment("");
           dom.appendChild(el0, el1);
           return el0;
         },
         buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
           var morphs = new Array(1);
-          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]), 0, 0);
+          morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
+          dom.insertBoundary(fragment, 0);
+          dom.insertBoundary(fragment, null);
           return morphs;
         },
-        statements: [["block", "link-to", ["play", ["get", "item.link", ["loc", [null, [29, 49], [29, 58]]]]], [], 0, null, ["loc", [null, [29, 31], [29, 85]]]]],
+        statements: [["block", "if", [["get", "item.link", ["loc", [null, [29, 9], [29, 18]]]]], [], 0, 1, ["loc", [null, [29, 3], [33, 10]]]]],
         locals: ["item"],
-        templates: [child0]
+        templates: [child0, child1]
       };
     })();
     var child2 = (function () {
@@ -3973,11 +4059,11 @@ define("ttexp/templates/play", ["exports"], function (exports) {
           "loc": {
             "source": null,
             "start": {
-              "line": 40,
+              "line": 44,
               "column": 0
             },
             "end": {
-              "line": 40,
+              "line": 44,
               "column": 167
             }
           },
@@ -4013,7 +4099,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 44,
+            "line": 49,
             "column": 0
           }
         },
@@ -4135,11 +4221,10 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         dom.appendChild(el0, el1);
         var el1 = dom.createComment("");
         dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
+        var el1 = dom.createTextNode("\n\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("div");
         dom.setAttribute(el1, "id", "customer-logo");
-        dom.setAttribute(el1, "class", "ttexp-position-absolute bottom-left");
         var el2 = dom.createElement("img");
         dom.setAttribute(el2, "src", "assets/images/logo-customer.png");
         dom.appendChild(el1, el2);
@@ -4162,7 +4247,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         morphs[4] = dom.createMorphAt(fragment, 12, 12, contextualElement);
         return morphs;
       },
-      statements: [["content", "model.dialog", ["loc", [null, [10, 3], [10, 19]]]], ["block", "if", [["get", "model.scores", ["loc", [null, [13, 8], [13, 20]]]]], [], 0, null, ["loc", [null, [13, 2], [17, 9]]]], ["block", "each", [["get", "model.items", ["loc", [null, [28, 10], [28, 21]]]]], [], 1, null, ["loc", [null, [28, 2], [30, 11]]]], ["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 2, null, ["loc", [null, [40, 0], [40, 179]]]], ["content", "outlet", ["loc", [null, [43, 0], [43, 10]]]]],
+      statements: [["content", "model.dialog", ["loc", [null, [10, 3], [10, 19]]]], ["block", "if", [["get", "model.scores", ["loc", [null, [13, 8], [13, 20]]]]], [], 0, null, ["loc", [null, [13, 2], [17, 9]]]], ["block", "each", [["get", "model.items", ["loc", [null, [28, 10], [28, 21]]]]], [], 1, null, ["loc", [null, [28, 2], [34, 11]]]], ["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 2, null, ["loc", [null, [44, 0], [44, 179]]]], ["content", "outlet", ["loc", [null, [48, 0], [48, 10]]]]],
       locals: [],
       templates: [child0, child1, child2]
     };
@@ -4218,7 +4303,7 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 6,
+            "line": 7,
             "column": 10
           }
         },
@@ -4239,11 +4324,10 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
         dom.appendChild(el0, el1);
         var el1 = dom.createComment("");
         dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
+        var el1 = dom.createTextNode("\n\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("div");
         dom.setAttribute(el1, "id", "customer-logo");
-        dom.setAttribute(el1, "class", "ttexp-position-absolute bottom-left");
         var el2 = dom.createElement("img");
         dom.setAttribute(el2, "src", "assets/images/logo-customer.png");
         dom.appendChild(el1, el2);
@@ -4263,7 +4347,7 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
         dom.insertBoundary(fragment, null);
         return morphs;
       },
-      statements: [["attribute", "style", ["concat", ["background-image: url('./assets/images/results-", ["get", "model", ["loc", [null, [1, 83], [1, 88]]]], ".png');"]]], ["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [3, 0], [3, 179]]]], ["content", "outlet", ["loc", [null, [6, 0], [6, 10]]]]],
+      statements: [["attribute", "style", ["concat", ["background-image: url('./assets/images/results-", ["get", "model", ["loc", [null, [1, 83], [1, 88]]]], ".png');"]]], ["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [3, 0], [3, 179]]]], ["content", "outlet", ["loc", [null, [7, 0], [7, 10]]]]],
       locals: [],
       templates: [child0]
     };
