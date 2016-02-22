@@ -629,6 +629,10 @@ define('ttexp/controllers/index', ['exports', 'ember'], function (exports, _embe
 		lastName: 'Cognome',
 		actions: {
 			closeApp: function closeApp() {
+				// http://stackoverflow.com/questions/30790605/ember-2-0-cordova-and-ondeviceready
+				// http://incorrectcode.news/question/35240/how-to-fire-deviceready-event-in-chrome-browser-trying-to-debug-phonegap-project/
+				// https://gist.github.com/htulipe/44d899e56e2526a82e46
+				// https://github.com/poetic/ember-cli-cordova/issues/153
 				alert("closing app");
 				navigator.app.exitApp();
 			}
@@ -664,6 +668,22 @@ define('ttexp/initializers/app-version', ['exports', 'ember-cli-app-version/init
     name: 'App Version',
     initialize: (0, _emberCliAppVersionInitializerFactory['default'])(name, version)
   };
+});
+define("ttexp/initializers/cordova", ["exports"], function (exports) {
+	exports.initialize = initialize;
+
+	function initialize(application) {
+		// application.inject('route', 'foo', 'service:foo');
+		application.deferReadiness();
+		document.addEventListener("deviceready", function () {
+			application.advanceReadiness();
+		}, false);
+	}
+
+	exports["default"] = {
+		name: 'cordova',
+		initialize: initialize
+	};
 });
 define('ttexp/initializers/export-application-global', ['exports', 'ember', 'ttexp/config/environment'], function (exports, _ember, _ttexpConfigEnvironment) {
   exports.initialize = initialize;
@@ -1232,8 +1252,11 @@ define("ttexp/templates/application", ["exports"], function (exports) {
   exports["default"] = Ember.HTMLBars.template((function () {
     return {
       meta: {
-        "topLevel": false,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type", "multiple-nodes"]
+        },
+        "revision": "Ember@2.3.0",
         "loc": {
           "source": null,
           "start": {
@@ -1279,8 +1302,8 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
       var child0 = (function () {
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.0",
             "loc": {
               "source": null,
               "start": {
@@ -1321,8 +1344,11 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": {
+            "name": "modifiers",
+            "modifiers": ["action"]
+          },
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -1376,8 +1402,8 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
     var child1 = (function () {
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -1425,8 +1451,8 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
       var child0 = (function () {
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.0",
             "loc": {
               "source": null,
               "start": {
@@ -1467,8 +1493,8 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -1521,8 +1547,11 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
     })();
     return {
       meta: {
-        "topLevel": false,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type", "multiple-nodes"]
+        },
+        "revision": "Ember@2.3.0",
         "loc": {
           "source": null,
           "start": {
@@ -1573,8 +1602,11 @@ define("ttexp/templates/components/cdv-nav-bar", ["exports"], function (exports)
   exports["default"] = Ember.HTMLBars.template((function () {
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.0",
         "loc": {
           "source": null,
           "start": {
@@ -1619,8 +1651,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
         var child0 = (function () {
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.0",
               "loc": {
                 "source": null,
                 "start": {
@@ -1659,8 +1691,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
         var child1 = (function () {
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.0",
               "loc": {
                 "source": null,
                 "start": {
@@ -1698,8 +1730,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
         })();
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.0",
             "loc": {
               "source": null,
               "start": {
@@ -1737,8 +1769,11 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": {
+            "name": "missing-wrapper",
+            "problems": ["wrong-type"]
+          },
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -1780,8 +1815,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
           var child0 = (function () {
             return {
               meta: {
-                "topLevel": null,
-                "revision": "Ember@2.1.0",
+                "fragmentReason": false,
+                "revision": "Ember@2.3.0",
                 "loc": {
                   "source": null,
                   "start": {
@@ -1820,8 +1855,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
           var child1 = (function () {
             return {
               meta: {
-                "topLevel": null,
-                "revision": "Ember@2.1.0",
+                "fragmentReason": false,
+                "revision": "Ember@2.3.0",
                 "loc": {
                   "source": null,
                   "start": {
@@ -1859,8 +1894,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
           })();
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.0",
               "loc": {
                 "source": null,
                 "start": {
@@ -1898,8 +1933,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
         })();
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.0",
             "loc": {
               "source": null,
               "start": {
@@ -1937,8 +1972,8 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -1976,8 +2011,11 @@ define("ttexp/templates/components/liquid-bind", ["exports"], function (exports)
     })();
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.0",
         "loc": {
           "source": null,
           "start": {
@@ -2018,8 +2056,11 @@ define("ttexp/templates/components/liquid-container", ["exports"], function (exp
   exports["default"] = Ember.HTMLBars.template((function () {
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.0",
         "loc": {
           "source": null,
           "start": {
@@ -2063,8 +2104,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
         var child0 = (function () {
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.0",
               "loc": {
                 "source": null,
                 "start": {
@@ -2105,8 +2146,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
         var child1 = (function () {
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.0",
               "loc": {
                 "source": null,
                 "start": {
@@ -2146,8 +2187,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
         })();
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.0",
             "loc": {
               "source": null,
               "start": {
@@ -2185,8 +2226,11 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": {
+            "name": "missing-wrapper",
+            "problems": ["wrong-type"]
+          },
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -2228,8 +2272,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
           var child0 = (function () {
             return {
               meta: {
-                "topLevel": null,
-                "revision": "Ember@2.1.0",
+                "fragmentReason": false,
+                "revision": "Ember@2.3.0",
                 "loc": {
                   "source": null,
                   "start": {
@@ -2270,8 +2314,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
           var child1 = (function () {
             return {
               meta: {
-                "topLevel": null,
-                "revision": "Ember@2.1.0",
+                "fragmentReason": false,
+                "revision": "Ember@2.3.0",
                 "loc": {
                   "source": null,
                   "start": {
@@ -2311,8 +2355,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
           })();
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.0",
               "loc": {
                 "source": null,
                 "start": {
@@ -2350,8 +2394,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
         })();
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.0",
             "loc": {
               "source": null,
               "start": {
@@ -2389,8 +2433,8 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -2428,8 +2472,11 @@ define("ttexp/templates/components/liquid-if", ["exports"], function (exports) {
     })();
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.0",
         "loc": {
           "source": null,
           "start": {
@@ -2472,8 +2519,8 @@ define("ttexp/templates/components/liquid-modal", ["exports"], function (exports
       var child0 = (function () {
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.0",
             "loc": {
               "source": null,
               "start": {
@@ -2524,8 +2571,11 @@ define("ttexp/templates/components/liquid-modal", ["exports"], function (exports
       })();
       return {
         meta: {
-          "topLevel": false,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": {
+            "name": "missing-wrapper",
+            "problems": ["wrong-type", "multiple-nodes"]
+          },
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -2569,8 +2619,11 @@ define("ttexp/templates/components/liquid-modal", ["exports"], function (exports
     })();
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.0",
         "loc": {
           "source": null,
           "start": {
@@ -2614,8 +2667,8 @@ define("ttexp/templates/components/liquid-outlet", ["exports"], function (export
         var child0 = (function () {
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.0",
               "loc": {
                 "source": null,
                 "start": {
@@ -2653,8 +2706,8 @@ define("ttexp/templates/components/liquid-outlet", ["exports"], function (export
         })();
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.0",
             "loc": {
               "source": null,
               "start": {
@@ -2692,8 +2745,11 @@ define("ttexp/templates/components/liquid-outlet", ["exports"], function (export
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": {
+            "name": "missing-wrapper",
+            "problems": ["wrong-type"]
+          },
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -2731,8 +2787,11 @@ define("ttexp/templates/components/liquid-outlet", ["exports"], function (export
     })();
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.0",
         "loc": {
           "source": null,
           "start": {
@@ -2776,8 +2835,8 @@ define("ttexp/templates/components/liquid-versions", ["exports"], function (expo
         var child0 = (function () {
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.0",
               "loc": {
                 "source": null,
                 "start": {
@@ -2815,8 +2874,8 @@ define("ttexp/templates/components/liquid-versions", ["exports"], function (expo
         })();
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.0",
             "loc": {
               "source": null,
               "start": {
@@ -2854,8 +2913,11 @@ define("ttexp/templates/components/liquid-versions", ["exports"], function (expo
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": {
+            "name": "missing-wrapper",
+            "problems": ["wrong-type"]
+          },
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -2893,8 +2955,11 @@ define("ttexp/templates/components/liquid-versions", ["exports"], function (expo
     })();
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.0",
         "loc": {
           "source": null,
           "start": {
@@ -2937,8 +3002,8 @@ define("ttexp/templates/components/liquid-with", ["exports"], function (exports)
       var child0 = (function () {
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.0",
             "loc": {
               "source": null,
               "start": {
@@ -2976,8 +3041,11 @@ define("ttexp/templates/components/liquid-with", ["exports"], function (exports)
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": {
+            "name": "missing-wrapper",
+            "problems": ["wrong-type"]
+          },
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -3018,8 +3086,8 @@ define("ttexp/templates/components/liquid-with", ["exports"], function (exports)
         var child0 = (function () {
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.0",
               "loc": {
                 "source": null,
                 "start": {
@@ -3057,8 +3125,8 @@ define("ttexp/templates/components/liquid-with", ["exports"], function (exports)
         })();
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.0",
             "loc": {
               "source": null,
               "start": {
@@ -3096,8 +3164,8 @@ define("ttexp/templates/components/liquid-with", ["exports"], function (exports)
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -3135,8 +3203,11 @@ define("ttexp/templates/components/liquid-with", ["exports"], function (exports)
     })();
     return {
       meta: {
-        "topLevel": null,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.3.0",
         "loc": {
           "source": null,
           "start": {
@@ -3177,8 +3248,11 @@ define("ttexp/templates/help", ["exports"], function (exports) {
   exports["default"] = Ember.HTMLBars.template((function () {
     return {
       meta: {
-        "topLevel": false,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["multiple-nodes", "wrong-type"]
+        },
+        "revision": "Ember@2.3.0",
         "loc": {
           "source": null,
           "start": {
@@ -3225,8 +3299,8 @@ define("ttexp/templates/index", ["exports"], function (exports) {
     var child0 = (function () {
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -3262,8 +3336,8 @@ define("ttexp/templates/index", ["exports"], function (exports) {
     var child1 = (function () {
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -3297,8 +3371,11 @@ define("ttexp/templates/index", ["exports"], function (exports) {
     })();
     return {
       meta: {
-        "topLevel": false,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["multiple-nodes", "wrong-type"]
+        },
+        "revision": "Ember@2.3.0",
         "loc": {
           "source": null,
           "start": {
@@ -3745,8 +3822,11 @@ define("ttexp/templates/page-not-found", ["exports"], function (exports) {
   exports["default"] = Ember.HTMLBars.template((function () {
     return {
       meta: {
-        "topLevel": false,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["multiple-nodes", "wrong-type"]
+        },
+        "revision": "Ember@2.3.0",
         "loc": {
           "source": null,
           "start": {
@@ -3794,8 +3874,8 @@ define("ttexp/templates/play", ["exports"], function (exports) {
       var child0 = (function () {
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.0",
             "loc": {
               "source": null,
               "start": {
@@ -3829,8 +3909,8 @@ define("ttexp/templates/play", ["exports"], function (exports) {
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -3880,8 +3960,8 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         var child0 = (function () {
           return {
             meta: {
-              "topLevel": null,
-              "revision": "Ember@2.1.0",
+              "fragmentReason": false,
+              "revision": "Ember@2.3.0",
               "loc": {
                 "source": null,
                 "start": {
@@ -3919,8 +3999,8 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         })();
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.0",
             "loc": {
               "source": null,
               "start": {
@@ -3964,8 +4044,8 @@ define("ttexp/templates/play", ["exports"], function (exports) {
       var child1 = (function () {
         return {
           meta: {
-            "topLevel": null,
-            "revision": "Ember@2.1.0",
+            "fragmentReason": false,
+            "revision": "Ember@2.3.0",
             "loc": {
               "source": null,
               "start": {
@@ -4010,8 +4090,8 @@ define("ttexp/templates/play", ["exports"], function (exports) {
       })();
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -4050,8 +4130,8 @@ define("ttexp/templates/play", ["exports"], function (exports) {
     var child2 = (function () {
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -4086,8 +4166,11 @@ define("ttexp/templates/play", ["exports"], function (exports) {
     })();
     return {
       meta: {
-        "topLevel": false,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["multiple-nodes", "wrong-type"]
+        },
+        "revision": "Ember@2.3.0",
         "loc": {
           "source": null,
           "start": {
@@ -4254,8 +4337,8 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
     var child0 = (function () {
       return {
         meta: {
-          "topLevel": null,
-          "revision": "Ember@2.1.0",
+          "fragmentReason": false,
+          "revision": "Ember@2.3.0",
           "loc": {
             "source": null,
             "start": {
@@ -4290,8 +4373,11 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
     })();
     return {
       meta: {
-        "topLevel": false,
-        "revision": "Ember@2.1.0",
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["multiple-nodes", "wrong-type"]
+        },
+        "revision": "Ember@2.3.0",
         "loc": {
           "source": null,
           "start": {
@@ -4797,7 +4883,7 @@ catch(err) {
 });
 
 if (!runningTests) {
-  require("ttexp/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+c32addd6"});
+  require("ttexp/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+9b64d5ed"});
 }
 
 /* jshint ignore:end */

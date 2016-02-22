@@ -91,6 +91,14 @@ define('ttexp/tests/helpers/start-app.jshint', ['exports'], function (exports) {
     assert.ok(true, 'helpers/start-app.js should pass jshint.');
   });
 });
+define('ttexp/tests/initializers/cordova.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - initializers');
+  QUnit.test('initializers/cordova.js should pass jshint', function (assert) {
+    assert.ok(true, 'initializers/cordova.js should pass jshint.');
+  });
+});
 define('ttexp/tests/router.jshint', ['exports'], function (exports) {
   'use strict';
 
@@ -149,6 +157,35 @@ define('ttexp/tests/test-helper.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - .');
   QUnit.test('test-helper.js should pass jshint', function (assert) {
     assert.ok(true, 'test-helper.js should pass jshint.');
+  });
+});
+define('ttexp/tests/unit/initializers/cordova-test', ['exports', 'ember', 'ttexp/initializers/cordova', 'qunit'], function (exports, _ember, _ttexpInitializersCordova, _qunit) {
+
+  var application = undefined;
+
+  (0, _qunit.module)('Unit | Initializer | cordova', {
+    beforeEach: function beforeEach() {
+      _ember['default'].run(function () {
+        application = _ember['default'].Application.create();
+        application.deferReadiness();
+      });
+    }
+  });
+
+  // Replace this with your real tests.
+  (0, _qunit.test)('it works', function (assert) {
+    _ttexpInitializersCordova['default'].initialize(application);
+
+    // you would normally confirm the results of the initializer here
+    assert.ok(true);
+  });
+});
+define('ttexp/tests/unit/initializers/cordova-test.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - unit/initializers');
+  QUnit.test('unit/initializers/cordova-test.js should pass jshint', function (assert) {
+    assert.ok(true, 'unit/initializers/cordova-test.js should pass jshint.');
   });
 });
 define('ttexp/tests/unit/models/pippo-test', ['exports', 'ember-qunit'], function (exports, _emberQunit) {
