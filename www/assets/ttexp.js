@@ -3234,11 +3234,11 @@ define("ttexp/templates/index", ["exports"], function (exports) {
           "loc": {
             "source": null,
             "start": {
-              "line": 34,
+              "line": 37,
               "column": 25
             },
             "end": {
-              "line": 34,
+              "line": 37,
               "column": 141
             }
           },
@@ -3271,11 +3271,11 @@ define("ttexp/templates/index", ["exports"], function (exports) {
           "loc": {
             "source": null,
             "start": {
-              "line": 35,
+              "line": 38,
               "column": 13
             },
             "end": {
-              "line": 35,
+              "line": 38,
               "column": 86
             }
           },
@@ -3310,7 +3310,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 82,
+            "line": 85,
             "column": 10
           }
         },
@@ -3331,7 +3331,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         var el3 = dom.createTextNode("\n		");
         dom.appendChild(el2, el3);
         var el3 = dom.createElement("div");
-        dom.setAttribute(el3, "class", "col-sm-3");
+        dom.setAttribute(el3, "class", "col-sm-12");
         var el4 = dom.createTextNode("\n			");
         dom.appendChild(el3, el4);
         var el4 = dom.createElement("div");
@@ -3340,7 +3340,21 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.setAttribute(el5, "src", "assets/images/logo-app.png");
         dom.appendChild(el4, el5);
         dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n			\n			");
+        var el4 = dom.createTextNode("\n		");
+        dom.appendChild(el3, el4);
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n	");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("div");
+        dom.setAttribute(el2, "class", "row");
+        var el3 = dom.createTextNode("\n		");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("div");
+        dom.setAttribute(el3, "class", "col-sm-3");
+        var el4 = dom.createTextNode("\n			");
         dom.appendChild(el3, el4);
         var el4 = dom.createComment("<ul id=\"main-menu\" class=\"list-group ttexp-vertical-menu\">");
         dom.appendChild(el3, el4);
@@ -3711,8 +3725,8 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var element0 = dom.childAt(fragment, [0, 1]);
-        var element1 = dom.childAt(element0, [1, 5, 11]);
+        var element0 = dom.childAt(fragment, [0, 3]);
+        var element1 = dom.childAt(element0, [1, 3, 11]);
         var element2 = dom.childAt(element0, [3, 1]);
         var element3 = dom.childAt(element2, [1, 1, 1]);
         var element4 = dom.childAt(element2, [3, 1, 1, 3, 1]);
@@ -3726,7 +3740,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.insertBoundary(fragment, null);
         return morphs;
       },
-      statements: [["element", "action", ["closeApp"], [], ["loc", [null, [13, 31], [13, 52]]]], ["content", "firstName", ["loc", [null, [19, 44], [19, 57]]]], ["content", "lastName", ["loc", [null, [19, 58], [19, 70]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-1", "class", "btn-link"], 0, null, ["loc", [null, [34, 25], [34, 153]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-1", "class", "btn-link"], 1, null, ["loc", [null, [35, 13], [35, 98]]]], ["content", "outlet", ["loc", [null, [82, 0], [82, 10]]]]],
+      statements: [["element", "action", ["closeApp"], [], ["loc", [null, [16, 31], [16, 52]]]], ["content", "firstName", ["loc", [null, [22, 44], [22, 57]]]], ["content", "lastName", ["loc", [null, [22, 58], [22, 70]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-1", "class", "btn-link"], 0, null, ["loc", [null, [37, 25], [37, 153]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-1", "class", "btn-link"], 1, null, ["loc", [null, [38, 13], [38, 98]]]], ["content", "outlet", ["loc", [null, [85, 0], [85, 10]]]]],
       locals: [],
       templates: [child0, child1]
     };
