@@ -674,10 +674,15 @@ define("ttexp/initializers/cordova", ["exports"], function (exports) {
 
 	function initialize(application) {
 		// application.inject('route', 'foo', 'service:foo');
-		application.deferReadiness();
-		document.addEventListener("deviceready", function () {
-			application.advanceReadiness();
-		}, false);
+		if (navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry)/)) {
+
+			alert("CHECK CORDOVA");
+			application.deferReadiness();
+			document.addEventListener("deviceready", function () {
+				alert("DEVICE READY");
+				application.advanceReadiness();
+			}, false);
+		}
 	}
 
 	exports["default"] = {
