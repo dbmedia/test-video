@@ -629,10 +629,6 @@ define('ttexp/controllers/index', ['exports', 'ember'], function (exports, _embe
 		lastName: 'Cognome',
 		actions: {
 			closeApp: function closeApp() {
-				// http://stackoverflow.com/questions/30790605/ember-2-0-cordova-and-ondeviceready
-				// http://incorrectcode.news/question/35240/how-to-fire-deviceready-event-in-chrome-browser-trying-to-debug-phonegap-project/
-				// https://gist.github.com/htulipe/44d899e56e2526a82e46
-				// https://github.com/poetic/ember-cli-cordova/issues/153
 				alert("closing app");
 				navigator.app.exitApp();
 			}
@@ -671,9 +667,16 @@ define('ttexp/initializers/app-version', ['exports', 'ember-cli-app-version/init
 });
 define("ttexp/initializers/cordova", ["exports"], function (exports) {
 	exports.initialize = initialize;
+	// https://github.com/poetic/ember-cli-cordova/issues/153
+	// http://stackoverflow.com/questions/30790605/ember-2-0-cordova-and-ondeviceready
+	// http://incorrectcode.news/question/35240/how-to-fire-deviceready-event-in-chrome-browser-trying-to-debug-phonegap-project/
+	// https://gist.github.com/htulipe/44d899e56e2526a82e46
 
 	function initialize(application) {
 		// application.inject('route', 'foo', 'service:foo');
+		alert("Is cordova enabled?");
+		console.log(window.cordova);
+
 		if (1 || navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry)/)) {
 
 			alert("CHECK CORDOVA");
@@ -681,6 +684,17 @@ define("ttexp/initializers/cordova", ["exports"], function (exports) {
 			document.addEventListener("deviceready", function () {
 				alert("DEVICE READY");
 				application.advanceReadiness();
+
+				cordova.plugins.Keyboard.disableScroll(true);
+				cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+
+				window.addEventListener('native.keyboardshow', keyboardShowHandler);
+				window.addEventListener('native.keyboardhide', keyboardHideHandler);
+
+				StatusBar.backgroundColorByHexString('#ffffff');
+				StatusBar.overlaysWebView(false);
+				StatusBar.styleDefault();
+				StatusBar.show();
 			}, false);
 
 			alert("END CHECK");
