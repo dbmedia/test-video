@@ -96,7 +96,7 @@ define('ttexp/tests/initializers/cordova.jshint', ['exports'], function (exports
 
   QUnit.module('JSHint - initializers');
   QUnit.test('initializers/cordova.js should pass jshint', function (assert) {
-    assert.ok(false, 'initializers/cordova.js should pass jshint.\ninitializers/cordova.js: line 19, col 13, \'cordova\' is not defined.\ninitializers/cordova.js: line 20, col 13, \'cordova\' is not defined.\ninitializers/cordova.js: line 22, col 60, \'keyboardShowHandler\' is not defined.\ninitializers/cordova.js: line 23, col 60, \'keyboardHideHandler\' is not defined.\ninitializers/cordova.js: line 25, col 13, \'StatusBar\' is not defined.\ninitializers/cordova.js: line 26, col 13, \'StatusBar\' is not defined.\ninitializers/cordova.js: line 27, col 13, \'StatusBar\' is not defined.\ninitializers/cordova.js: line 28, col 13, \'StatusBar\' is not defined.\n\n8 errors');
+    assert.ok(true, 'initializers/cordova.js should pass jshint.');
   });
 });
 define('ttexp/tests/router.jshint', ['exports'], function (exports) {

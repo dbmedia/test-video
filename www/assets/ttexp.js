@@ -674,30 +674,23 @@ define("ttexp/initializers/cordova", ["exports"], function (exports) {
 
 	function initialize(application) {
 		// application.inject('route', 'foo', 'service:foo');
-		alert("Is cordova enabled?");
 		console.log(window.cordova);
 
 		if (1 || navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry)/)) {
-
-			alert("CHECK CORDOVA");
 			application.deferReadiness();
 			document.addEventListener("deviceready", function () {
-				alert("DEVICE READY");
 				application.advanceReadiness();
 
-				cordova.plugins.Keyboard.disableScroll(true);
-				cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+				//			cordova.plugins.Keyboard.disableScroll(true);
+				//			cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+				//			window.addEventListener('native.keyboardshow', keyboardShowHandler);
+				//			window.addEventListener('native.keyboardhide', keyboardHideHandler);
 
-				window.addEventListener('native.keyboardshow', keyboardShowHandler);
-				window.addEventListener('native.keyboardhide', keyboardHideHandler);
-
-				StatusBar.backgroundColorByHexString('#ffffff');
-				StatusBar.overlaysWebView(false);
-				StatusBar.styleDefault();
-				StatusBar.show();
+				//			StatusBar.backgroundColorByHexString('#ffffff');
+				//			StatusBar.overlaysWebView(false);
+				//			StatusBar.styleDefault();
+				//			StatusBar.show();
 			}, false);
-
-			alert("END CHECK");
 		}
 	}
 
@@ -4904,7 +4897,7 @@ catch(err) {
 });
 
 if (!runningTests) {
-  require("ttexp/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+9b64d5ed"});
+  require("ttexp/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+a930c2c8"});
 }
 
 /* jshint ignore:end */
