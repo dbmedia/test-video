@@ -629,8 +629,9 @@ define('ttexp/controllers/index', ['exports', 'ember'], function (exports, _embe
 		lastName: 'Cognome',
 		actions: {
 			closeApp: function closeApp() {
-				alert("closing app");
-				navigator.app.exitApp();
+				if (confirm("Vuoi davvero uscire dall'applicazione?")) {
+					navigator.app.exitApp();
+				}
 			}
 		}
 	});
@@ -671,15 +672,29 @@ define("ttexp/initializers/cordova", ["exports"], function (exports) {
 	// http://stackoverflow.com/questions/30790605/ember-2-0-cordova-and-ondeviceready
 	// http://incorrectcode.news/question/35240/how-to-fire-deviceready-event-in-chrome-browser-trying-to-debug-phonegap-project/
 	// https://gist.github.com/htulipe/44d899e56e2526a82e46
+	//import $ from 'jquery'
 
 	function initialize(application) {
 		// application.inject('route', 'foo', 'service:foo');
-		console.log(window.cordova);
 
-		if (1 || navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry)/)) {
+		//if (navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry)/)) {
+		if (window.cordova) {
 			application.deferReadiness();
 			document.addEventListener("deviceready", function () {
 				application.advanceReadiness();
+
+				/*
+    // Spostare in una variabile globale
+    // http://w3foverflow.com/question/get-controller-var-from-run-schedule/
+    Ember.$(function() {
+    	if (navigator.userAgent.match(/(iPod|iPhone|iPad)/i)) {
+    	    Ember.$('.showIOS').show();
+    	}
+    	if (1 || navigator.userAgent.match(/Android/i)){
+    	    Ember.$('.showAndroid').show();
+    	}
+    });
+    */
 
 				//			cordova.plugins.Keyboard.disableScroll(true);
 				//			cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
@@ -3318,12 +3333,12 @@ define("ttexp/templates/index", ["exports"], function (exports) {
           "loc": {
             "source": null,
             "start": {
-              "line": 37,
-              "column": 25
+              "line": 40,
+              "column": 26
             },
             "end": {
-              "line": 37,
-              "column": 145
+              "line": 40,
+              "column": 146
             }
           },
           "moduleName": "ttexp/templates/index.hbs"
@@ -3355,12 +3370,12 @@ define("ttexp/templates/index", ["exports"], function (exports) {
           "loc": {
             "source": null,
             "start": {
-              "line": 38,
-              "column": 13
+              "line": 41,
+              "column": 14
             },
             "end": {
-              "line": 38,
-              "column": 86
+              "line": 41,
+              "column": 87
             }
           },
           "moduleName": "ttexp/templates/index.hbs"
@@ -3397,7 +3412,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 85,
+            "line": 164,
             "column": 10
           }
         },
@@ -3414,107 +3429,22 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
         var el2 = dom.createElement("div");
-        dom.setAttribute(el2, "class", "row");
+        dom.setAttribute(el2, "class", "container-fluid");
         var el3 = dom.createTextNode("\n		");
         dom.appendChild(el2, el3);
         var el3 = dom.createElement("div");
-        dom.setAttribute(el3, "class", "col-sm-12");
+        dom.setAttribute(el3, "class", "row");
         var el4 = dom.createTextNode("\n			");
         dom.appendChild(el3, el4);
         var el4 = dom.createElement("div");
-        dom.setAttribute(el4, "id", "logo-app");
-        var el5 = dom.createElement("img");
-        dom.setAttribute(el5, "src", "assets/images/logo-app.png");
-        dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n		");
-        dom.appendChild(el3, el4);
-        dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("\n	");
-        dom.appendChild(el2, el3);
-        dom.appendChild(el1, el2);
-        var el2 = dom.createTextNode("\n	");
-        dom.appendChild(el1, el2);
-        var el2 = dom.createElement("div");
-        dom.setAttribute(el2, "class", "row");
-        var el3 = dom.createTextNode("\n		");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createElement("div");
-        dom.setAttribute(el3, "class", "col-sm-3");
-        var el4 = dom.createTextNode("\n			");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createComment("<ul id=\"main-menu\" class=\"list-group ttexp-vertical-menu\">");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n			");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("div");
-        dom.setAttribute(el4, "id", "main-menu");
-        dom.setAttribute(el4, "class", "list-group");
-        var el5 = dom.createTextNode("\n				");
-        dom.appendChild(el4, el5);
-        var el5 = dom.createElement("a");
-        dom.setAttribute(el5, "class", "list-group-item");
-        var el6 = dom.createTextNode("Profilo Utente");
-        dom.appendChild(el5, el6);
-        dom.appendChild(el4, el5);
-        var el5 = dom.createTextNode("\n				");
-        dom.appendChild(el4, el5);
-        var el5 = dom.createElement("a");
-        dom.setAttribute(el5, "class", "list-group-item active");
-        var el6 = dom.createTextNode("Simulazioni");
-        dom.appendChild(el5, el6);
-        dom.appendChild(el4, el5);
-        var el5 = dom.createTextNode("\n				");
-        dom.appendChild(el4, el5);
-        var el5 = dom.createElement("a");
-        dom.setAttribute(el5, "class", "list-group-item");
-        var el6 = dom.createTextNode("Storico");
-        dom.appendChild(el5, el6);
-        dom.appendChild(el4, el5);
-        var el5 = dom.createTextNode("\n				");
-        dom.appendChild(el4, el5);
-        var el5 = dom.createElement("a");
-        dom.setAttribute(el5, "class", "list-group-item");
-        var el6 = dom.createTextNode("Messaggi");
-        dom.appendChild(el5, el6);
-        dom.appendChild(el4, el5);
-        var el5 = dom.createTextNode("\n				");
-        dom.appendChild(el4, el5);
-        var el5 = dom.createElement("a");
-        dom.setAttribute(el5, "class", "list-group-item");
-        var el6 = dom.createTextNode("Help");
-        dom.appendChild(el5, el6);
-        dom.appendChild(el4, el5);
-        var el5 = dom.createTextNode("\n				");
-        dom.appendChild(el4, el5);
-        var el5 = dom.createElement("a");
-        dom.setAttribute(el5, "class", "list-group-item");
-        var el6 = dom.createTextNode("Esci");
-        dom.appendChild(el5, el6);
-        dom.appendChild(el4, el5);
-        var el5 = dom.createTextNode("\n			");
-        dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n		");
-        dom.appendChild(el3, el4);
-        dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("\n		");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createElement("div");
-        dom.setAttribute(el3, "class", "col-sm-9");
-        var el4 = dom.createTextNode("\n			");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("div");
-        dom.setAttribute(el4, "id", "main-content");
-        dom.setAttribute(el4, "class", "panel panel-default");
+        dom.setAttribute(el4, "class", "col-md-3 sidebar");
         var el5 = dom.createTextNode("\n				");
         dom.appendChild(el4, el5);
         var el5 = dom.createElement("div");
-        dom.setAttribute(el5, "class", "panel-heading");
+        dom.setAttribute(el5, "id", "menu-header");
         var el6 = dom.createTextNode("\n					");
         dom.appendChild(el5, el6);
-        var el6 = dom.createElement("h3");
-        dom.setAttribute(el6, "class", "panel-title");
+        var el6 = dom.createElement("span");
         var el7 = dom.createTextNode("Salve, ");
         dom.appendChild(el6, el7);
         var el7 = dom.createElement("strong");
@@ -3534,98 +3464,177 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         var el5 = dom.createTextNode("\n				");
         dom.appendChild(el4, el5);
         var el5 = dom.createElement("div");
-        dom.setAttribute(el5, "class", "panel-body");
+        dom.setAttribute(el5, "id", "main-menu");
+        dom.setAttribute(el5, "class", "list-group");
+        var el6 = dom.createTextNode("\n					");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("a");
+        dom.setAttribute(el6, "class", "list-group-item");
+        var el7 = dom.createTextNode("Profilo Utente");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n					");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("a");
+        dom.setAttribute(el6, "class", "list-group-item active");
+        var el7 = dom.createTextNode("Simulazioni");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n					");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("a");
+        dom.setAttribute(el6, "class", "list-group-item");
+        var el7 = dom.createTextNode("Storico");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n					");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("a");
+        dom.setAttribute(el6, "class", "list-group-item");
+        var el7 = dom.createTextNode("Messaggi");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n					");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("a");
+        dom.setAttribute(el6, "class", "list-group-item");
+        var el7 = dom.createTextNode("Help");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n					");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("a");
+        dom.setAttribute(el6, "class", "list-group-item hidden showAndroid");
+        var el7 = dom.createTextNode("Esci");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n				");
+        dom.appendChild(el5, el6);
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("\n			");
+        dom.appendChild(el4, el5);
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("\n			");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createElement("div");
+        dom.setAttribute(el4, "class", "col-md-9 col-md-offset-3 content");
+        var el5 = dom.createTextNode("\n				");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createElement("div");
+        dom.setAttribute(el5, "class", "row");
         var el6 = dom.createTextNode("\n					");
         dom.appendChild(el5, el6);
         var el6 = dom.createElement("div");
-        dom.setAttribute(el6, "class", "table-responsive");
+        dom.setAttribute(el6, "class", "col-sm-12");
         var el7 = dom.createTextNode("\n						");
         dom.appendChild(el6, el7);
-        var el7 = dom.createElement("table");
-        dom.setAttribute(el7, "class", "table table-striped");
+        var el7 = dom.createElement("div");
+        dom.setAttribute(el7, "id", "logo-app");
+        var el8 = dom.createElement("img");
+        dom.setAttribute(el8, "src", "assets/images/logo-app.png");
+        dom.appendChild(el7, el8);
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode("\n					");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n				");
+        dom.appendChild(el5, el6);
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("\n				");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createElement("div");
+        dom.setAttribute(el5, "id", "main-content");
+        dom.setAttribute(el5, "class", "panel panel-default");
+        var el6 = dom.createTextNode("\n					");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("div");
+        dom.setAttribute(el6, "class", "panel-heading");
+        var el7 = dom.createTextNode("\n						");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createElement("h3");
+        dom.setAttribute(el7, "class", "panel-title");
+        var el8 = dom.createTextNode("Simulazioni disponibili");
+        dom.appendChild(el7, el8);
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode("\n					");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n					");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("div");
+        dom.setAttribute(el6, "class", "panel-body");
+        var el7 = dom.createTextNode("\n						");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createElement("div");
+        dom.setAttribute(el7, "class", "table-responsive");
         var el8 = dom.createTextNode("\n							");
         dom.appendChild(el7, el8);
-        var el8 = dom.createElement("thead");
+        var el8 = dom.createElement("table");
+        dom.setAttribute(el8, "class", "table table-striped");
         var el9 = dom.createTextNode("\n								");
         dom.appendChild(el8, el9);
-        var el9 = dom.createElement("tr");
+        var el9 = dom.createElement("thead");
         var el10 = dom.createTextNode("\n									");
         dom.appendChild(el9, el10);
-        var el10 = dom.createElement("th");
-        dom.setAttribute(el10, "class", "fit");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("th");
-        var el11 = dom.createTextNode("Simulazione");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("th");
-        var el11 = dom.createTextNode("Tentativi");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("th");
-        var el11 = dom.createTextNode("Media");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n								");
-        dom.appendChild(el9, el10);
-        dom.appendChild(el8, el9);
-        var el9 = dom.createTextNode("\n							");
-        dom.appendChild(el8, el9);
-        dom.appendChild(el7, el8);
-        var el8 = dom.createTextNode("\n							");
-        dom.appendChild(el7, el8);
-        var el8 = dom.createElement("tbody");
-        var el9 = dom.createTextNode("\n								");
-        dom.appendChild(el8, el9);
-        var el9 = dom.createElement("tr");
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        dom.setAttribute(el10, "class", "fit");
-        var el11 = dom.createComment("");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        var el11 = dom.createComment("");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        var el11 = dom.createTextNode("5");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        var el11 = dom.createTextNode("62%");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n								");
-        dom.appendChild(el9, el10);
-        dom.appendChild(el8, el9);
-        var el9 = dom.createTextNode("\n								");
-        dom.appendChild(el8, el9);
-        var el9 = dom.createElement("tr");
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        dom.setAttribute(el10, "class", "fit");
+        var el10 = dom.createElement("tr");
         var el11 = dom.createTextNode("\n										");
         dom.appendChild(el10, el11);
-        var el11 = dom.createElement("a");
-        dom.setAttribute(el11, "href", "#");
-        dom.setAttribute(el11, "class", "btn btn-link disabled");
-        var el12 = dom.createElement("span");
-        dom.setAttribute(el12, "class", "glyphicon glyphicon-play-circle");
+        var el11 = dom.createElement("th");
+        dom.setAttribute(el11, "class", "fit");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("th");
+        var el12 = dom.createTextNode("Simulazione");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("th");
+        var el12 = dom.createTextNode("Tentativi");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("th");
+        var el12 = dom.createTextNode("Media");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n									");
+        dom.appendChild(el10, el11);
+        dom.appendChild(el9, el10);
+        var el10 = dom.createTextNode("\n								");
+        dom.appendChild(el9, el10);
+        dom.appendChild(el8, el9);
+        var el9 = dom.createTextNode("\n								");
+        dom.appendChild(el8, el9);
+        var el9 = dom.createElement("tbody");
+        var el10 = dom.createTextNode("\n									");
+        dom.appendChild(el9, el10);
+        var el10 = dom.createElement("tr");
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        dom.setAttribute(el11, "class", "fit");
+        var el12 = dom.createComment("");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        var el12 = dom.createComment("");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        var el12 = dom.createTextNode("5");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        var el12 = dom.createTextNode("62%");
         dom.appendChild(el11, el12);
         dom.appendChild(el10, el11);
         var el11 = dom.createTextNode("\n									");
@@ -3633,39 +3642,39 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el9, el10);
         var el10 = dom.createTextNode("\n									");
         dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        var el11 = dom.createTextNode("Empatia");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        var el11 = dom.createTextNode("-");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        var el11 = dom.createTextNode("-");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n								");
-        dom.appendChild(el9, el10);
-        dom.appendChild(el8, el9);
-        var el9 = dom.createTextNode("\n								");
-        dom.appendChild(el8, el9);
-        var el9 = dom.createElement("tr");
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        dom.setAttribute(el10, "class", "fit");
+        var el10 = dom.createElement("tr");
         var el11 = dom.createTextNode("\n										");
         dom.appendChild(el10, el11);
-        var el11 = dom.createElement("a");
-        dom.setAttribute(el11, "href", "#");
-        dom.setAttribute(el11, "class", "btn btn-link disabled");
-        var el12 = dom.createElement("span");
-        dom.setAttribute(el12, "class", "glyphicon glyphicon-play-circle");
+        var el11 = dom.createElement("td");
+        dom.setAttribute(el11, "class", "fit");
+        var el12 = dom.createTextNode("\n											");
+        dom.appendChild(el11, el12);
+        var el12 = dom.createElement("a");
+        dom.setAttribute(el12, "href", "#");
+        dom.setAttribute(el12, "class", "btn btn-link disabled");
+        var el13 = dom.createElement("span");
+        dom.setAttribute(el13, "class", "glyphicon glyphicon-play-circle");
+        dom.appendChild(el12, el13);
+        dom.appendChild(el11, el12);
+        var el12 = dom.createTextNode("\n										");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        var el12 = dom.createTextNode("Empatia");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        var el12 = dom.createTextNode("-");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        var el12 = dom.createTextNode("-");
         dom.appendChild(el11, el12);
         dom.appendChild(el10, el11);
         var el11 = dom.createTextNode("\n									");
@@ -3673,39 +3682,39 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el9, el10);
         var el10 = dom.createTextNode("\n									");
         dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        var el11 = dom.createTextNode("Motivazione");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        var el11 = dom.createTextNode("-");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        var el11 = dom.createTextNode("-");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n								");
-        dom.appendChild(el9, el10);
-        dom.appendChild(el8, el9);
-        var el9 = dom.createTextNode("\n								");
-        dom.appendChild(el8, el9);
-        var el9 = dom.createElement("tr");
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        dom.setAttribute(el10, "class", "fit");
+        var el10 = dom.createElement("tr");
         var el11 = dom.createTextNode("\n										");
         dom.appendChild(el10, el11);
-        var el11 = dom.createElement("a");
-        dom.setAttribute(el11, "href", "#");
-        dom.setAttribute(el11, "class", "btn btn-link disabled");
-        var el12 = dom.createElement("span");
-        dom.setAttribute(el12, "class", "glyphicon glyphicon-play-circle");
+        var el11 = dom.createElement("td");
+        dom.setAttribute(el11, "class", "fit");
+        var el12 = dom.createTextNode("\n											");
+        dom.appendChild(el11, el12);
+        var el12 = dom.createElement("a");
+        dom.setAttribute(el12, "href", "#");
+        dom.setAttribute(el12, "class", "btn btn-link disabled");
+        var el13 = dom.createElement("span");
+        dom.setAttribute(el13, "class", "glyphicon glyphicon-play-circle");
+        dom.appendChild(el12, el13);
+        dom.appendChild(el11, el12);
+        var el12 = dom.createTextNode("\n										");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        var el12 = dom.createTextNode("Motivazione");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        var el12 = dom.createTextNode("-");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        var el12 = dom.createTextNode("-");
         dom.appendChild(el11, el12);
         dom.appendChild(el10, el11);
         var el11 = dom.createTextNode("\n									");
@@ -3713,39 +3722,39 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el9, el10);
         var el10 = dom.createTextNode("\n									");
         dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        var el11 = dom.createTextNode("Chiusura");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        var el11 = dom.createTextNode("-");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        var el11 = dom.createTextNode("-");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n								");
-        dom.appendChild(el9, el10);
-        dom.appendChild(el8, el9);
-        var el9 = dom.createTextNode("\n								");
-        dom.appendChild(el8, el9);
-        var el9 = dom.createElement("tr");
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        dom.setAttribute(el10, "class", "fit");
+        var el10 = dom.createElement("tr");
         var el11 = dom.createTextNode("\n										");
         dom.appendChild(el10, el11);
-        var el11 = dom.createElement("a");
-        dom.setAttribute(el11, "href", "#");
-        dom.setAttribute(el11, "class", "btn btn-link disabled");
-        var el12 = dom.createElement("span");
-        dom.setAttribute(el12, "class", "glyphicon glyphicon-play-circle");
+        var el11 = dom.createElement("td");
+        dom.setAttribute(el11, "class", "fit");
+        var el12 = dom.createTextNode("\n											");
+        dom.appendChild(el11, el12);
+        var el12 = dom.createElement("a");
+        dom.setAttribute(el12, "href", "#");
+        dom.setAttribute(el12, "class", "btn btn-link disabled");
+        var el13 = dom.createElement("span");
+        dom.setAttribute(el13, "class", "glyphicon glyphicon-play-circle");
+        dom.appendChild(el12, el13);
+        dom.appendChild(el11, el12);
+        var el12 = dom.createTextNode("\n										");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        var el12 = dom.createTextNode("Chiusura");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        var el12 = dom.createTextNode("-");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        var el12 = dom.createTextNode("-");
         dom.appendChild(el11, el12);
         dom.appendChild(el10, el11);
         var el11 = dom.createTextNode("\n									");
@@ -3753,20 +3762,42 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el9, el10);
         var el10 = dom.createTextNode("\n									");
         dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        var el11 = dom.createTextNode("Referenze");
+        var el10 = dom.createElement("tr");
+        var el11 = dom.createTextNode("\n										");
         dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        var el11 = dom.createTextNode("-");
+        var el11 = dom.createElement("td");
+        dom.setAttribute(el11, "class", "fit");
+        var el12 = dom.createTextNode("\n											");
+        dom.appendChild(el11, el12);
+        var el12 = dom.createElement("a");
+        dom.setAttribute(el12, "href", "#");
+        dom.setAttribute(el12, "class", "btn btn-link disabled");
+        var el13 = dom.createElement("span");
+        dom.setAttribute(el13, "class", "glyphicon glyphicon-play-circle");
+        dom.appendChild(el12, el13);
+        dom.appendChild(el11, el12);
+        var el12 = dom.createTextNode("\n										");
+        dom.appendChild(el11, el12);
         dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("td");
-        var el11 = dom.createTextNode("-");
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        var el12 = dom.createTextNode("Referenze");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        var el12 = dom.createTextNode("-");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("td");
+        var el12 = dom.createTextNode("-");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n									");
         dom.appendChild(el10, el11);
         dom.appendChild(el9, el10);
         var el10 = dom.createTextNode("\n								");
@@ -3778,10 +3809,10 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         var el8 = dom.createTextNode("\n						");
         dom.appendChild(el7, el8);
         dom.appendChild(el6, el7);
-        var el7 = dom.createTextNode("\n					");
+        var el7 = dom.createTextNode(" \n					");
         dom.appendChild(el6, el7);
         dom.appendChild(el5, el6);
-        var el6 = dom.createTextNode(" \n				");
+        var el6 = dom.createTextNode("\n				");
         dom.appendChild(el5, el6);
         dom.appendChild(el4, el5);
         var el5 = dom.createTextNode("\n			");
@@ -3792,6 +3823,10 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n	");
         dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createComment("\n	<div class=\"row\">\n		<div class=\"col-sm-3\">\n			<div id=\"main-menu\" class=\"list-group\">\n				<a class=\"list-group-item\">Profilo Utente</a>\n				<a class=\"list-group-item active\">Simulazioni</a>\n				<a class=\"list-group-item\">Storico</a>\n				<a class=\"list-group-item\">Messaggi</a>\n				<a class=\"list-group-item\">Help</a>\n				<a class=\"list-group-item hidden showAndroid\" {{action \"closeApp\"}}>Esci</a>\n			</div>\n		</div>\n		<div class=\"col-sm-9\">\n			<div id=\"main-content\" class=\"panel panel-default\">\n				<div class=\"panel-heading\">\n					<h3 class=\"panel-title\">Salve, <strong>{{firstName}} {{lastName}}</strong>!</h3>\n				</div>\n				<div class=\"panel-body\">\n					<div class=\"table-responsive\">\n						<table class=\"table table-striped\">\n							<thead>\n								<tr>\n									<th class=\"fit\"></th>\n									<th>Simulazione</th>\n									<th>Tentativi</th>\n									<th>Media</th>\n								</tr>\n							</thead>\n							<tbody>\n								<tr>\n									<td class=\"fit\">{{#link-to \"play\" \"start\" id=\"button-play-1\" class=\"btn btn-link\"}}<span class=\"glyphicon glyphicon-play-circle\"></span>{{/link-to}}</td>\n									<td>{{#link-to \"play\" \"start\" id=\"button-play-1\" class=\"btn-link\"}}Telefonata{{/link-to}}</td>\n									<td>5</td>\n									<td>62%</td>\n								</tr>\n								<tr>\n									<td class=\"fit\">\n										<a href=\"#\" class=\"btn btn-link disabled\"><span class=\"glyphicon glyphicon-play-circle\"></span></a>\n									</td>\n									<td>Empatia</td>\n									<td>-</td>\n									<td>-</td>\n								</tr>\n								<tr>\n									<td class=\"fit\">\n										<a href=\"#\" class=\"btn btn-link disabled\"><span class=\"glyphicon glyphicon-play-circle\"></span></a>\n									</td>\n									<td>Motivazione</td>\n									<td>-</td>\n									<td>-</td>\n								</tr>\n								<tr>\n									<td class=\"fit\">\n										<a href=\"#\" class=\"btn btn-link disabled\"><span class=\"glyphicon glyphicon-play-circle\"></span></a>\n									</td>\n									<td>Chiusura</td>\n									<td>-</td>\n									<td>-</td>\n								</tr>\n								<tr>\n									<td class=\"fit\">\n										<a href=\"#\" class=\"btn btn-link disabled\"><span class=\"glyphicon glyphicon-play-circle\"></span></a>\n									</td>\n									<td>Referenze</td>\n									<td>-</td>\n									<td>-</td>\n								</tr>\n							</tbody>\n						</table>\n					</div> \n				</div>\n			</div>\n		</div>\n	</div>\n	");
         dom.appendChild(el1, el2);
         var el2 = dom.createTextNode("\n");
         dom.appendChild(el1, el2);
@@ -3811,22 +3846,22 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var element0 = dom.childAt(fragment, [0, 3]);
-        var element1 = dom.childAt(element0, [1, 3, 11]);
-        var element2 = dom.childAt(element0, [3, 1]);
-        var element3 = dom.childAt(element2, [1, 1, 1]);
-        var element4 = dom.childAt(element2, [3, 1, 1, 3, 1]);
+        var element0 = dom.childAt(fragment, [0, 1, 1]);
+        var element1 = dom.childAt(element0, [1]);
+        var element2 = dom.childAt(element1, [1, 1, 1]);
+        var element3 = dom.childAt(element1, [3, 11]);
+        var element4 = dom.childAt(element0, [3, 3, 3, 1, 1, 3, 1]);
         var morphs = new Array(6);
-        morphs[0] = dom.createElementMorph(element1);
-        morphs[1] = dom.createMorphAt(element3, 0, 0);
-        morphs[2] = dom.createMorphAt(element3, 2, 2);
+        morphs[0] = dom.createMorphAt(element2, 0, 0);
+        morphs[1] = dom.createMorphAt(element2, 2, 2);
+        morphs[2] = dom.createElementMorph(element3);
         morphs[3] = dom.createMorphAt(dom.childAt(element4, [1]), 0, 0);
         morphs[4] = dom.createMorphAt(dom.childAt(element4, [3]), 0, 0);
         morphs[5] = dom.createMorphAt(fragment, 4, 4, contextualElement);
         dom.insertBoundary(fragment, null);
         return morphs;
       },
-      statements: [["element", "action", ["closeApp"], [], ["loc", [null, [16, 31], [16, 52]]]], ["content", "firstName", ["loc", [null, [22, 44], [22, 57]]]], ["content", "lastName", ["loc", [null, [22, 58], [22, 70]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-1", "class", "btn btn-link"], 0, null, ["loc", [null, [37, 25], [37, 157]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-1", "class", "btn-link"], 1, null, ["loc", [null, [38, 13], [38, 98]]]], ["content", "outlet", ["loc", [null, [85, 0], [85, 10]]]]],
+      statements: [["content", "firstName", ["loc", [null, [6, 26], [6, 39]]]], ["content", "lastName", ["loc", [null, [6, 40], [6, 52]]]], ["element", "action", ["closeApp"], [], ["loc", [null, [14, 51], [14, 72]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-1", "class", "btn btn-link"], 0, null, ["loc", [null, [40, 26], [40, 158]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-1", "class", "btn-link"], 1, null, ["loc", [null, [41, 14], [41, 99]]]], ["content", "outlet", ["loc", [null, [164, 0], [164, 10]]]]],
       locals: [],
       templates: [child0, child1]
     };
