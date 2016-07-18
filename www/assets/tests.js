@@ -254,7 +254,7 @@ define('ttexp/tests/models/score.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - models/score.js');
   QUnit.test('should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(true, 'models/score.js should pass jshint.');
+    assert.ok(false, 'models/score.js should pass jshint.\nmodels/score.js: line 13, col 12, \'Ember\' is not defined.\nmodels/score.js: line 32, col 9, \'Ember\' is not defined.\nmodels/score.js: line 48, col 14, \'Ember\' is not defined.\n\n3 errors');
   });
 });
 define('ttexp/tests/models/tank.jshint', ['exports'], function (exports) {
@@ -362,7 +362,7 @@ define('ttexp/tests/routes/scenarios.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - routes/scenarios.js');
   QUnit.test('should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'routes/scenarios.js should pass jshint.\nroutes/scenarios.js: line 6, col 9, \'params\' is defined but never used.\nroutes/scenarios.js: line 2, col 8, \'ENV\' is defined but never used.\n\n2 errors');
+    assert.ok(false, 'routes/scenarios.js should pass jshint.\nroutes/scenarios.js: line 6, col 9, \'params\' is defined but never used.\nroutes/scenarios.js: line 11, col 11, \'self\' is defined but never used.\nroutes/scenarios.js: line 2, col 8, \'ENV\' is defined but never used.\n\n3 errors');
   });
 });
 define('ttexp/tests/routes/scores.jshint', ['exports'], function (exports) {

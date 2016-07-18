@@ -7334,6 +7334,49 @@ html, body {
     background-attachment: fixed;
     background-position: center center;
     background-size: cover; }
+    .page-scores #scores-container #main-content {
+      margin: 0 10%;
+      position: relative;
+      top: 50%;
+      -webkit-transform: translateY(-50%);
+      -ms-transform: translateY(-50%);
+      transform: translateY(-50%); }
+      .page-scores #scores-container #main-content .panel-body {
+        padding-left: 0;
+        padding-right: 0; }
+      .page-scores #scores-container #main-content #general-score-container,
+      .page-scores #scores-container #main-content #objectives-container {
+        margin: 20px 40px;
+        height: 180px;
+        padding: 20px;
+        background-color: rgba(0, 0, 0, 0.3); }
+      .page-scores #scores-container #main-content #general-score-container {
+        margin-right: 10px;
+        font-size: 3em;
+        text-align: center;
+        vertical-align: middle; }
+      .page-scores #scores-container #main-content #objectives-container {
+        margin-left: 10px;
+        font-size: 3em;
+        text-align: center;
+        vertical-align: middle; }
+      .page-scores #scores-container #main-content #variables-score-container {
+        margin: 20px 40px;
+        background-color: rgba(0, 0, 0, 0.3); }
+        .page-scores #scores-container #main-content #variables-score-container table {
+          width: 100%;
+          background-color: transparent; }
+          .page-scores #scores-container #main-content #variables-score-container table th,
+          .page-scores #scores-container #main-content #variables-score-container table td {
+            width: 1%;
+            padding: 20px;
+            text-align: center; }
+          .page-scores #scores-container #main-content #variables-score-container table th {
+            vertical-align: middle; }
+          .page-scores #scores-container #main-content #variables-score-container table td {
+            vertical-align: middle; }
+          .page-scores #scores-container #main-content #variables-score-container table .score-vote {
+            text-transform: uppercase; }
   .page-scores #button-close {
     top: 32px;
     left: 32px; }

@@ -613,6 +613,7 @@ define('ttexp/models/playthrough', ['exports', 'ember-data'], function (exports,
     playState: _emberData['default'].belongsTo('playState'),
     scores: _emberData['default'].hasMany('score'),
 
+    success: _emberData['default'].attr('boolean'),
     startedAt: _emberData['default'].attr('date'),
     completedAt: _emberData['default'].attr('date')
   });
@@ -634,8 +635,61 @@ define('ttexp/models/score', ['exports', 'ember-data'], function (exports, _embe
     value: _emberData['default'].attr('number'),
     minValue: _emberData['default'].attr('number'),
     maxValue: _emberData['default'].attr('number'),
+    variableId: _emberData['default'].attr('string'),
     variableCode: _emberData['default'].attr('string'),
-    variableName: _emberData['default'].attr('string')
+    variableName: _emberData['default'].attr('string'),
+
+    percent: Ember.computed('value', 'minValue', 'maxValue', function () {
+      var value = this.get('value');
+      var minValue = this.get('minValue');
+      var maxValue = this.get('maxValue');
+
+      var absValue = value - minValue;
+      var maxAbsValue = maxValue - minValue;
+      if (maxAbsValue > 0) {
+        var percent = Math.round(absValue / maxAbsValue * 100);
+        if (percent > 100) {
+          percent = 100;
+        } else if (percent < 0) {
+          percent = 0;
+        }
+        return percent;
+      } else {
+        return null;
+      }
+    }),
+    vote: Ember.computed('value', function () {
+      var value = this.get('value');
+      if (value == null) {
+        return 'non pervenuto';
+      } else if (value <= -6) {
+        return 'critico';
+      } else if (value <= -1) {
+        return 'debole';
+      } else if (value <= 2) {
+        return 'medio';
+      } else if (value <= 7) {
+        return 'buono';
+      } else {
+        return 'eccellente';
+      }
+    }),
+    voteClass: Ember.computed('value', function () {
+      var value = this.get('value');
+      if (value == null) {
+        return 'vote-unknown';
+      } else if (value <= -6) {
+        return 'vote-1';
+      } else if (value <= -1) {
+        return 'vote-2';
+      } else if (value <= 2) {
+        return 'vote-3';
+      } else if (value <= 7) {
+        return 'vote-4';
+      } else {
+        return 'vote-5';
+      }
+    })
   });
 });
 define('ttexp/models/tank', ['exports', 'ember-data'], function (exports, _emberData) {
@@ -677,7 +731,7 @@ define('ttexp/router', ['exports', 'ember', 'ttexp/config/environment'], functio
 		this.route('help');
 		this.route('play', { path: '/play/:scenario_id' });
 		this.route('action', { path: '/action/:scenario_id/:item_id' });
-		this.route('scores', { path: '/scores/:session_id' });
+		this.route('scores', { path: '/scores/:playthrough_id' });
 		this.route('admin/index', { path: '/admin' });
 		this.route('admin/scenario', { path: '/admin/scenario' });
 		this.route('page-not-found', { path: '/*wildcard' });
@@ -811,13 +865,51 @@ define('ttexp/routes/scenarios', ['exports', 'ember', 'ttexp/config/environment'
   exports['default'] = _ember['default'].Route.extend(_emberSimpleAuthMixinsAuthenticatedRouteMixin['default'], {
     model: function model(params) {
       return this.store.findAll('scenario');
+    },
+    actions: {
+      download: function download(scenario) {
+        var self = this;
+        if (scenario) {
+          console.log("DOWNLOAD " + scenario.id);
+          //        var fileTransfer = new FileTransfer();
+          //        var uri = encodeURI("http://some.server.com/download.php");
+          //https://github.com/apache/cordova-plugin-file-transfer/blob/1882bfbd2d150c6db501b2092374d644cb056505/doc/index.md
+          //https://github.com/apache/cordova-plugin-file-transfer
+          //http://docs.phonegap.com/en/1.8.0/cordova_file_file.md.html#FileTransfer
+        }
+
+        /*
+        var model = this.currentModel;
+        var scenario = model.scenario;
+        var playState = scenario.get('playState');
+        if (playState) {
+          playState.get('playthrough').then(function (playthrough) {
+            if (playthrough) {
+              var action = self.store.createRecord('action', {
+                playthrough: playthrough,
+                item: item,
+              });
+              action.save().then(function() {
+                if (item) {
+                  self.refresh();
+                } else {
+                  self.transitionTo('scenarios');
+                }
+              });
+            }
+          });
+        }
+        */
+      }
     }
   });
 });
 define("ttexp/routes/scores", ["exports", "ember"], function (exports, _ember) {
   exports["default"] = _ember["default"].Route.extend({
     model: function model(params) {
-      return params.session_id;
+      return _ember["default"].RSVP.hash({
+        playthrough: this.store.findRecord('playthrough', params.playthrough_id, { reload: true })
+      });
     }
   });
 });
@@ -2690,7 +2782,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
               },
               "end": {
                 "line": 24,
-                "column": 69
+                "column": 101
               }
             },
             "moduleName": "ttexp/templates/play.hbs"
@@ -2752,7 +2844,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
           morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]), 0, 0);
           return morphs;
         },
-        statements: [["block", "link-to", ["scores", "a1"], [], 0, null, ["loc", [null, [24, 32], [24, 81]]]]],
+        statements: [["block", "link-to", ["scores", ["get", "model.scenario.playState.playthrough", ["loc", [null, [24, 52], [24, 88]]]]], [], 0, null, ["loc", [null, [24, 32], [24, 113]]]]],
         locals: [],
         templates: [child0]
       };
@@ -3213,11 +3305,11 @@ define("ttexp/templates/scenarios", ["exports"], function (exports) {
             "loc": {
               "source": null,
               "start": {
-                "line": 34,
+                "line": 35,
                 "column": 27
               },
               "end": {
-                "line": 34,
+                "line": 35,
                 "column": 171
               }
             },
@@ -3250,11 +3342,11 @@ define("ttexp/templates/scenarios", ["exports"], function (exports) {
             "loc": {
               "source": null,
               "start": {
-                "line": 35,
+                "line": 36,
                 "column": 15
               },
               "end": {
-                "line": 35,
+                "line": 36,
                 "column": 124
               }
             },
@@ -3277,7 +3369,7 @@ define("ttexp/templates/scenarios", ["exports"], function (exports) {
             dom.insertBoundary(fragment, null);
             return morphs;
           },
-          statements: [["content", "scenario.name", ["loc", [null, [35, 107], [35, 124]]]]],
+          statements: [["content", "scenario.name", ["loc", [null, [36, 107], [36, 124]]]]],
           locals: [],
           templates: []
         };
@@ -3289,11 +3381,11 @@ define("ttexp/templates/scenarios", ["exports"], function (exports) {
           "loc": {
             "source": null,
             "start": {
-              "line": 32,
+              "line": 33,
               "column": 9
             },
             "end": {
-              "line": 39,
+              "line": 41,
               "column": 9
             }
           },
@@ -3333,6 +3425,15 @@ define("ttexp/templates/scenarios", ["exports"], function (exports) {
           var el3 = dom.createTextNode("-");
           dom.appendChild(el2, el3);
           dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n									  		");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createElement("td");
+          var el3 = dom.createElement("a");
+          var el4 = dom.createElement("span");
+          dom.setAttribute(el4, "class", "glyphicon glyphicon-download");
+          dom.appendChild(el3, el4);
+          dom.appendChild(el2, el3);
+          dom.appendChild(el1, el2);
           var el2 = dom.createTextNode("\n									  	");
           dom.appendChild(el1, el2);
           dom.appendChild(el0, el1);
@@ -3342,13 +3443,15 @@ define("ttexp/templates/scenarios", ["exports"], function (exports) {
         },
         buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
           var element0 = dom.childAt(fragment, [1]);
-          var morphs = new Array(3);
+          var element1 = dom.childAt(element0, [9, 0]);
+          var morphs = new Array(4);
           morphs[0] = dom.createMorphAt(dom.childAt(element0, [1]), 0, 0);
           morphs[1] = dom.createMorphAt(dom.childAt(element0, [3]), 0, 0);
           morphs[2] = dom.createMorphAt(dom.childAt(element0, [5]), 0, 0);
+          morphs[3] = dom.createElementMorph(element1);
           return morphs;
         },
-        statements: [["block", "link-to", ["play", ["get", "scenario.id", ["loc", [null, [34, 45], [34, 56]]]]], ["id", ["subexpr", "concat", ["button-play-", ["get", "scenario.id", ["loc", [null, [34, 83], [34, 94]]]]], [], ["loc", [null, [34, 60], [34, 95]]]], "class", "btn btn-link"], 0, null, ["loc", [null, [34, 27], [34, 183]]]], ["block", "link-to", ["play", ["get", "scenario.id", ["loc", [null, [35, 33], [35, 44]]]]], ["id", ["subexpr", "concat", ["button-play-text-", ["get", "scenario.id", ["loc", [null, [35, 76], [35, 87]]]]], [], ["loc", [null, [35, 48], [35, 88]]]], "class", "btn-link"], 1, null, ["loc", [null, [35, 15], [35, 136]]]], ["content", "scenario.attempts", ["loc", [null, [36, 17], [36, 38]]]]],
+        statements: [["block", "link-to", ["play", ["get", "scenario.id", ["loc", [null, [35, 45], [35, 56]]]]], ["id", ["subexpr", "concat", ["button-play-", ["get", "scenario.id", ["loc", [null, [35, 83], [35, 94]]]]], [], ["loc", [null, [35, 60], [35, 95]]]], "class", "btn btn-link"], 0, null, ["loc", [null, [35, 27], [35, 183]]]], ["block", "link-to", ["play", ["get", "scenario.id", ["loc", [null, [36, 33], [36, 44]]]]], ["id", ["subexpr", "concat", ["button-play-text-", ["get", "scenario.id", ["loc", [null, [36, 76], [36, 87]]]]], [], ["loc", [null, [36, 48], [36, 88]]]], "class", "btn-link"], 1, null, ["loc", [null, [36, 15], [36, 136]]]], ["content", "scenario.attempts", ["loc", [null, [37, 17], [37, 38]]]], ["element", "action", ["download", ["get", "scenario", ["loc", [null, [39, 40], [39, 48]]]]], [], ["loc", [null, [39, 20], [39, 50]]]]],
         locals: ["scenario"],
         templates: [child0, child1]
       };
@@ -3361,11 +3464,11 @@ define("ttexp/templates/scenarios", ["exports"], function (exports) {
           "loc": {
             "source": null,
             "start": {
-              "line": 39,
+              "line": 41,
               "column": 9
             },
             "end": {
-              "line": 43,
+              "line": 45,
               "column": 9
             }
           },
@@ -3383,7 +3486,7 @@ define("ttexp/templates/scenarios", ["exports"], function (exports) {
           var el2 = dom.createTextNode("\n									  		");
           dom.appendChild(el1, el2);
           var el2 = dom.createElement("td");
-          dom.setAttribute(el2, "colspan", "4");
+          dom.setAttribute(el2, "colspan", "5");
           var el3 = dom.createTextNode("Nessuna simulazione disponibile");
           dom.appendChild(el2, el3);
           dom.appendChild(el1, el2);
@@ -3416,7 +3519,7 @@ define("ttexp/templates/scenarios", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 56,
+            "line": 58,
             "column": 10
           }
         },
@@ -3559,6 +3662,11 @@ define("ttexp/templates/scenarios", ["exports"], function (exports) {
         var el12 = dom.createTextNode("Media");
         dom.appendChild(el11, el12);
         dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("th");
+        dom.setAttribute(el11, "class", "fit");
+        dom.appendChild(el10, el11);
         var el11 = dom.createTextNode("\n									");
         dom.appendChild(el10, el11);
         dom.appendChild(el9, el10);
@@ -3614,19 +3722,19 @@ define("ttexp/templates/scenarios", ["exports"], function (exports) {
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var element1 = dom.childAt(fragment, [0, 1, 1]);
-        var element2 = dom.childAt(element1, [1]);
-        var element3 = dom.childAt(element2, [1, 1, 1]);
+        var element2 = dom.childAt(fragment, [0, 1, 1]);
+        var element3 = dom.childAt(element2, [1]);
+        var element4 = dom.childAt(element3, [1, 1, 1]);
         var morphs = new Array(5);
-        morphs[0] = dom.createMorphAt(element3, 0, 0);
-        morphs[1] = dom.createMorphAt(element3, 2, 2);
-        morphs[2] = dom.createMorphAt(element2, 3, 3);
-        morphs[3] = dom.createMorphAt(dom.childAt(element1, [3, 3, 3, 1, 1, 3]), 1, 1);
+        morphs[0] = dom.createMorphAt(element4, 0, 0);
+        morphs[1] = dom.createMorphAt(element4, 2, 2);
+        morphs[2] = dom.createMorphAt(element3, 3, 3);
+        morphs[3] = dom.createMorphAt(dom.childAt(element2, [3, 3, 3, 1, 1, 3]), 1, 1);
         morphs[4] = dom.createMorphAt(fragment, 4, 4, contextualElement);
         dom.insertBoundary(fragment, null);
         return morphs;
       },
-      statements: [["content", "firstName", ["loc", [null, [6, 26], [6, 39]]]], ["content", "lastName", ["loc", [null, [6, 40], [6, 52]]]], ["inline", "partial", ["layout/menu"], [], ["loc", [null, [8, 4], [8, 29]]]], ["block", "each", [["get", "model", ["loc", [null, [32, 17], [32, 22]]]]], [], 0, 1, ["loc", [null, [32, 9], [43, 18]]]], ["content", "outlet", ["loc", [null, [56, 0], [56, 10]]]]],
+      statements: [["content", "firstName", ["loc", [null, [6, 26], [6, 39]]]], ["content", "lastName", ["loc", [null, [6, 40], [6, 52]]]], ["inline", "partial", ["layout/menu"], [], ["loc", [null, [8, 4], [8, 29]]]], ["block", "each", [["get", "model", ["loc", [null, [33, 17], [33, 22]]]]], [], 0, 1, ["loc", [null, [33, 9], [45, 18]]]], ["content", "outlet", ["loc", [null, [58, 0], [58, 10]]]]],
       locals: [],
       templates: [child0, child1]
     };
@@ -3647,7 +3755,7 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
             },
             "end": {
               "line": 2,
-              "column": 167
+              "column": 171
             }
           },
           "moduleName": "ttexp/templates/scores.hbs"
@@ -3671,11 +3779,392 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
         templates: []
       };
     })();
+    var child1 = (function () {
+      var child0 = (function () {
+        return {
+          meta: {
+            "fragmentReason": false,
+            "revision": "Ember@2.6.1",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 12,
+                "column": 7
+              },
+              "end": {
+                "line": 13,
+                "column": 7
+              }
+            },
+            "moduleName": "ttexp/templates/scores.hbs"
+          },
+          isEmpty: true,
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes() {
+            return [];
+          },
+          statements: [],
+          locals: [],
+          templates: []
+        };
+      })();
+      var child1 = (function () {
+        return {
+          meta: {
+            "fragmentReason": false,
+            "revision": "Ember@2.6.1",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 13,
+                "column": 7
+              },
+              "end": {
+                "line": 15,
+                "column": 7
+              }
+            },
+            "moduleName": "ttexp/templates/scores.hbs"
+          },
+          isEmpty: false,
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("								");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createElement("div");
+            var el2 = dom.createComment("");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("br");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createComment("");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("%");
+            dom.appendChild(el1, el2);
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+            var element1 = dom.childAt(fragment, [1]);
+            var morphs = new Array(2);
+            morphs[0] = dom.createMorphAt(element1, 0, 0);
+            morphs[1] = dom.createMorphAt(element1, 2, 2);
+            return morphs;
+          },
+          statements: [["content", "score.variableName", ["loc", [null, [14, 13], [14, 35]]]], ["content", "score.percent", ["loc", [null, [14, 40], [14, 57]]]]],
+          locals: [],
+          templates: []
+        };
+      })();
+      return {
+        meta: {
+          "fragmentReason": false,
+          "revision": "Ember@2.6.1",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 11,
+              "column": 6
+            },
+            "end": {
+              "line": 16,
+              "column": 6
+            }
+          },
+          "moduleName": "ttexp/templates/scores.hbs"
+        },
+        isEmpty: false,
+        arity: 1,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createComment("");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
+          dom.insertBoundary(fragment, 0);
+          dom.insertBoundary(fragment, null);
+          return morphs;
+        },
+        statements: [["block", "if", [["get", "score.variableId", ["loc", [null, [12, 13], [12, 29]]]]], [], 0, 1, ["loc", [null, [12, 7], [15, 14]]]]],
+        locals: ["score"],
+        templates: [child0, child1]
+      };
+    })();
+    var child2 = (function () {
+      return {
+        meta: {
+          "fragmentReason": false,
+          "revision": "Ember@2.6.1",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 22,
+              "column": 6
+            },
+            "end": {
+              "line": 24,
+              "column": 6
+            }
+          },
+          "moduleName": "ttexp/templates/scores.hbs"
+        },
+        isEmpty: false,
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("							Raggiunto\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes() {
+          return [];
+        },
+        statements: [],
+        locals: [],
+        templates: []
+      };
+    })();
+    var child3 = (function () {
+      return {
+        meta: {
+          "fragmentReason": false,
+          "revision": "Ember@2.6.1",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 24,
+              "column": 6
+            },
+            "end": {
+              "line": 26,
+              "column": 6
+            }
+          },
+          "moduleName": "ttexp/templates/scores.hbs"
+        },
+        isEmpty: false,
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("							Mancato\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes() {
+          return [];
+        },
+        statements: [],
+        locals: [],
+        templates: []
+      };
+    })();
+    var child4 = (function () {
+      var child0 = (function () {
+        return {
+          meta: {
+            "fragmentReason": false,
+            "revision": "Ember@2.6.1",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 43,
+                "column": 11
+              },
+              "end": {
+                "line": 47,
+                "column": 11
+              }
+            },
+            "moduleName": "ttexp/templates/scores.hbs"
+          },
+          isEmpty: false,
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("												");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createElement("th");
+            var el2 = dom.createTextNode("\n													");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("div");
+            dom.setAttribute(el2, "class", "score-name");
+            var el3 = dom.createComment("");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n												");
+            dom.appendChild(el1, el2);
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+            var morphs = new Array(1);
+            morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1, 1]), 0, 0);
+            return morphs;
+          },
+          statements: [["content", "score.variableName", ["loc", [null, [45, 37], [45, 59]]]]],
+          locals: [],
+          templates: []
+        };
+      })();
+      return {
+        meta: {
+          "fragmentReason": false,
+          "revision": "Ember@2.6.1",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 42,
+              "column": 10
+            },
+            "end": {
+              "line": 48,
+              "column": 10
+            }
+          },
+          "moduleName": "ttexp/templates/scores.hbs"
+        },
+        isEmpty: false,
+        arity: 1,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createComment("");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
+          dom.insertBoundary(fragment, 0);
+          dom.insertBoundary(fragment, null);
+          return morphs;
+        },
+        statements: [["block", "if", [["get", "score.variableId", ["loc", [null, [43, 17], [43, 33]]]]], [], 0, null, ["loc", [null, [43, 11], [47, 18]]]]],
+        locals: ["score"],
+        templates: [child0]
+      };
+    })();
+    var child5 = (function () {
+      var child0 = (function () {
+        return {
+          meta: {
+            "fragmentReason": false,
+            "revision": "Ember@2.6.1",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 54,
+                "column": 11
+              },
+              "end": {
+                "line": 58,
+                "column": 11
+              }
+            },
+            "moduleName": "ttexp/templates/scores.hbs"
+          },
+          isEmpty: false,
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("												");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createElement("td");
+            var el2 = dom.createTextNode("\n													");
+            dom.appendChild(el1, el2);
+            var el2 = dom.createElement("div");
+            var el3 = dom.createComment("");
+            dom.appendChild(el2, el3);
+            dom.appendChild(el1, el2);
+            var el2 = dom.createTextNode("\n												");
+            dom.appendChild(el1, el2);
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+            var element0 = dom.childAt(fragment, [1, 1]);
+            var morphs = new Array(2);
+            morphs[0] = dom.createAttrMorph(element0, 'class');
+            morphs[1] = dom.createMorphAt(element0, 0, 0);
+            return morphs;
+          },
+          statements: [["attribute", "class", ["concat", ["score-vote ", ["get", "score.voteClass", ["loc", [null, [56, 38], [56, 53]]]]]]], ["content", "score.vote", ["loc", [null, [56, 57], [56, 71]]]]],
+          locals: [],
+          templates: []
+        };
+      })();
+      return {
+        meta: {
+          "fragmentReason": false,
+          "revision": "Ember@2.6.1",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 53,
+              "column": 10
+            },
+            "end": {
+              "line": 59,
+              "column": 10
+            }
+          },
+          "moduleName": "ttexp/templates/scores.hbs"
+        },
+        isEmpty: false,
+        arity: 1,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createComment("");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
+          dom.insertBoundary(fragment, 0);
+          dom.insertBoundary(fragment, null);
+          return morphs;
+        },
+        statements: [["block", "if", [["get", "score.variableId", ["loc", [null, [54, 17], [54, 33]]]]], [], 0, null, ["loc", [null, [54, 11], [58, 18]]]]],
+        locals: ["score"],
+        templates: [child0]
+      };
+    })();
     return {
       meta: {
         "fragmentReason": {
           "name": "missing-wrapper",
-          "problems": ["multiple-nodes", "wrong-type"]
+          "problems": ["wrong-type", "multiple-nodes"]
         },
         "revision": "Ember@2.6.1",
         "loc": {
@@ -3685,7 +4174,7 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 6,
+            "line": 74,
             "column": 10
           }
         },
@@ -3697,14 +4186,152 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
       hasRendered: false,
       buildFragment: function buildFragment(dom) {
         var el0 = dom.createDocumentFragment();
-        var el1 = dom.createElement("div");
-        dom.setAttribute(el1, "id", "scores-container");
+        var el1 = dom.createComment("<div id=\"scores-container\" style=\"background-image: url('./assets/images/results-.png');\"></div>");
         dom.appendChild(el0, el1);
         var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createComment("");
         dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n\n");
+        var el1 = dom.createTextNode("\n\n\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createElement("div");
+        dom.setAttribute(el1, "id", "scores-container");
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("div");
+        dom.setAttribute(el2, "id", "main-content");
+        dom.setAttribute(el2, "class", "panel panel-default");
+        var el3 = dom.createTextNode("\n		");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("div");
+        dom.setAttribute(el3, "class", "panel-body");
+        var el4 = dom.createTextNode("\n			");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createElement("div");
+        dom.setAttribute(el4, "class", "row");
+        var el5 = dom.createTextNode("\n				");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createElement("div");
+        dom.setAttribute(el5, "class", "col-md-6");
+        var el6 = dom.createTextNode("\n					");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("div");
+        dom.setAttribute(el6, "id", "general-score-container");
+        var el7 = dom.createTextNode("\n");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createComment("");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode("					");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n				");
+        dom.appendChild(el5, el6);
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("\n				");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createElement("div");
+        dom.setAttribute(el5, "class", "col-md-6");
+        var el6 = dom.createTextNode("\n					");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("div");
+        dom.setAttribute(el6, "id", "objectives-container");
+        var el7 = dom.createTextNode("\n						Obiettivo");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createElement("br");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode("\n");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createComment("");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode("					");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n				");
+        dom.appendChild(el5, el6);
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("\n				");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createComment("\n				<div class=\"col-md-6\">\n					<div id=\"hints-container\">Suggerimento</div>\n				</div>\n				");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("\n			");
+        dom.appendChild(el4, el5);
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("\n			");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createElement("div");
+        dom.setAttribute(el4, "class", "row");
+        var el5 = dom.createTextNode("\n				");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createElement("div");
+        dom.setAttribute(el5, "class", "col-md-12");
+        var el6 = dom.createTextNode("\n					");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("div");
+        dom.setAttribute(el6, "id", "variables-score-container");
+        var el7 = dom.createTextNode("\n						");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createElement("div");
+        dom.setAttribute(el7, "class", "table-responsive");
+        var el8 = dom.createTextNode("\n							");
+        dom.appendChild(el7, el8);
+        var el8 = dom.createElement("table");
+        var el9 = dom.createTextNode("\n								");
+        dom.appendChild(el8, el9);
+        var el9 = dom.createElement("thead");
+        var el10 = dom.createTextNode("\n									");
+        dom.appendChild(el9, el10);
+        var el10 = dom.createElement("tr");
+        var el11 = dom.createTextNode("\n");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createComment("");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("									");
+        dom.appendChild(el10, el11);
+        dom.appendChild(el9, el10);
+        var el10 = dom.createTextNode("\n								");
+        dom.appendChild(el9, el10);
+        dom.appendChild(el8, el9);
+        var el9 = dom.createTextNode("\n								");
+        dom.appendChild(el8, el9);
+        var el9 = dom.createElement("tbody");
+        var el10 = dom.createTextNode("\n									");
+        dom.appendChild(el9, el10);
+        var el10 = dom.createElement("tr");
+        var el11 = dom.createTextNode("\n");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createComment("");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("									");
+        dom.appendChild(el10, el11);
+        dom.appendChild(el9, el10);
+        var el10 = dom.createTextNode("\n								");
+        dom.appendChild(el9, el10);
+        dom.appendChild(el8, el9);
+        var el9 = dom.createTextNode("\n							");
+        dom.appendChild(el8, el9);
+        dom.appendChild(el7, el8);
+        var el8 = dom.createTextNode("\n						");
+        dom.appendChild(el7, el8);
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode("\n					");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n				");
+        dom.appendChild(el5, el6);
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("\n			");
+        dom.appendChild(el4, el5);
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("\n		");
+        dom.appendChild(el3, el4);
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n	");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n");
+        dom.appendChild(el1, el2);
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n\n\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("div");
         dom.setAttribute(el1, "id", "customer-logo");
@@ -3719,17 +4346,22 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var element0 = dom.childAt(fragment, [0]);
-        var morphs = new Array(3);
-        morphs[0] = dom.createAttrMorph(element0, 'style');
-        morphs[1] = dom.createMorphAt(fragment, 2, 2, contextualElement);
-        morphs[2] = dom.createMorphAt(fragment, 6, 6, contextualElement);
+        var element2 = dom.childAt(fragment, [4, 1, 1]);
+        var element3 = dom.childAt(element2, [1]);
+        var element4 = dom.childAt(element2, [3, 1, 1, 1, 1]);
+        var morphs = new Array(6);
+        morphs[0] = dom.createMorphAt(fragment, 2, 2, contextualElement);
+        morphs[1] = dom.createMorphAt(dom.childAt(element3, [1, 1]), 1, 1);
+        morphs[2] = dom.createMorphAt(dom.childAt(element3, [3, 1]), 3, 3);
+        morphs[3] = dom.createMorphAt(dom.childAt(element4, [1, 1]), 1, 1);
+        morphs[4] = dom.createMorphAt(dom.childAt(element4, [3, 1]), 1, 1);
+        morphs[5] = dom.createMorphAt(fragment, 8, 8, contextualElement);
         dom.insertBoundary(fragment, null);
         return morphs;
       },
-      statements: [["attribute", "style", ["concat", ["background-image: url('./assets/images/results-", ["get", "model", ["loc", [null, [1, 83], [1, 88]]]], ".png');"]]], ["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [2, 0], [2, 179]]]], ["content", "outlet", ["loc", [null, [6, 0], [6, 10]]]]],
+      statements: [["block", "link-to", ["scenarios"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [2, 0], [2, 183]]]], ["block", "each", [["get", "model.playthrough.scores", ["loc", [null, [11, 14], [11, 38]]]]], [], 1, null, ["loc", [null, [11, 6], [16, 15]]]], ["block", "if", [["get", "model.playthrough.success", ["loc", [null, [22, 12], [22, 37]]]]], [], 2, 3, ["loc", [null, [22, 6], [26, 13]]]], ["block", "each", [["get", "model.playthrough.scores", ["loc", [null, [42, 18], [42, 42]]]]], [], 4, null, ["loc", [null, [42, 10], [48, 19]]]], ["block", "each", [["get", "model.playthrough.scores", ["loc", [null, [53, 18], [53, 42]]]]], [], 5, null, ["loc", [null, [53, 10], [59, 19]]]], ["content", "outlet", ["loc", [null, [74, 0], [74, 10]]]]],
       locals: [],
-      templates: [child0]
+      templates: [child0, child1, child2, child3, child4, child5]
     };
   })());
 });
@@ -3765,7 +4397,7 @@ catch(err) {
 /* jshint ignore:start */
 
 if (!runningTests) {
-  require("ttexp/app")["default"].create({"serverApiUrl":"http://demo.ttexp.net/api","LOG_ACTIVE_GENERATION":false,"LOG_VIEW_LOOKUPS":false,"name":"ttexp","version":"0.0.0+799f29f8"});
+  require("ttexp/app")["default"].create({"serverApiUrl":"http://ttexp-server.localhost/api","LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+17ade5d9"});
 }
 
 /* jshint ignore:end */
