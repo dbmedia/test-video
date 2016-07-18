@@ -6,8 +6,9 @@
 
 /* jshint ignore:end */
 
-define('ttexp/adapters/application', ['exports', 'ember-data', 'ember-simple-auth/mixins/data-adapter-mixin'], function (exports, _emberData, _emberSimpleAuthMixinsDataAdapterMixin) {
+define('ttexp/adapters/application', ['exports', 'ember-data', 'ttexp/config/environment', 'ember-simple-auth/mixins/data-adapter-mixin'], function (exports, _emberData, _ttexpConfigEnvironment, _emberSimpleAuthMixinsDataAdapterMixin) {
 	exports['default'] = _emberData['default'].JSONAPIAdapter.extend(_emberSimpleAuthMixinsDataAdapterMixin['default'], {
+		host: _ttexpConfigEnvironment['default'].APP.serverApiUrl,
 		authorizer: 'authorizer:oauth2'
 	});
 });
@@ -20,16 +21,19 @@ define('ttexp/app', ['exports', 'ember', 'ember/resolver', 'ember/load-initializ
 	App = _ember['default'].Application.extend({
 		modulePrefix: _ttexpConfigEnvironment['default'].modulePrefix,
 		podModulePrefix: _ttexpConfigEnvironment['default'].podModulePrefix,
-		Resolver: _emberResolver['default']
+		Resolver: _emberResolver['default'],
+
+		LOG_TRANSITIONS: true,
+		LOG_TRANSITIONS_INTERNAL: true
 	});
 
 	(0, _emberLoadInitializers['default'])(App, _ttexpConfigEnvironment['default'].modulePrefix);
 
 	exports['default'] = App;
 });
-define('ttexp/authenticators/oauth2', ['exports', 'ember-simple-auth/authenticators/oauth2-password-grant'], function (exports, _emberSimpleAuthAuthenticatorsOauth2PasswordGrant) {
+define('ttexp/authenticators/oauth2', ['exports', 'ember-simple-auth/authenticators/oauth2-password-grant', 'ttexp/config/environment'], function (exports, _emberSimpleAuthAuthenticatorsOauth2PasswordGrant, _ttexpConfigEnvironment) {
 	exports['default'] = _emberSimpleAuthAuthenticatorsOauth2PasswordGrant['default'].extend({
-		serverTokenEndpoint: 'http://ttexp-server.localhost/api/access_token',
+		serverTokenEndpoint: _ttexpConfigEnvironment['default'].APP.serverApiUrl + '/access_token',
 
 		makeRequest: function makeRequest(url, data) {
 			data.client_id = 'ttexp';
@@ -56,77 +60,274 @@ define('ttexp/components/cdv-nav-bar', ['exports', 'ember'], function (exports, 
     tagName: 'header'
   });
 });
+define('ttexp/controllers/action', ['exports', 'ember'], function (exports, _ember) {
+  exports['default'] = _ember['default'].Controller.extend({
+    session: _ember['default'].inject.service('session')
+  });
+});
 define('ttexp/controllers/array', ['exports', 'ember'], function (exports, _ember) {
   exports['default'] = _ember['default'].Controller;
 });
 define('ttexp/controllers/help', ['exports', 'ember'], function (exports, _ember) {
-	exports['default'] = _ember['default'].Controller.extend({});
+  exports['default'] = _ember['default'].Controller.extend({
+    session: _ember['default'].inject.service('session')
+  });
 });
 define('ttexp/controllers/index', ['exports', 'ember'], function (exports, _ember) {
-	exports['default'] = _ember['default'].Controller.extend({
-		session: _ember['default'].inject.service('session'),
-		firstName: 'Nome',
-		lastName: 'Cognome',
-		actions: {
-			closeApp: function closeApp() {
-				if (confirm("Vuoi davvero uscire dall'applicazione?")) {
-					navigator.app.exitApp();
-				}
-			},
-			invalidateSession: function invalidateSession() {
-				this.get('session').invalidate();
-			}
-		}
-	});
+  exports['default'] = _ember['default'].Controller.extend({
+    session: _ember['default'].inject.service('session'),
+    firstName: 'Nome',
+    lastName: 'Cognome',
+    actions: {
+      closeApp: function closeApp() {
+        if (confirm("Vuoi davvero uscire dall'applicazione?")) {
+          navigator.app.exitApp();
+        }
+      },
+      invalidateSession: function invalidateSession() {
+        this.get('session').invalidate();
+      }
+    }
+  });
 
-	/*
- alert('pippo');
- document.addEventListener("deviceready", onDeviceReady, true);
- 
- function exitFromApp() {
- 	navigator.app.exitApp();
- }
- */
+  /*
+  alert('pippo');
+  document.addEventListener("deviceready", onDeviceReady, true);
+  
+  function exitFromApp() {
+    navigator.app.exitApp();
+  }
+  */
 });
 define('ttexp/controllers/login', ['exports', 'ember'], function (exports, _ember) {
-	exports['default'] = _ember['default'].Controller.extend({
-		session: _ember['default'].inject.service('session'),
+  exports['default'] = _ember['default'].Controller.extend({
+    session: _ember['default'].inject.service('session'),
 
-		actions: {
-			authenticate: function authenticate() {
-				var _this = this;
+    actions: {
+      authenticate: function authenticate() {
+        var _this = this;
 
-				var _getProperties = this.getProperties('identification', 'password');
+        var _getProperties = this.getProperties('identification', 'password');
 
-				var identification = _getProperties.identification;
-				var password = _getProperties.password;
+        var identification = _getProperties.identification;
+        var password = _getProperties.password;
 
-				console.log(identification);
-				console.log(password);
-				this.get('session').authenticate('authenticator:oauth2', identification, password)['catch'](function (reason) {
-					_this.set('errorMessage', reason.error || reason);
-				});
-			}
-		}
-	});
+        console.log(identification);
+        console.log(password);
+        this.get('session').authenticate('authenticator:oauth2', identification, password)['catch'](function (reason) {
+          console.log(reason);
+          _this.set('errorMessage', reason.error_description || reason.error || reason);
+        });
+      }
+    }
+  });
 });
 define('ttexp/controllers/object', ['exports', 'ember'], function (exports, _ember) {
   exports['default'] = _ember['default'].Controller;
 });
 define('ttexp/controllers/page-not-found', ['exports', 'ember'], function (exports, _ember) {
-	exports['default'] = _ember['default'].Controller.extend({});
+  exports['default'] = _ember['default'].Controller.extend({});
 });
 define('ttexp/controllers/play', ['exports', 'ember'], function (exports, _ember) {
-	exports['default'] = _ember['default'].Controller.extend({});
+  exports['default'] = _ember['default'].Controller.extend({
+    session: _ember['default'].inject.service('session')
+  });
+});
+define('ttexp/controllers/scenarios', ['exports', 'ember'], function (exports, _ember) {
+  exports['default'] = _ember['default'].Controller.extend({
+    session: _ember['default'].inject.service('session'),
+    firstName: 'Nome',
+    lastName: 'Cognome',
+    actions: {
+      closeApp: function closeApp() {
+        if (confirm("Vuoi davvero uscire dall'applicazione?")) {
+          navigator.app.exitApp();
+        }
+      },
+      invalidateSession: function invalidateSession() {
+        this.get('session').invalidate();
+      }
+    }
+  });
 });
 define('ttexp/controllers/scores', ['exports', 'ember'], function (exports, _ember) {
-	exports['default'] = _ember['default'].Controller.extend({});
+  exports['default'] = _ember['default'].Controller.extend({
+    session: _ember['default'].inject.service('session')
+  });
+});
+define('ttexp/helpers/add', ['exports', 'ember-math-helpers/helpers/add'], function (exports, _emberMathHelpersHelpersAdd) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersAdd['default'];
+    }
+  });
+  Object.defineProperty(exports, 'add', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersAdd.add;
+    }
+  });
+});
+define('ttexp/helpers/ceil', ['exports', 'ember-math-helpers/helpers/ceil'], function (exports, _emberMathHelpersHelpersCeil) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersCeil['default'];
+    }
+  });
+  Object.defineProperty(exports, 'ceil', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersCeil.ceil;
+    }
+  });
+});
+define('ttexp/helpers/div', ['exports', 'ember-math-helpers/helpers/div'], function (exports, _emberMathHelpersHelpersDiv) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersDiv['default'];
+    }
+  });
+  Object.defineProperty(exports, 'div', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersDiv.div;
+    }
+  });
+});
+define('ttexp/helpers/floor', ['exports', 'ember-math-helpers/helpers/floor'], function (exports, _emberMathHelpersHelpersFloor) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersFloor['default'];
+    }
+  });
+  Object.defineProperty(exports, 'floor', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersFloor.floor;
+    }
+  });
+});
+define('ttexp/helpers/max', ['exports', 'ember-math-helpers/helpers/max'], function (exports, _emberMathHelpersHelpersMax) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersMax['default'];
+    }
+  });
+  Object.defineProperty(exports, 'max', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersMax.max;
+    }
+  });
+});
+define('ttexp/helpers/min', ['exports', 'ember-math-helpers/helpers/min'], function (exports, _emberMathHelpersHelpersMin) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersMin['default'];
+    }
+  });
+  Object.defineProperty(exports, 'min', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersMin.min;
+    }
+  });
+});
+define('ttexp/helpers/mod', ['exports', 'ember-math-helpers/helpers/mod'], function (exports, _emberMathHelpersHelpersMod) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersMod['default'];
+    }
+  });
+  Object.defineProperty(exports, 'mod', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersMod.mod;
+    }
+  });
+});
+define('ttexp/helpers/mult', ['exports', 'ember-math-helpers/helpers/mult'], function (exports, _emberMathHelpersHelpersMult) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersMult['default'];
+    }
+  });
+  Object.defineProperty(exports, 'mult', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersMult.mult;
+    }
+  });
 });
 define('ttexp/helpers/pluralize', ['exports', 'ember-inflector/lib/helpers/pluralize'], function (exports, _emberInflectorLibHelpersPluralize) {
   exports['default'] = _emberInflectorLibHelpersPluralize['default'];
 });
+define('ttexp/helpers/pow', ['exports', 'ember-math-helpers/helpers/pow'], function (exports, _emberMathHelpersHelpersPow) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersPow['default'];
+    }
+  });
+  Object.defineProperty(exports, 'pow', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersPow.pow;
+    }
+  });
+});
+define('ttexp/helpers/round', ['exports', 'ember-math-helpers/helpers/round'], function (exports, _emberMathHelpersHelpersRound) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersRound['default'];
+    }
+  });
+  Object.defineProperty(exports, 'round', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersRound.round;
+    }
+  });
+});
 define('ttexp/helpers/singularize', ['exports', 'ember-inflector/lib/helpers/singularize'], function (exports, _emberInflectorLibHelpersSingularize) {
   exports['default'] = _emberInflectorLibHelpersSingularize['default'];
+});
+define('ttexp/helpers/sqrt', ['exports', 'ember-math-helpers/helpers/sqrt'], function (exports, _emberMathHelpersHelpersSqrt) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersSqrt['default'];
+    }
+  });
+  Object.defineProperty(exports, 'sqrt', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersSqrt.sqrt;
+    }
+  });
+});
+define('ttexp/helpers/sub', ['exports', 'ember-math-helpers/helpers/sub'], function (exports, _emberMathHelpersHelpersSub) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersSub['default'];
+    }
+  });
+  Object.defineProperty(exports, 'sub', {
+    enumerable: true,
+    get: function get() {
+      return _emberMathHelpersHelpersSub.sub;
+    }
+  });
 });
 define('ttexp/initializers/app-version', ['exports', 'ember-cli-app-version/initializer-factory', 'ttexp/config/environment'], function (exports, _emberCliAppVersionInitializerFactory, _ttexpConfigEnvironment) {
   exports['default'] = {
@@ -372,6 +573,97 @@ define('ttexp/instance-initializers/ember-simple-auth', ['exports', 'ember-simpl
     }
   };
 });
+define('ttexp/models/action', ['exports', 'ember-data'], function (exports, _emberData) {
+  exports['default'] = _emberData['default'].Model.extend({
+    playthrough: _emberData['default'].belongsTo('playthrough'),
+    tank: _emberData['default'].belongsTo('tank'),
+    item: _emberData['default'].belongsTo('item')
+  });
+});
+define('ttexp/models/item', ['exports', 'ember-data'], function (exports, _emberData) {
+  exports['default'] = _emberData['default'].Model.extend({
+    action: _emberData['default'].hasMany('action'),
+    text: _emberData['default'].attr('string')
+  });
+});
+define('ttexp/models/play-state', ['exports', 'ember-data'], function (exports, _emberData) {
+  exports['default'] = _emberData['default'].Model.extend({
+    scenario: _emberData['default'].belongsTo('scenario'),
+    playthrough: _emberData['default'].belongsTo('playthrough'),
+    video: _emberData['default'].belongsTo('video'),
+
+    stepsCount: _emberData['default'].attr('number'),
+
+    gameCompleted: Ember.computed('scenario', 'playthrough', 'video', function () {
+      var playthrough = this.get('playthrough');
+      var video = this.get('video');
+      if (video.get('closing') || playthrough.get('completedAt')) {
+        return true;
+      } else {
+        return false;
+      }
+    })
+  });
+});
+define('ttexp/models/playthrough', ['exports', 'ember-data'], function (exports, _emberData) {
+  exports['default'] = _emberData['default'].Model.extend({
+    user: _emberData['default'].belongsTo('user'),
+    scenario: _emberData['default'].belongsTo('scenario'),
+    action: _emberData['default'].hasMany('action'),
+    playState: _emberData['default'].belongsTo('playState'),
+    scores: _emberData['default'].hasMany('score'),
+
+    startedAt: _emberData['default'].attr('date'),
+    completedAt: _emberData['default'].attr('date')
+  });
+});
+define('ttexp/models/scenario', ['exports', 'ember-data'], function (exports, _emberData) {
+  exports['default'] = _emberData['default'].Model.extend({
+    code: _emberData['default'].attr('string'),
+    name: _emberData['default'].attr('string'),
+    attempts: _emberData['default'].attr('number'),
+
+    playthroughs: _emberData['default'].hasMany('playthrough'),
+    playState: _emberData['default'].belongsTo('playState')
+  });
+});
+define('ttexp/models/score', ['exports', 'ember-data'], function (exports, _emberData) {
+  exports['default'] = _emberData['default'].Model.extend({
+    playthrough: _emberData['default'].belongsTo('playthrough'),
+
+    value: _emberData['default'].attr('number'),
+    minValue: _emberData['default'].attr('number'),
+    maxValue: _emberData['default'].attr('number'),
+    variableCode: _emberData['default'].attr('string'),
+    variableName: _emberData['default'].attr('string')
+  });
+});
+define('ttexp/models/tank', ['exports', 'ember-data'], function (exports, _emberData) {
+  exports['default'] = _emberData['default'].Model.extend({
+    action: _emberData['default'].hasMany('action')
+  });
+});
+define('ttexp/models/user', ['exports', 'ember-data'], function (exports, _emberData) {
+  exports['default'] = _emberData['default'].Model.extend({
+    name: _emberData['default'].attr('string'),
+    playthroughs: _emberData['default'].hasMany('playthrough')
+  });
+});
+define('ttexp/models/video', ['exports', 'ember-data'], function (exports, _emberData) {
+  exports['default'] = _emberData['default'].Model.extend({
+    uniqueCode: _emberData['default'].attr('string'),
+    scenarioCode: _emberData['default'].attr('string'),
+    transcript: _emberData['default'].attr('string'),
+    closing: _emberData['default'].attr('boolean'),
+
+    items: _emberData['default'].hasMany('item'),
+    playState: _emberData['default'].belongsTo('playState'),
+
+    fullPath: Ember.computed('uniqueCode', 'scenarioCode', function () {
+      return 'assets/media/video/' + this.get('scenarioCode').toLowerCase() + '/' + this.get('uniqueCode') + '.mp4';
+    })
+  });
+});
 define('ttexp/router', ['exports', 'ember', 'ttexp/config/environment'], function (exports, _ember, _ttexpConfigEnvironment) {
 
 	var Router = _ember['default'].Router.extend({
@@ -380,9 +672,11 @@ define('ttexp/router', ['exports', 'ember', 'ttexp/config/environment'], functio
 
 	Router.map(function () {
 		this.route('index', { path: '/' });
+		this.route('scenarios', { path: '/scenarios' });
 		this.route('login', { path: '/login' });
 		this.route('help');
-		this.route('play', { path: '/play/:video_id' });
+		this.route('play', { path: '/play/:scenario_id' });
+		this.route('action', { path: '/action/:scenario_id/:item_id' });
 		this.route('scores', { path: '/scores/:session_id' });
 		this.route('admin/index', { path: '/admin' });
 		this.route('admin/scenario', { path: '/admin/scenario' });
@@ -397,6 +691,7 @@ define('ttexp/router', ['exports', 'ember', 'ttexp/config/environment'], functio
 			if (cssClass !== "application") {
 				_ember['default'].$('body').addClass(cssClass);
 			}
+			_ember['default'].$('#main-menu a[data-page-route="' + this.routeName + '"]').addClass('active');
 		},
 		deactivate: function deactivate() {
 			_ember['default'].$('body').removeClass(this.toCssClass());
@@ -407,344 +702,124 @@ define('ttexp/router', ['exports', 'ember', 'ttexp/config/environment'], functio
 		}
 	});
 });
+define('ttexp/routes/action', ['exports', 'ember', 'ttexp/config/environment', 'ember-simple-auth/mixins/authenticated-route-mixin'], function (exports, _ember, _ttexpConfigEnvironment, _emberSimpleAuthMixinsAuthenticatedRouteMixin) {
+  //http://emberigniter.com/real-world-authentication-with-ember-simple-auth/
+  exports['default'] = _ember['default'].Route.extend(_emberSimpleAuthMixinsAuthenticatedRouteMixin['default'], {
+
+    //  beforeModel() {
+    //    console.log("beforeModel");
+    //  },
+    afterModel: function afterModel(model, transition) {
+      console.log(model);
+      console.log("afterModel");
+      if (model.get('length') === 1) {
+        //      this.route('index');
+        //      this.route('play', params.scenario_id);
+        //      this.transitionTo('play', model.get('firstObject'));
+      }
+    },
+    model: function model(params) {
+      var model = {};
+      //console.log("ACTION");
+      //console.log(params.scenario_id);
+      //console.log(params.scenario_id);
+      //    model.scenario = this.store.findRecord('scenario',params.scenario_id, { reload: true });
+
+      //      this.route('index');
+      return model;
+    }
+  });
+});
 define("ttexp/routes/admin/index", ["exports", "ember", "ember-simple-auth/mixins/authenticated-route-mixin"], function (exports, _ember, _emberSimpleAuthMixinsAuthenticatedRouteMixin) {
   exports["default"] = _ember["default"].Route.extend(_emberSimpleAuthMixinsAuthenticatedRouteMixin["default"]);
-});
-define("ttexp/routes/admin/scenario", ["exports", "ember"], function (exports, _ember) {
-	exports["default"] = _ember["default"].Route.extend({
-		model: function model(params) {
-			return params.session_id;
-		}
-	});
 });
 define('ttexp/routes/application', ['exports', 'ember', 'ember-simple-auth/mixins/application-route-mixin'], function (exports, _ember, _emberSimpleAuthMixinsApplicationRouteMixin) {
   exports['default'] = _ember['default'].Route.extend(_emberSimpleAuthMixinsApplicationRouteMixin['default']);
 });
 define("ttexp/routes/help", ["exports", "ember"], function (exports, _ember) {
-	exports["default"] = _ember["default"].Route.extend({});
+  exports["default"] = _ember["default"].Route.extend({});
 });
-define("ttexp/routes/index", ["exports", "ember"], function (exports, _ember) {
-	exports["default"] = _ember["default"].Route.extend({});
+define('ttexp/routes/index', ['exports', 'ember', 'ttexp/config/environment', 'ember-simple-auth/mixins/authenticated-route-mixin'], function (exports, _ember, _ttexpConfigEnvironment, _emberSimpleAuthMixinsAuthenticatedRouteMixin) {
+    exports['default'] = _ember['default'].Route.extend(_emberSimpleAuthMixinsAuthenticatedRouteMixin['default'], {
+        model: function model(params) {
+            return _ember['default'].RSVP.hash({});
+        }
+    });
 });
 define("ttexp/routes/page-not-found", ["exports", "ember"], function (exports, _ember) {
-	exports["default"] = _ember["default"].Route.extend({});
+  exports["default"] = _ember["default"].Route.extend({});
 });
-define("ttexp/routes/play", ["exports", "ember", "ember-simple-auth/mixins/authenticated-route-mixin"], function (exports, _ember, _emberSimpleAuthMixinsAuthenticatedRouteMixin) {
+define('ttexp/routes/play', ['exports', 'ember', 'ttexp/config/environment', 'ember-simple-auth/mixins/authenticated-route-mixin'], function (exports, _ember, _ttexpConfigEnvironment, _emberSimpleAuthMixinsAuthenticatedRouteMixin) {
+  //http://emberigniter.com/real-world-authentication-with-ember-simple-auth/
+  exports['default'] = _ember['default'].Route.extend(_emberSimpleAuthMixinsAuthenticatedRouteMixin['default'], {
+    model: function model(params) {
+      return _ember['default'].RSVP.hash({
+        scenario: this.store.findRecord('scenario', params.scenario_id, { reload: true })
+      });
+    },
 
-	//export default Ember.Route.extend(AuthenticatedRouteMixin);
-	exports["default"] = _ember["default"].Route.extend({
-		actions: {
-			closeApp: function closeApp() {
-				alert("closing app");
-				navigator.app.exitApp();
-			}
-		},
-		model: function model(params) {
+    afterModel: function afterModel(model, transition) {
+      var self = this;
+      var scenario = model.scenario;
+      var playState = scenario.get('playState');
+      if (playState) {
+        var playthrough = playState.get('playthrough');
+        var video = playState.get('video');
+      }
+    },
 
-			var steps = {};
+    actions: {
+      clickItem: function clickItem(item) {
+        var self = this;
+        var model = this.currentModel;
+        var scenario = model.scenario;
+        var playState = scenario.get('playState');
+        if (playState) {
+          playState.get('playthrough').then(function (playthrough) {
+            if (playthrough) {
+              var action = self.store.createRecord('action', {
+                playthrough: playthrough,
+                item: item
+              });
+              action.save().then(function () {
+                if (item) {
+                  self.refresh();
+                } else {
+                  self.transitionTo('scenarios');
+                }
+              });
+            }
+          });
+        }
+      },
+      exit: function exit(item) {
+        if (confirm("Vuoi uscire dalla sessione di gioco?")) {
+          this.send('clickItem', false);
+        }
+      },
+      error: function error(reason) {
+        alert(reason);
 
-			steps['start'] = {
-				'dialog': '*risponde al telefono*',
-				'items': [{
-					'text': 'Pronto, Giovanni Borini?',
-					'link': '1'
-				}, {
-					'text': 'Pronto? Buongiorno.',
-					'link': false
-				}, {
-					'text': 'Giovanni Borini?',
-					'link': '2'
-				}]
-			};
+        // Can transition to another route here, e.g. this.transitionTo('index');
 
-			steps['1'] = {
-				'dialog': 'Sì… Chi parla scusi?',
-				'items': [{
-					'text': 'Buongiorno Giovanni, sono Francesco Mariani, di Generali: suo cugino Filippo la ha avvisata della mia chiamata?',
-					'link': '1-A'
-				}, {
-					'text': 'Buongiorno, sono Francesco Mariani, di Generali. Possiamo parlare o la disturbo?',
-					'link': false
-				}, {
-					'text': 'La chiamo da Generali. Mi dica, la disturbo, adesso?',
-					'link': false
-				}]
-			};
-			steps['1-A'] = {
-				'dialog': 'Ehm… Penso di sì… Di preciso di cosa aveva bisogno?',
-				'items': [{
-					'text': 'Vorrei proporle un incontro per parlare di previdenza, come ho fatto con Filippo.',
-					'link': '1-B'
-				}, {
-					'text': 'La chiamo per fissare un incontro e parlare come abbiamo fatto con suo cugino. Lei ha un negozio di ottica, vero? Ottica Borini?',
-					'link': false
-				}, {
-					'text': 'Le rubo qualche minuto. La disturbo, adesso?',
-					'link': false
-				}]
-			};
-			steps['1-B'] = {
-				'dialog': 'Mmm… Quindi per quella cosa della pensione...',
-				'items': [{
-					'text': 'Abbiamo parlato con lui anche di questo, certo. Poi mi diceva che ha un negozio: ottica Borini, giusto?',
-					'link': '1-C'
-				}, {
-					'text': 'Si può dire di sì… Va bene se passo da lei questa sera, alle 18,30?',
-					'link': false
-				}, {
-					'text': 'Sì: ora vorrei parlarne anche con lei. Quando possiamo vederci?',
-					'link': false
-				}]
-			};
-			steps['1-C'] = {
-				'dialog': 'Sì… ',
-				'items': [{
-					'text': 'È un negozio storico della città, mi sembra. Siete aperti da molti anni, giusto?',
-					'link': '1-D'
-				}, {
-					'text': 'Beh, il vostro negozio deve avere un gran giro di affari, visto che siete aperti da tanto tempo.',
-					'link': false
-				}, {
-					'text': 'E gli affari andranno bene, giusto?',
-					'link': false
-				}]
-			};
-			steps['1-D'] = {
-				'dialog': 'Mah, sì… Diciamo che lo gestiamo da un po\' di anni.',
-				'items': [{
-					'text': 'Complimenti! Giovanni, Filippo ci teneva che parlassi anche con lei e la sua famiglia del programma che ho discusso con lui: io stasera posso passare per le sei e mezza oppure per le otto e mezza.',
-					'link': '1-E'
-				}, {
-					'text': 'Ottimo. Allora io passerei da lei questa sera. Che ne dice?',
-					'link': false
-				}, {
-					'text': 'Ottimo. Mi dica, quando pensa che potremmo vederci?',
-					'link': false
-				}]
-			};
-			steps['1-E'] = {
-				'dialog': 'No, stasera no… Portiamo i bambini dalla nonna per qualche giorno.',
-				'items': [{
-					'text': 'Allora domani: io sono già a Monza. Facciamo alle 20,30.',
-					'link': '1-F'
-				}, {
-					'text': 'E quando preferirebbe?',
-					'link': false
-				}, {
-					'text': 'Capisco, certo. Quanti anni hanno i bambini?',
-					'link': false
-				}]
-			};
-			steps['1-F'] = {
-				'dialog': 'Sì... Ma guardi che noi siamo a posto… Non faccia un viaggio per niente.',
-				'items': [{
-					'text': 'Io comunque domani sono in zona, poi Filippo mi ha chiesto espressamente di passare. Lei abita in via Falcone, al 10?',
-					'link': '1-G'
-				}, {
-					'text': 'Ma ci mancherebbe. Se vuole possiamo fare sabato mattina: per me non ci sono problemi.',
-					'link': false
-				}, {
-					'text': 'Ma non le interessa parlare del suo futuro?',
-					'link': false
-				}]
-			};
-			steps['1-G'] = {
-				'dialog': 'Beh, se è in zona… L\'indirizzo è quello.',
-				'items': [{
-					'text': 'Va benissimo: allora a domani, alle 20,30.',
-					'link': '1-H'
-				}, {
-					'text': 'Certo. Allora ci vediamo domani.',
-					'link': false
-				}, {
-					'text': 'Allora ci vediamo domani. Ci sarà anche la moglie, immagino.',
-					'link': false
-				}]
-			};
-			steps['1-H'] = {
-				'dialog': 'Senta, però… Mi lasci un numero per confermare… Sa, non si sa mai in negozio…',
-				'items': [{
-					'text': 'Fissiamo adesso. Se preferisce facciamo un quarto d\'ora dopo, così vi organizzate con calma.',
-					'link': '1-I'
-				}, {
-					'text': 'Può chiamare in agenzia, d\'accordo?',
-					'link': false
-				}, {
-					'text': 'Ma non ce n\'è bisogno. La chiamo io nel pomeriggio di domani.',
-					'link': false
-				}]
-			};
-			steps['1-I'] = {
-				'dialog': 'Ah… Va bene… nove meno un quarto?',
-				'items': [{
-					'text': 'Perfetto: allora a domani, alle 20,45 Giovanni. Buona serata (CHIUDI)',
-					'link': 'end-1'
-				}, {
-					'text': 'Esatto. A domani. (CHIUDI)',
-					'link': false
-				}, {
-					'text': 'Se per lei va bene… Sì.',
-					'link': false
-				}]
-			};
-			steps['end-1'] = {
-				'dialog': 'A domani… *aggancia*',
-				'items': [],
-				'scores': 'a1'
-			};
-
-			steps['2'] = {
-				'dialog': 'Si, chi parla scusi?',
-				'items': [{
-					'text': 'Buongiorno Giovanni, sono Francesco Mariani, di Generali: suo cugino Filippo la ha avvisata della mia chiamata?',
-					'link': '2-A'
-				}, {
-					'text': 'Buongiorno, sono Francesco Mariani, di Generali. Possiamo parlare o la disturbo?',
-					'link': false
-				}, {
-					'text': 'La chiamo da Generali. Mi dica, la disturbo, adesso?',
-					'link': false
-				}]
-			};
-			steps['2-A'] = {
-				'dialog': 'Ehm… Penso di sì… Di preciso di cosa aveva bisogno?',
-				'items': [{
-					'text': 'Le rubo qualche minuto. La disturbo, adesso?',
-					'link': '2-B'
-				}, {
-					'text': 'La chiamo per fissare un incontro e parlare come abbiamo fatto con suo cugino. Lei ha un negozio di ottica, vero? Ottica Borini?',
-					'link': false
-				}, {
-					'text': 'Vorrei proporle un incontro per parlare di previdenza, come ho fatto con Filippo.',
-					'link': false
-				}]
-			};
-			steps['2-B'] = {
-				'dialog': 'Guardi, sì… ma tanto è sempre così. Mi dica. Cosa voleva?',
-				'items': [{
-					'text': 'Dovrei parlarle della sua polizza pensionistica.',
-					'link': '2-C'
-				}, {
-					'text': 'Solo proporle un incontro per parlare della sua polizza. Cosa ne dice?',
-					'link': false
-				}, {
-					'text': 'Proporle un incontro, come quello fatto con Filippo.',
-					'link': false
-				}]
-			};
-			steps['2-C'] = {
-				'dialog': 'Sarà un discorso breve perché io non ho una polizza…',
-				'items': [{
-					'text': 'Infatti: come Generali possiamo offrirle però una serie di soluzioni molto intriganti. Io penso che potremmo parlarne, no?',
-					'link': '2-D'
-				}, {
-					'text': 'Lo so, e per questo la chiamo: Filippo ci tiene che anche lei abbia la possibilità di capire come funzionano queste polizze.',
-					'link': false
-				}, {
-					'text': 'Me lo ha detto Filippo. Ed è per questo che ci teneva la chiamassi. Vogliamo vederci stasera per parlarne?',
-					'link': false
-				}]
-			};
-			steps['2-D'] = {
-				'dialog': 'No. Mi scusi, non capisco cosa vuole…',
-				'items': [{
-					'text': 'Le sto proponendo un investimento vantaggioso per lei e la sua famiglia.',
-					'link': '2-E'
-				}, {
-					'text': 'Ha ragione: vediamoci per parlarne con calma. Stasera preferisce che passi alle 18,30 o alle 19,30?',
-					'link': false
-				}, {
-					'text': 'Solo vederla, Giovanni.',
-					'link': false
-				}]
-			};
-			steps['2-E'] = {
-				'dialog': 'Mmmm… Ma di che cifre stiamo parlando?',
-				'items': [{
-					'text': 'L\'ammontare del premio dipende da quanto vuole guadagnare, ovviamente... Ma 5mila, 6mila come minimo.',
-					'link': '2-F'
-				}, {
-					'text': 'Preferisco palarne a voce: quando posso venire da lei?',
-					'link': false
-				}, {
-					'text': 'La cifra dipende soprattutto dalle sue esigenze: stasera potremmo parlarne con calma. Passo alle 19,30 o più tardi, verso le 20?',
-					'link': false
-				}]
-			};
-			steps['2-F'] = {
-				'dialog': 'Mah, no. Sono numeri troppo grossi, adesso… Mi scusi, ma io ho già gli investimenti che mi servono… ',
-				'items': [{
-					'text': 'Capisco. Lei ha un negozio di ottica… Ottica Borini, giusto?',
-					'link': '2-G'
-				}, {
-					'text': 'E di cosa si tratta?',
-					'link': false
-				}, {
-					'text': 'Però tenga presente che il nostro prodotto è unico, diverso da tuti gli altri.',
-					'link': false
-				}]
-			};
-			steps['2-G'] = {
-				'dialog': 'Sì, ma se pensa che avere un negozio significhi aver soldi a palate, devo dirle che non è così…',
-				'items': [{
-					'text': 'Lo so, lo so. Ma proprio per questo dovremmo parlare di come gestire i suoi fondi per il futuro, non crede?',
-					'link': '2-H'
-				}, {
-					'text': 'Il vostro è uno dei negozi storici della città, giusto?',
-					'link': false
-				}, {
-					'text': 'Senta, io sono già in città, domani: possiamo vederci alle 19,30.',
-					'link': false
-				}]
-			};
-			steps['2-H'] = {
-				'dialog': 'Guardi, davvero, non stia a perdere tempo. Abbiamo altre cose in ballo che sono più pressanti.',
-				'items': [{
-					'text': 'Certo… Ma mi lasci provare a convincerla. Se vuole io posso venire da lei anche la mattina, nel fine settimana.',
-					'link': '2-I'
-				}, {
-					'text': 'Posso chiederle di cosa si tratta?',
-					'link': false
-				}, {
-					'text': 'Mi sta dicendo che non vuole parlare del suo futuro?',
-					'link': false
-				}]
-			};
-			steps['2-I'] = {
-				'dialog': 'Ma no, a questo punto facciamo la sera… Verso le 19,30, appena torno dall\'ufficio.',
-				'items': [{
-					'text': 'Ottimo: che giorno potrebbe?',
-					'link': 'end-2'
-				}, {
-					'text': 'Però così forse la disturbo. Posso venire più tardi, che ne dice?',
-					'link': false
-				}, {
-					'text': 'Allora fisso per stasera?',
-					'link': false
-				}]
-			};
-			steps['end-2'] = {
-				'dialog': 'Senta, ora non so dirle e devo proprio andare. Grazie comunque... *aggancia*',
-				'items': [],
-				'scores': 'b1'
-			};
-
-			if (typeof steps[params.video_id] !== undefined) {
-				return steps[params.video_id];
-			} else {
-				return false;
-			}
-
-			//return this.store.findRecord('video', params.video_id);
-		}
-	});
+        return true;
+      }
+    }
+  });
+});
+define('ttexp/routes/scenarios', ['exports', 'ember', 'ttexp/config/environment', 'ember-simple-auth/mixins/authenticated-route-mixin'], function (exports, _ember, _ttexpConfigEnvironment, _emberSimpleAuthMixinsAuthenticatedRouteMixin) {
+  exports['default'] = _ember['default'].Route.extend(_emberSimpleAuthMixinsAuthenticatedRouteMixin['default'], {
+    model: function model(params) {
+      return this.store.findAll('scenario');
+    }
+  });
 });
 define("ttexp/routes/scores", ["exports", "ember"], function (exports, _ember) {
-	exports["default"] = _ember["default"].Route.extend({
-		model: function model(params) {
-			return params.session_id;
-		}
-	});
+  exports["default"] = _ember["default"].Route.extend({
+    model: function model(params) {
+      return params.session_id;
+    }
+  });
 });
 define('ttexp/services/ajax', ['exports', 'ember-ajax/services/ajax'], function (exports, _emberAjaxServicesAjax) {
   Object.defineProperty(exports, 'default', {
@@ -754,11 +829,63 @@ define('ttexp/services/ajax', ['exports', 'ember-ajax/services/ajax'], function 
     }
   });
 });
-define('ttexp/services/session', ['exports', 'ember-simple-auth/services/session'], function (exports, _emberSimpleAuthServicesSession) {
-  exports['default'] = _emberSimpleAuthServicesSession['default'];
+define('ttexp/services/session', ['exports', 'ember', 'ember-data', 'ember-simple-auth/services/session'], function (exports, _ember, _emberData, _emberSimpleAuthServicesSession) {
+  exports['default'] = _emberSimpleAuthServicesSession['default'].extend({
+
+    store: _ember['default'].inject.service(),
+
+    currentUser: _ember['default'].computed('isAuthenticated', function () {
+      if (this.get('isAuthenticated')) {
+        var promise = this.get('store').queryRecord('user', {});
+        return _emberData['default'].PromiseObject.create({ promise: promise });
+      }
+    })
+
+  });
 });
 define('ttexp/session-stores/application', ['exports', 'ember-simple-auth/session-stores/adaptive'], function (exports, _emberSimpleAuthSessionStoresAdaptive) {
   exports['default'] = _emberSimpleAuthSessionStoresAdaptive['default'].extend();
+});
+define("ttexp/templates/action", ["exports"], function (exports) {
+  exports["default"] = Ember.HTMLBars.template((function () {
+    return {
+      meta: {
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.6.1",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 13
+          }
+        },
+        "moduleName": "ttexp/templates/action.hbs"
+      },
+      isEmpty: false,
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createTextNode("PAGINA ACTION");
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes() {
+        return [];
+      },
+      statements: [],
+      locals: [],
+      templates: []
+    };
+  })());
 });
 define("ttexp/templates/admin/index", ["exports"], function (exports) {
   exports["default"] = Ember.HTMLBars.template((function () {
@@ -768,7 +895,7 @@ define("ttexp/templates/admin/index", ["exports"], function (exports) {
           "fragmentReason": {
             "name": "triple-curlies"
           },
-          "revision": "Ember@2.4.1",
+          "revision": "Ember@2.6.1",
           "loc": {
             "source": null,
             "start": {
@@ -805,15 +932,15 @@ define("ttexp/templates/admin/index", ["exports"], function (exports) {
       return {
         meta: {
           "fragmentReason": false,
-          "revision": "Ember@2.4.1",
+          "revision": "Ember@2.6.1",
           "loc": {
             "source": null,
             "start": {
-              "line": 6,
+              "line": 7,
               "column": 0
             },
             "end": {
-              "line": 6,
+              "line": 7,
               "column": 60
             }
           },
@@ -843,7 +970,7 @@ define("ttexp/templates/admin/index", ["exports"], function (exports) {
           "name": "missing-wrapper",
           "problems": ["wrong-type", "multiple-nodes"]
         },
-        "revision": "Ember@2.4.1",
+        "revision": "Ember@2.6.1",
         "loc": {
           "source": null,
           "start": {
@@ -851,7 +978,7 @@ define("ttexp/templates/admin/index", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 10,
+            "line": 11,
             "column": 10
           }
         },
@@ -866,6 +993,10 @@ define("ttexp/templates/admin/index", ["exports"], function (exports) {
         var el1 = dom.createComment("");
         dom.appendChild(el0, el1);
         var el1 = dom.createTextNode("\n\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("div");
         dom.setAttribute(el1, "style", "text-align:center;");
@@ -898,15 +1029,16 @@ define("ttexp/templates/admin/index", ["exports"], function (exports) {
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var morphs = new Array(3);
+        var morphs = new Array(4);
         morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
-        morphs[1] = dom.createMorphAt(dom.childAt(fragment, [4]), 1, 1);
-        morphs[2] = dom.createMorphAt(fragment, 8, 8, contextualElement);
+        morphs[1] = dom.createMorphAt(fragment, 2, 2, contextualElement);
+        morphs[2] = dom.createMorphAt(dom.childAt(fragment, [6]), 1, 1);
+        morphs[3] = dom.createMorphAt(fragment, 10, 10, contextualElement);
         dom.insertBoundary(fragment, 0);
         dom.insertBoundary(fragment, null);
         return morphs;
       },
-      statements: [["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [1, 0], [1, 179]]]], ["block", "link-to", ["admin/scenario"], ["class", "list-group-item"], 1, null, ["loc", [null, [6, 0], [6, 72]]]], ["content", "outlet", ["loc", [null, [10, 0], [10, 10]]]]],
+      statements: [["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [1, 0], [1, 179]]]], ["inline", "partial", ["layout/menu"], [], ["loc", [null, [3, 0], [3, 25]]]], ["block", "link-to", ["admin/scenario"], ["class", "list-group-item"], 1, null, ["loc", [null, [7, 0], [7, 72]]]], ["content", "outlet", ["loc", [null, [11, 0], [11, 10]]]]],
       locals: [],
       templates: [child0, child1]
     };
@@ -918,7 +1050,7 @@ define("ttexp/templates/admin/scenario", ["exports"], function (exports) {
       return {
         meta: {
           "fragmentReason": false,
-          "revision": "Ember@2.4.1",
+          "revision": "Ember@2.6.1",
           "loc": {
             "source": null,
             "start": {
@@ -955,7 +1087,7 @@ define("ttexp/templates/admin/scenario", ["exports"], function (exports) {
       return {
         meta: {
           "fragmentReason": false,
-          "revision": "Ember@2.4.1",
+          "revision": "Ember@2.6.1",
           "loc": {
             "source": null,
             "start": {
@@ -964,7 +1096,7 @@ define("ttexp/templates/admin/scenario", ["exports"], function (exports) {
             },
             "end": {
               "line": 22,
-              "column": 140
+              "column": 138
             }
           },
           "moduleName": "ttexp/templates/admin/scenario.hbs"
@@ -992,7 +1124,7 @@ define("ttexp/templates/admin/scenario", ["exports"], function (exports) {
       return {
         meta: {
           "fragmentReason": false,
-          "revision": "Ember@2.4.1",
+          "revision": "Ember@2.6.1",
           "loc": {
             "source": null,
             "start": {
@@ -1001,7 +1133,7 @@ define("ttexp/templates/admin/scenario", ["exports"], function (exports) {
             },
             "end": {
               "line": 23,
-              "column": 86
+              "column": 84
             }
           },
           "moduleName": "ttexp/templates/admin/scenario.hbs"
@@ -1030,7 +1162,7 @@ define("ttexp/templates/admin/scenario", ["exports"], function (exports) {
           "name": "missing-wrapper",
           "problems": ["multiple-nodes", "wrong-type"]
         },
-        "revision": "Ember@2.4.1",
+        "revision": "Ember@2.6.1",
         "loc": {
           "source": null,
           "start": {
@@ -1352,7 +1484,7 @@ define("ttexp/templates/admin/scenario", ["exports"], function (exports) {
         dom.insertBoundary(fragment, null);
         return morphs;
       },
-      statements: [["attribute", "style", ["concat", ["background-image: url('./assets/images/results-", ["get", "model", ["loc", [null, [1, 83], [1, 88]]]], ".png');"]]], ["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [2, 0], [2, 179]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-1", "class", "btn btn-link"], 1, null, ["loc", [null, [22, 20], [22, 152]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-text-1", "class", "btn-link"], 2, null, ["loc", [null, [23, 8], [23, 98]]]], ["content", "outlet", ["loc", [null, [64, 0], [64, 10]]]]],
+      statements: [["attribute", "style", ["concat", ["background-image: url('./assets/images/results-", ["get", "model", ["loc", [null, [1, 83], [1, 88]]]], ".png');"]]], ["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 0, null, ["loc", [null, [2, 0], [2, 179]]]], ["block", "link-to", ["play", "new"], ["id", "button-play-1", "class", "btn btn-link"], 1, null, ["loc", [null, [22, 20], [22, 150]]]], ["block", "link-to", ["play", "new"], ["id", "button-play-text-1", "class", "btn-link"], 2, null, ["loc", [null, [23, 8], [23, 96]]]], ["content", "outlet", ["loc", [null, [64, 0], [64, 10]]]]],
       locals: [],
       templates: [child0, child1, child2]
     };
@@ -1366,7 +1498,7 @@ define("ttexp/templates/application", ["exports"], function (exports) {
           "name": "missing-wrapper",
           "problems": ["wrong-type", "multiple-nodes"]
         },
-        "revision": "Ember@2.4.1",
+        "revision": "Ember@2.6.1",
         "loc": {
           "source": null,
           "start": {
@@ -1386,7 +1518,7 @@ define("ttexp/templates/application", ["exports"], function (exports) {
       hasRendered: false,
       buildFragment: function buildFragment(dom) {
         var el0 = dom.createDocumentFragment();
-        var el1 = dom.createComment("\n<nav>\n	{{#link-to \"index\"}}Index{{/link-to}}\n	{{#link-to \"help\"}}Help{{/link-to}}\n	{{#link-to \"play\" \"start\" class=\"btn btn-link\"}}Play{{/link-to}}\n</nav>\n");
+        var el1 = dom.createComment("\n<nav>\n	{{#link-to \"index\"}}Index{{/link-to}}\n	{{#link-to \"help\"}}Help{{/link-to}}\n	{{#link-to \"play\" \"new\" class=\"btn btn-link\"}}Play{{/link-to}}\n</nav>\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
@@ -1413,7 +1545,7 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
         return {
           meta: {
             "fragmentReason": false,
-            "revision": "Ember@2.4.1",
+            "revision": "Ember@2.6.1",
             "loc": {
               "source": null,
               "start": {
@@ -1458,7 +1590,7 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
             "name": "modifiers",
             "modifiers": ["action"]
           },
-          "revision": "Ember@2.4.1",
+          "revision": "Ember@2.6.1",
           "loc": {
             "source": null,
             "start": {
@@ -1513,7 +1645,7 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
       return {
         meta: {
           "fragmentReason": false,
-          "revision": "Ember@2.4.1",
+          "revision": "Ember@2.6.1",
           "loc": {
             "source": null,
             "start": {
@@ -1562,7 +1694,7 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
         return {
           meta: {
             "fragmentReason": false,
-            "revision": "Ember@2.4.1",
+            "revision": "Ember@2.6.1",
             "loc": {
               "source": null,
               "start": {
@@ -1604,7 +1736,7 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
       return {
         meta: {
           "fragmentReason": false,
-          "revision": "Ember@2.4.1",
+          "revision": "Ember@2.6.1",
           "loc": {
             "source": null,
             "start": {
@@ -1661,7 +1793,7 @@ define("ttexp/templates/cdv-generic-nav-bar", ["exports"], function (exports) {
           "name": "missing-wrapper",
           "problems": ["wrong-type", "multiple-nodes"]
         },
-        "revision": "Ember@2.4.1",
+        "revision": "Ember@2.6.1",
         "loc": {
           "source": null,
           "start": {
@@ -1716,7 +1848,7 @@ define("ttexp/templates/components/cdv-nav-bar", ["exports"], function (exports)
           "name": "missing-wrapper",
           "problems": ["wrong-type"]
         },
-        "revision": "Ember@2.4.1",
+        "revision": "Ember@2.6.1",
         "loc": {
           "source": null,
           "start": {
@@ -1762,7 +1894,7 @@ define("ttexp/templates/help", ["exports"], function (exports) {
           "name": "missing-wrapper",
           "problems": ["multiple-nodes", "wrong-type"]
         },
-        "revision": "Ember@2.4.1",
+        "revision": "Ember@2.6.1",
         "loc": {
           "source": null,
           "start": {
@@ -1806,246 +1938,13 @@ define("ttexp/templates/help", ["exports"], function (exports) {
 });
 define("ttexp/templates/index", ["exports"], function (exports) {
   exports["default"] = Ember.HTMLBars.template((function () {
-    var child0 = (function () {
-      return {
-        meta: {
-          "fragmentReason": false,
-          "revision": "Ember@2.4.1",
-          "loc": {
-            "source": null,
-            "start": {
-              "line": 9,
-              "column": 5
-            },
-            "end": {
-              "line": 9,
-              "column": 70
-            }
-          },
-          "moduleName": "ttexp/templates/index.hbs"
-        },
-        isEmpty: false,
-        arity: 0,
-        cachedFragment: null,
-        hasRendered: false,
-        buildFragment: function buildFragment(dom) {
-          var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("Amministrazione");
-          dom.appendChild(el0, el1);
-          return el0;
-        },
-        buildRenderNodes: function buildRenderNodes() {
-          return [];
-        },
-        statements: [],
-        locals: [],
-        templates: []
-      };
-    })();
-    var child1 = (function () {
-      return {
-        meta: {
-          "fragmentReason": false,
-          "revision": "Ember@2.4.1",
-          "loc": {
-            "source": null,
-            "start": {
-              "line": 17,
-              "column": 5
-            },
-            "end": {
-              "line": 19,
-              "column": 5
-            }
-          },
-          "moduleName": "ttexp/templates/index.hbs"
-        },
-        isEmpty: false,
-        arity: 0,
-        cachedFragment: null,
-        hasRendered: false,
-        buildFragment: function buildFragment(dom) {
-          var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("						");
-          dom.appendChild(el0, el1);
-          var el1 = dom.createElement("a");
-          dom.setAttribute(el1, "class", "list-group-item");
-          var el2 = dom.createTextNode("Logout");
-          dom.appendChild(el1, el2);
-          dom.appendChild(el0, el1);
-          var el1 = dom.createTextNode("\n");
-          dom.appendChild(el0, el1);
-          return el0;
-        },
-        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-          var element0 = dom.childAt(fragment, [1]);
-          var morphs = new Array(1);
-          morphs[0] = dom.createElementMorph(element0);
-          return morphs;
-        },
-        statements: [["element", "action", ["invalidateSession"], [], ["loc", [null, [18, 33], [18, 63]]]]],
-        locals: [],
-        templates: []
-      };
-    })();
-    var child2 = (function () {
-      var child0 = (function () {
-        return {
-          meta: {
-            "fragmentReason": false,
-            "revision": "Ember@2.4.1",
-            "loc": {
-              "source": null,
-              "start": {
-                "line": 20,
-                "column": 6
-              },
-              "end": {
-                "line": 20,
-                "column": 55
-              }
-            },
-            "moduleName": "ttexp/templates/index.hbs"
-          },
-          isEmpty: false,
-          arity: 0,
-          cachedFragment: null,
-          hasRendered: false,
-          buildFragment: function buildFragment(dom) {
-            var el0 = dom.createDocumentFragment();
-            var el1 = dom.createTextNode("Login");
-            dom.appendChild(el0, el1);
-            return el0;
-          },
-          buildRenderNodes: function buildRenderNodes() {
-            return [];
-          },
-          statements: [],
-          locals: [],
-          templates: []
-        };
-      })();
-      return {
-        meta: {
-          "fragmentReason": false,
-          "revision": "Ember@2.4.1",
-          "loc": {
-            "source": null,
-            "start": {
-              "line": 19,
-              "column": 5
-            },
-            "end": {
-              "line": 21,
-              "column": 5
-            }
-          },
-          "moduleName": "ttexp/templates/index.hbs"
-        },
-        isEmpty: false,
-        arity: 0,
-        cachedFragment: null,
-        hasRendered: false,
-        buildFragment: function buildFragment(dom) {
-          var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("						");
-          dom.appendChild(el0, el1);
-          var el1 = dom.createComment("");
-          dom.appendChild(el0, el1);
-          var el1 = dom.createTextNode("\n");
-          dom.appendChild(el0, el1);
-          return el0;
-        },
-        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-          var morphs = new Array(1);
-          morphs[0] = dom.createMorphAt(fragment, 1, 1, contextualElement);
-          return morphs;
-        },
-        statements: [["block", "link-to", ["login"], ["class", "list-group-item"], 0, null, ["loc", [null, [20, 6], [20, 67]]]]],
-        locals: [],
-        templates: [child0]
-      };
-    })();
-    var child3 = (function () {
-      return {
-        meta: {
-          "fragmentReason": false,
-          "revision": "Ember@2.4.1",
-          "loc": {
-            "source": null,
-            "start": {
-              "line": 47,
-              "column": 26
-            },
-            "end": {
-              "line": 47,
-              "column": 146
-            }
-          },
-          "moduleName": "ttexp/templates/index.hbs"
-        },
-        isEmpty: false,
-        arity: 0,
-        cachedFragment: null,
-        hasRendered: false,
-        buildFragment: function buildFragment(dom) {
-          var el0 = dom.createDocumentFragment();
-          var el1 = dom.createElement("span");
-          dom.setAttribute(el1, "class", "glyphicon glyphicon-play-circle");
-          dom.appendChild(el0, el1);
-          return el0;
-        },
-        buildRenderNodes: function buildRenderNodes() {
-          return [];
-        },
-        statements: [],
-        locals: [],
-        templates: []
-      };
-    })();
-    var child4 = (function () {
-      return {
-        meta: {
-          "fragmentReason": false,
-          "revision": "Ember@2.4.1",
-          "loc": {
-            "source": null,
-            "start": {
-              "line": 48,
-              "column": 14
-            },
-            "end": {
-              "line": 48,
-              "column": 92
-            }
-          },
-          "moduleName": "ttexp/templates/index.hbs"
-        },
-        isEmpty: false,
-        arity: 0,
-        cachedFragment: null,
-        hasRendered: false,
-        buildFragment: function buildFragment(dom) {
-          var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("Telefonata");
-          dom.appendChild(el0, el1);
-          return el0;
-        },
-        buildRenderNodes: function buildRenderNodes() {
-          return [];
-        },
-        statements: [],
-        locals: [],
-        templates: []
-      };
-    })();
     return {
       meta: {
         "fragmentReason": {
           "name": "missing-wrapper",
           "problems": ["multiple-nodes", "wrong-type"]
         },
-        "revision": "Ember@2.4.1",
+        "revision": "Ember@2.6.1",
         "loc": {
           "source": null,
           "start": {
@@ -2053,7 +1952,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 171,
+            "line": 32,
             "column": 10
           }
         },
@@ -2104,61 +2003,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el4, el5);
         var el5 = dom.createTextNode("\n				");
         dom.appendChild(el4, el5);
-        var el5 = dom.createElement("div");
-        dom.setAttribute(el5, "id", "main-menu");
-        dom.setAttribute(el5, "class", "list-group");
-        var el6 = dom.createTextNode("\n					");
-        dom.appendChild(el5, el6);
-        var el6 = dom.createComment("");
-        dom.appendChild(el5, el6);
-        var el6 = dom.createTextNode("\n					");
-        dom.appendChild(el5, el6);
-        var el6 = dom.createElement("a");
-        dom.setAttribute(el6, "class", "list-group-item");
-        var el7 = dom.createTextNode("Profilo Utente");
-        dom.appendChild(el6, el7);
-        dom.appendChild(el5, el6);
-        var el6 = dom.createTextNode("\n					");
-        dom.appendChild(el5, el6);
-        var el6 = dom.createElement("a");
-        dom.setAttribute(el6, "class", "list-group-item active");
-        var el7 = dom.createTextNode("Simulazioni");
-        dom.appendChild(el6, el7);
-        dom.appendChild(el5, el6);
-        var el6 = dom.createTextNode("\n					");
-        dom.appendChild(el5, el6);
-        var el6 = dom.createElement("a");
-        dom.setAttribute(el6, "class", "list-group-item");
-        var el7 = dom.createTextNode("Storico");
-        dom.appendChild(el6, el7);
-        dom.appendChild(el5, el6);
-        var el6 = dom.createTextNode("\n					");
-        dom.appendChild(el5, el6);
-        var el6 = dom.createElement("a");
-        dom.setAttribute(el6, "class", "list-group-item");
-        var el7 = dom.createTextNode("Messaggi");
-        dom.appendChild(el6, el7);
-        dom.appendChild(el5, el6);
-        var el6 = dom.createTextNode("\n					");
-        dom.appendChild(el5, el6);
-        var el6 = dom.createElement("a");
-        dom.setAttribute(el6, "class", "list-group-item");
-        var el7 = dom.createTextNode("Help");
-        dom.appendChild(el6, el7);
-        dom.appendChild(el5, el6);
-        var el6 = dom.createTextNode("\n					");
-        dom.appendChild(el5, el6);
-        var el6 = dom.createElement("a");
-        dom.setAttribute(el6, "class", "list-group-item hidden showAndroid");
-        var el7 = dom.createTextNode("Esci");
-        dom.appendChild(el6, el7);
-        dom.appendChild(el5, el6);
-        var el6 = dom.createTextNode("\n\n");
-        dom.appendChild(el5, el6);
-        var el6 = dom.createComment("");
-        dom.appendChild(el5, el6);
-        var el6 = dom.createTextNode("				");
-        dom.appendChild(el5, el6);
+        var el5 = dom.createComment("");
         dom.appendChild(el4, el5);
         var el5 = dom.createTextNode("\n			");
         dom.appendChild(el4, el5);
@@ -2202,7 +2047,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el6, el7);
         var el7 = dom.createElement("h3");
         dom.setAttribute(el7, "class", "panel-title");
-        var el8 = dom.createTextNode("Simulazioni disponibili");
+        var el8 = dom.createTextNode("Home");
         dom.appendChild(el7, el8);
         dom.appendChild(el6, el7);
         var el7 = dom.createTextNode("\n					");
@@ -2214,251 +2059,17 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.setAttribute(el6, "class", "panel-body");
         var el7 = dom.createTextNode("\n						");
         dom.appendChild(el6, el7);
-        var el7 = dom.createElement("div");
-        dom.setAttribute(el7, "class", "table-responsive");
-        var el8 = dom.createTextNode("\n							");
-        dom.appendChild(el7, el8);
-        var el8 = dom.createElement("table");
-        dom.setAttribute(el8, "class", "table table-striped");
-        var el9 = dom.createTextNode("\n								");
-        dom.appendChild(el8, el9);
-        var el9 = dom.createElement("thead");
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("tr");
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("th");
-        dom.setAttribute(el11, "class", "fit");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("th");
-        var el12 = dom.createTextNode("Simulazione");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("th");
-        var el12 = dom.createTextNode("Tentativi");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("th");
-        var el12 = dom.createTextNode("Media");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n									");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n								");
-        dom.appendChild(el9, el10);
-        dom.appendChild(el8, el9);
-        var el9 = dom.createTextNode("\n								");
-        dom.appendChild(el8, el9);
-        var el9 = dom.createElement("tbody");
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("tr");
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        dom.setAttribute(el11, "class", "fit");
-        var el12 = dom.createComment("");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        var el12 = dom.createComment("");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        var el12 = dom.createTextNode("5");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        var el12 = dom.createTextNode("62%");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n									");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("tr");
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        dom.setAttribute(el11, "class", "fit");
-        var el12 = dom.createTextNode("\n											");
-        dom.appendChild(el11, el12);
-        var el12 = dom.createElement("a");
-        dom.setAttribute(el12, "href", "#");
-        dom.setAttribute(el12, "class", "btn btn-link disabled");
-        var el13 = dom.createElement("span");
-        dom.setAttribute(el13, "class", "glyphicon glyphicon-play-circle");
-        dom.appendChild(el12, el13);
-        dom.appendChild(el11, el12);
-        var el12 = dom.createTextNode("\n										");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        var el12 = dom.createTextNode("Empatia");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        var el12 = dom.createTextNode("-");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        var el12 = dom.createTextNode("-");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n									");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("tr");
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        dom.setAttribute(el11, "class", "fit");
-        var el12 = dom.createTextNode("\n											");
-        dom.appendChild(el11, el12);
-        var el12 = dom.createElement("a");
-        dom.setAttribute(el12, "href", "#");
-        dom.setAttribute(el12, "class", "btn btn-link disabled");
-        var el13 = dom.createElement("span");
-        dom.setAttribute(el13, "class", "glyphicon glyphicon-play-circle");
-        dom.appendChild(el12, el13);
-        dom.appendChild(el11, el12);
-        var el12 = dom.createTextNode("\n										");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        var el12 = dom.createTextNode("Motivazione");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        var el12 = dom.createTextNode("-");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        var el12 = dom.createTextNode("-");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n									");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("tr");
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        dom.setAttribute(el11, "class", "fit");
-        var el12 = dom.createTextNode("\n											");
-        dom.appendChild(el11, el12);
-        var el12 = dom.createElement("a");
-        dom.setAttribute(el12, "href", "#");
-        dom.setAttribute(el12, "class", "btn btn-link disabled");
-        var el13 = dom.createElement("span");
-        dom.setAttribute(el13, "class", "glyphicon glyphicon-play-circle");
-        dom.appendChild(el12, el13);
-        dom.appendChild(el11, el12);
-        var el12 = dom.createTextNode("\n										");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        var el12 = dom.createTextNode("Chiusura");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        var el12 = dom.createTextNode("-");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        var el12 = dom.createTextNode("-");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n									");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n									");
-        dom.appendChild(el9, el10);
-        var el10 = dom.createElement("tr");
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        dom.setAttribute(el11, "class", "fit");
-        var el12 = dom.createTextNode("\n											");
-        dom.appendChild(el11, el12);
-        var el12 = dom.createElement("a");
-        dom.setAttribute(el12, "href", "#");
-        dom.setAttribute(el12, "class", "btn btn-link disabled");
-        var el13 = dom.createElement("span");
-        dom.setAttribute(el13, "class", "glyphicon glyphicon-play-circle");
-        dom.appendChild(el12, el13);
-        dom.appendChild(el11, el12);
-        var el12 = dom.createTextNode("\n										");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        var el12 = dom.createTextNode("Referenze");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        var el12 = dom.createTextNode("-");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n										");
-        dom.appendChild(el10, el11);
-        var el11 = dom.createElement("td");
-        var el12 = dom.createTextNode("-");
-        dom.appendChild(el11, el12);
-        dom.appendChild(el10, el11);
-        var el11 = dom.createTextNode("\n									");
-        dom.appendChild(el10, el11);
-        dom.appendChild(el9, el10);
-        var el10 = dom.createTextNode("\n								");
-        dom.appendChild(el9, el10);
-        dom.appendChild(el8, el9);
-        var el9 = dom.createTextNode("\n							");
-        dom.appendChild(el8, el9);
-        dom.appendChild(el7, el8);
-        var el8 = dom.createTextNode("\n						");
+        var el7 = dom.createElement("br");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createElement("br");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode("\n						");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createElement("center");
+        var el8 = dom.createTextNode("CONTENUTO HOMEPAGE");
         dom.appendChild(el7, el8);
         dom.appendChild(el6, el7);
-        var el7 = dom.createTextNode(" \n					");
+        var el7 = dom.createTextNode("\n					");
         dom.appendChild(el6, el7);
         dom.appendChild(el5, el6);
         var el6 = dom.createTextNode("\n				");
@@ -2472,10 +2083,6 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n	");
         dom.appendChild(el2, el3);
-        dom.appendChild(el1, el2);
-        var el2 = dom.createTextNode("\n	");
-        dom.appendChild(el1, el2);
-        var el2 = dom.createComment("\n	<div class=\"row\">\n		<div class=\"col-sm-3\">\n			<div id=\"main-menu\" class=\"list-group\">\n				<a class=\"list-group-item\">Profilo Utente</a>\n				<a class=\"list-group-item active\">Simulazioni</a>\n				<a class=\"list-group-item\">Storico</a>\n				<a class=\"list-group-item\">Messaggi</a>\n				<a class=\"list-group-item\">Help</a>\n				<a class=\"list-group-item hidden showAndroid\" {{action \"closeApp\"}}>Esci</a>\n			</div>\n		</div>\n		<div class=\"col-sm-9\">\n			<div id=\"main-content\" class=\"panel panel-default\">\n				<div class=\"panel-heading\">\n					<h3 class=\"panel-title\">Salve, <strong>{{firstName}} {{lastName}}</strong>!</h3>\n				</div>\n				<div class=\"panel-body\">\n					<div class=\"table-responsive\">\n						<table class=\"table table-striped\">\n							<thead>\n								<tr>\n									<th class=\"fit\"></th>\n									<th>Simulazione</th>\n									<th>Tentativi</th>\n									<th>Media</th>\n								</tr>\n							</thead>\n							<tbody>\n								<tr>\n									<td class=\"fit\">{{#link-to \"play\" \"start\" id=\"button-play-1\" class=\"btn btn-link\"}}<span class=\"glyphicon glyphicon-play-circle\"></span>{{/link-to}}</td>\n									<td>{{#link-to \"play\" \"start\" id=\"button-play-1\" class=\"btn-link\"}}Telefonata{{/link-to}}</td>\n									<td>5</td>\n									<td>62%</td>\n								</tr>\n								<tr>\n									<td class=\"fit\">\n										<a href=\"#\" class=\"btn btn-link disabled\"><span class=\"glyphicon glyphicon-play-circle\"></span></a>\n									</td>\n									<td>Empatia</td>\n									<td>-</td>\n									<td>-</td>\n								</tr>\n								<tr>\n									<td class=\"fit\">\n										<a href=\"#\" class=\"btn btn-link disabled\"><span class=\"glyphicon glyphicon-play-circle\"></span></a>\n									</td>\n									<td>Motivazione</td>\n									<td>-</td>\n									<td>-</td>\n								</tr>\n								<tr>\n									<td class=\"fit\">\n										<a href=\"#\" class=\"btn btn-link disabled\"><span class=\"glyphicon glyphicon-play-circle\"></span></a>\n									</td>\n									<td>Chiusura</td>\n									<td>-</td>\n									<td>-</td>\n								</tr>\n								<tr>\n									<td class=\"fit\">\n										<a href=\"#\" class=\"btn btn-link disabled\"><span class=\"glyphicon glyphicon-play-circle\"></span></a>\n									</td>\n									<td>Referenze</td>\n									<td>-</td>\n									<td>-</td>\n								</tr>\n							</tbody>\n						</table>\n					</div> \n				</div>\n			</div>\n		</div>\n	</div>\n	");
         dom.appendChild(el1, el2);
         var el2 = dom.createTextNode("\n");
         dom.appendChild(el1, el2);
@@ -2495,25 +2102,346 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var element1 = dom.childAt(fragment, [0, 1, 1]);
-        var element2 = dom.childAt(element1, [1]);
-        var element3 = dom.childAt(element2, [1, 1, 1]);
-        var element4 = dom.childAt(element2, [3]);
-        var element5 = dom.childAt(element4, [13]);
-        var element6 = dom.childAt(element1, [3, 3, 3, 1, 1, 3, 1]);
-        var morphs = new Array(8);
-        morphs[0] = dom.createMorphAt(element3, 0, 0);
-        morphs[1] = dom.createMorphAt(element3, 2, 2);
-        morphs[2] = dom.createMorphAt(element4, 1, 1);
-        morphs[3] = dom.createElementMorph(element5);
-        morphs[4] = dom.createMorphAt(element4, 15, 15);
-        morphs[5] = dom.createMorphAt(dom.childAt(element6, [1]), 0, 0);
-        morphs[6] = dom.createMorphAt(dom.childAt(element6, [3]), 0, 0);
-        morphs[7] = dom.createMorphAt(fragment, 4, 4, contextualElement);
+        var element0 = dom.childAt(fragment, [0, 1, 1, 1]);
+        var element1 = dom.childAt(element0, [1, 1, 1]);
+        var morphs = new Array(4);
+        morphs[0] = dom.createMorphAt(element1, 0, 0);
+        morphs[1] = dom.createMorphAt(element1, 2, 2);
+        morphs[2] = dom.createMorphAt(element0, 3, 3);
+        morphs[3] = dom.createMorphAt(fragment, 4, 4, contextualElement);
         dom.insertBoundary(fragment, null);
         return morphs;
       },
-      statements: [["content", "firstName", ["loc", [null, [6, 26], [6, 39]]]], ["content", "lastName", ["loc", [null, [6, 40], [6, 52]]]], ["block", "link-to", ["admin/index"], ["class", "list-group-item"], 0, null, ["loc", [null, [9, 5], [9, 82]]]], ["element", "action", ["closeApp"], [], ["loc", [null, [15, 51], [15, 72]]]], ["block", "if", [["get", "session.isAuthenticated", ["loc", [null, [17, 11], [17, 34]]]]], [], 1, 2, ["loc", [null, [17, 5], [21, 12]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-1", "class", "btn btn-link"], 3, null, ["loc", [null, [47, 26], [47, 158]]]], ["block", "link-to", ["play", "start"], ["id", "button-play-text-1", "class", "btn-link"], 4, null, ["loc", [null, [48, 14], [48, 104]]]], ["content", "outlet", ["loc", [null, [171, 0], [171, 10]]]]],
+      statements: [["content", "firstName", ["loc", [null, [6, 26], [6, 39]]]], ["content", "lastName", ["loc", [null, [6, 40], [6, 52]]]], ["inline", "partial", ["layout/menu"], [], ["loc", [null, [8, 4], [8, 29]]]], ["content", "outlet", ["loc", [null, [32, 0], [32, 10]]]]],
+      locals: [],
+      templates: []
+    };
+  })());
+});
+define("ttexp/templates/layout/menu", ["exports"], function (exports) {
+  exports["default"] = Ember.HTMLBars.template((function () {
+    var child0 = (function () {
+      return {
+        meta: {
+          "fragmentReason": false,
+          "revision": "Ember@2.6.1",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 2,
+              "column": 1
+            },
+            "end": {
+              "line": 2,
+              "column": 73
+            }
+          },
+          "moduleName": "ttexp/templates/layout/menu.hbs"
+        },
+        isEmpty: false,
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("Home");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes() {
+          return [];
+        },
+        statements: [],
+        locals: [],
+        templates: []
+      };
+    })();
+    var child1 = (function () {
+      return {
+        meta: {
+          "fragmentReason": false,
+          "revision": "Ember@2.6.1",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 3,
+              "column": 1
+            },
+            "end": {
+              "line": 3,
+              "column": 88
+            }
+          },
+          "moduleName": "ttexp/templates/layout/menu.hbs"
+        },
+        isEmpty: false,
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("Simulazioni");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes() {
+          return [];
+        },
+        statements: [],
+        locals: [],
+        templates: []
+      };
+    })();
+    var child2 = (function () {
+      return {
+        meta: {
+          "fragmentReason": false,
+          "revision": "Ember@2.6.1",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 6,
+              "column": 1
+            },
+            "end": {
+              "line": 6,
+              "column": 90
+            }
+          },
+          "moduleName": "ttexp/templates/layout/menu.hbs"
+        },
+        isEmpty: false,
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("Amministrazione");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes() {
+          return [];
+        },
+        statements: [],
+        locals: [],
+        templates: []
+      };
+    })();
+    var child3 = (function () {
+      return {
+        meta: {
+          "fragmentReason": false,
+          "revision": "Ember@2.6.1",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 10,
+              "column": 1
+            },
+            "end": {
+              "line": 12,
+              "column": 1
+            }
+          },
+          "moduleName": "ttexp/templates/layout/menu.hbs"
+        },
+        isEmpty: false,
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("		");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("a");
+          dom.setAttribute(el1, "class", "list-group-item");
+          var el2 = dom.createTextNode("Logout");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var element0 = dom.childAt(fragment, [1]);
+          var morphs = new Array(1);
+          morphs[0] = dom.createElementMorph(element0);
+          return morphs;
+        },
+        statements: [["element", "action", ["invalidateSession"], [], ["loc", [null, [11, 29], [11, 59]]]]],
+        locals: [],
+        templates: []
+      };
+    })();
+    var child4 = (function () {
+      var child0 = (function () {
+        return {
+          meta: {
+            "fragmentReason": false,
+            "revision": "Ember@2.6.1",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 13,
+                "column": 2
+              },
+              "end": {
+                "line": 13,
+                "column": 51
+              }
+            },
+            "moduleName": "ttexp/templates/layout/menu.hbs"
+          },
+          isEmpty: false,
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("Login");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes() {
+            return [];
+          },
+          statements: [],
+          locals: [],
+          templates: []
+        };
+      })();
+      return {
+        meta: {
+          "fragmentReason": false,
+          "revision": "Ember@2.6.1",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 12,
+              "column": 1
+            },
+            "end": {
+              "line": 14,
+              "column": 1
+            }
+          },
+          "moduleName": "ttexp/templates/layout/menu.hbs"
+        },
+        isEmpty: false,
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("		");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createComment("");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var morphs = new Array(1);
+          morphs[0] = dom.createMorphAt(fragment, 1, 1, contextualElement);
+          return morphs;
+        },
+        statements: [["block", "link-to", ["login"], ["class", "list-group-item"], 0, null, ["loc", [null, [13, 2], [13, 63]]]]],
+        locals: [],
+        templates: [child0]
+      };
+    })();
+    return {
+      meta: {
+        "fragmentReason": {
+          "name": "triple-curlies"
+        },
+        "revision": "Ember@2.6.1",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 15,
+            "column": 6
+          }
+        },
+        "moduleName": "ttexp/templates/layout/menu.hbs"
+      },
+      isEmpty: false,
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createElement("div");
+        dom.setAttribute(el1, "id", "main-menu");
+        dom.setAttribute(el1, "class", "list-group");
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createComment("");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createComment("");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("a");
+        dom.setAttribute(el2, "class", "list-group-item");
+        dom.setAttribute(el2, "data-page-route", "messages");
+        var el3 = dom.createTextNode("Messaggi");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("a");
+        dom.setAttribute(el2, "class", "list-group-item");
+        dom.setAttribute(el2, "data-page-route", "help");
+        var el3 = dom.createTextNode("Help");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createComment("");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("a");
+        dom.setAttribute(el2, "class", "list-group-item");
+        dom.setAttribute(el2, "data-page-route", "user");
+        var el3 = dom.createTextNode("Profilo Utente");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("a");
+        dom.setAttribute(el2, "class", "list-group-item hidden showAndroid");
+        var el3 = dom.createTextNode("Esci");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n\n");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createComment("");
+        dom.appendChild(el1, el2);
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+        var element1 = dom.childAt(fragment, [0]);
+        var element2 = dom.childAt(element1, [13]);
+        var morphs = new Array(5);
+        morphs[0] = dom.createMorphAt(element1, 1, 1);
+        morphs[1] = dom.createMorphAt(element1, 3, 3);
+        morphs[2] = dom.createMorphAt(element1, 9, 9);
+        morphs[3] = dom.createElementMorph(element2);
+        morphs[4] = dom.createMorphAt(element1, 15, 15);
+        return morphs;
+      },
+      statements: [["block", "link-to", ["index"], ["class", "list-group-item", "data-page-route", "index"], 0, null, ["loc", [null, [2, 1], [2, 85]]]], ["block", "link-to", ["scenarios"], ["class", "list-group-item", "data-page-route", "scenarios"], 1, null, ["loc", [null, [3, 1], [3, 100]]]], ["block", "link-to", ["admin/index"], ["class", "list-group-item", "data-page-route", "admin"], 2, null, ["loc", [null, [6, 1], [6, 102]]]], ["element", "action", ["closeApp"], [], ["loc", [null, [8, 47], [8, 68]]]], ["block", "if", [["get", "session.isAuthenticated", ["loc", [null, [10, 7], [10, 30]]]]], [], 3, 4, ["loc", [null, [10, 1], [14, 8]]]]],
       locals: [],
       templates: [child0, child1, child2, child3, child4]
     };
@@ -2525,7 +2453,7 @@ define("ttexp/templates/login", ["exports"], function (exports) {
       return {
         meta: {
           "fragmentReason": false,
-          "revision": "Ember@2.4.1",
+          "revision": "Ember@2.6.1",
           "loc": {
             "source": null,
             "start": {
@@ -2571,7 +2499,7 @@ define("ttexp/templates/login", ["exports"], function (exports) {
           "name": "missing-wrapper",
           "problems": ["multiple-nodes"]
         },
-        "revision": "Ember@2.4.1",
+        "revision": "Ember@2.6.1",
         "loc": {
           "source": null,
           "start": {
@@ -2704,7 +2632,7 @@ define("ttexp/templates/page-not-found", ["exports"], function (exports) {
           "name": "missing-wrapper",
           "problems": ["multiple-nodes", "wrong-type"]
         },
-        "revision": "Ember@2.4.1",
+        "revision": "Ember@2.6.1",
         "loc": {
           "source": null,
           "start": {
@@ -2753,16 +2681,16 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         return {
           meta: {
             "fragmentReason": false,
-            "revision": "Ember@2.4.1",
+            "revision": "Ember@2.6.1",
             "loc": {
               "source": null,
               "start": {
-                "line": 15,
-                "column": 4
+                "line": 24,
+                "column": 32
               },
               "end": {
-                "line": 15,
-                "column": 71
+                "line": 24,
+                "column": 69
               }
             },
             "moduleName": "ttexp/templates/play.hbs"
@@ -2773,7 +2701,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
           hasRendered: false,
           buildFragment: function buildFragment(dom) {
             var el0 = dom.createDocumentFragment();
-            var el1 = dom.createTextNode("Risultati");
+            var el1 = dom.createTextNode("Continua...");
             dom.appendChild(el0, el1);
             return el0;
           },
@@ -2788,16 +2716,16 @@ define("ttexp/templates/play", ["exports"], function (exports) {
       return {
         meta: {
           "fragmentReason": false,
-          "revision": "Ember@2.4.1",
+          "revision": "Ember@2.6.1",
           "loc": {
             "source": null,
             "start": {
-              "line": 13,
-              "column": 2
+              "line": 23,
+              "column": 3
             },
             "end": {
-              "line": 17,
-              "column": 2
+              "line": 25,
+              "column": 3
             }
           },
           "moduleName": "ttexp/templates/play.hbs"
@@ -2808,15 +2736,11 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         hasRendered: false,
         buildFragment: function buildFragment(dom) {
           var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("			");
+          var el1 = dom.createTextNode("				");
           dom.appendChild(el0, el1);
-          var el1 = dom.createElement("div");
-          dom.setAttribute(el1, "id", "scores-button");
-          var el2 = dom.createTextNode("\n				");
-          dom.appendChild(el1, el2);
+          var el1 = dom.createElement("li");
+          dom.setAttribute(el1, "class", "list-group-item");
           var el2 = dom.createComment("");
-          dom.appendChild(el1, el2);
-          var el2 = dom.createTextNode("\n			");
           dom.appendChild(el1, el2);
           dom.appendChild(el0, el1);
           var el1 = dom.createTextNode("\n");
@@ -2825,125 +2749,40 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         },
         buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
           var morphs = new Array(1);
-          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]), 1, 1);
+          morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]), 0, 0);
           return morphs;
         },
-        statements: [["block", "link-to", ["scores", ["get", "model.scores", ["loc", [null, [15, 24], [15, 36]]]]], ["class", "btn btn-primary"], 0, null, ["loc", [null, [15, 4], [15, 83]]]]],
+        statements: [["block", "link-to", ["scores", "a1"], [], 0, null, ["loc", [null, [24, 32], [24, 81]]]]],
         locals: [],
         templates: [child0]
       };
     })();
     var child1 = (function () {
       var child0 = (function () {
-        var child0 = (function () {
-          return {
-            meta: {
-              "fragmentReason": false,
-              "revision": "Ember@2.4.1",
-              "loc": {
-                "source": null,
-                "start": {
-                  "line": 30,
-                  "column": 32
-                },
-                "end": {
-                  "line": 30,
-                  "column": 74
-                }
-              },
-              "moduleName": "ttexp/templates/play.hbs"
-            },
-            isEmpty: false,
-            arity: 0,
-            cachedFragment: null,
-            hasRendered: false,
-            buildFragment: function buildFragment(dom) {
-              var el0 = dom.createDocumentFragment();
-              var el1 = dom.createComment("");
-              dom.appendChild(el0, el1);
-              return el0;
-            },
-            buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-              var morphs = new Array(1);
-              morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
-              dom.insertBoundary(fragment, 0);
-              dom.insertBoundary(fragment, null);
-              return morphs;
-            },
-            statements: [["content", "item.text", ["loc", [null, [30, 61], [30, 74]]]]],
-            locals: [],
-            templates: []
-          };
-        })();
         return {
           meta: {
             "fragmentReason": false,
-            "revision": "Ember@2.4.1",
+            "revision": "Ember@2.6.1",
             "loc": {
               "source": null,
               "start": {
+                "line": 26,
+                "column": 4
+              },
+              "end": {
                 "line": 29,
-                "column": 3
-              },
-              "end": {
-                "line": 31,
-                "column": 3
+                "column": 4
               }
             },
             "moduleName": "ttexp/templates/play.hbs"
           },
           isEmpty: false,
-          arity: 0,
+          arity: 1,
           cachedFragment: null,
           hasRendered: false,
           buildFragment: function buildFragment(dom) {
             var el0 = dom.createDocumentFragment();
-            var el1 = dom.createTextNode("				");
-            dom.appendChild(el0, el1);
-            var el1 = dom.createElement("li");
-            dom.setAttribute(el1, "class", "list-group-item");
-            var el2 = dom.createComment("");
-            dom.appendChild(el1, el2);
-            dom.appendChild(el0, el1);
-            var el1 = dom.createTextNode("\n");
-            dom.appendChild(el0, el1);
-            return el0;
-          },
-          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-            var morphs = new Array(1);
-            morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]), 0, 0);
-            return morphs;
-          },
-          statements: [["block", "link-to", ["play", ["get", "item.link", ["loc", [null, [30, 50], [30, 59]]]]], [], 0, null, ["loc", [null, [30, 32], [30, 86]]]]],
-          locals: [],
-          templates: [child0]
-        };
-      })();
-      var child1 = (function () {
-        return {
-          meta: {
-            "fragmentReason": false,
-            "revision": "Ember@2.4.1",
-            "loc": {
-              "source": null,
-              "start": {
-                "line": 31,
-                "column": 3
-              },
-              "end": {
-                "line": 33,
-                "column": 3
-              }
-            },
-            "moduleName": "ttexp/templates/play.hbs"
-          },
-          isEmpty: false,
-          arity: 0,
-          cachedFragment: null,
-          hasRendered: false,
-          buildFragment: function buildFragment(dom) {
-            var el0 = dom.createDocumentFragment();
-            var el1 = dom.createTextNode("				");
+            var el1 = dom.createTextNode("					");
             dom.appendChild(el0, el1);
             var el1 = dom.createElement("li");
             dom.setAttribute(el1, "class", "list-group-item");
@@ -2952,39 +2791,45 @@ define("ttexp/templates/play", ["exports"], function (exports) {
             dom.appendChild(el2, el3);
             dom.appendChild(el1, el2);
             dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n					");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createComment("<li class=\"list-group-item\">{{#link-to \"action\" model.scenario.id item.id}}{{item.text}}{{/link-to}}</li>");
+            dom.appendChild(el0, el1);
             var el1 = dom.createTextNode("\n");
             dom.appendChild(el0, el1);
             return el0;
           },
           buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-            var morphs = new Array(1);
-            morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1, 0]), 0, 0);
+            var element2 = dom.childAt(fragment, [1, 0]);
+            var morphs = new Array(2);
+            morphs[0] = dom.createElementMorph(element2);
+            morphs[1] = dom.createMorphAt(element2, 0, 0);
             return morphs;
           },
-          statements: [["content", "item.text", ["loc", [null, [32, 35], [32, 48]]]]],
-          locals: [],
+          statements: [["element", "action", ["clickItem", ["get", "item", ["loc", [null, [27, 57], [27, 61]]]]], [], ["loc", [null, [27, 36], [27, 63]]]], ["content", "item.text", ["loc", [null, [27, 64], [27, 77]]]]],
+          locals: ["item"],
           templates: []
         };
       })();
       return {
         meta: {
           "fragmentReason": false,
-          "revision": "Ember@2.4.1",
+          "revision": "Ember@2.6.1",
           "loc": {
             "source": null,
             "start": {
-              "line": 28,
-              "column": 2
+              "line": 25,
+              "column": 3
             },
             "end": {
-              "line": 34,
-              "column": 2
+              "line": 30,
+              "column": 3
             }
           },
           "moduleName": "ttexp/templates/play.hbs"
         },
         isEmpty: false,
-        arity: 1,
+        arity: 0,
         cachedFragment: null,
         hasRendered: false,
         buildFragment: function buildFragment(dom) {
@@ -3000,25 +2845,133 @@ define("ttexp/templates/play", ["exports"], function (exports) {
           dom.insertBoundary(fragment, null);
           return morphs;
         },
-        statements: [["block", "if", [["get", "item.link", ["loc", [null, [29, 9], [29, 18]]]]], [], 0, 1, ["loc", [null, [29, 3], [33, 10]]]]],
-        locals: ["item"],
-        templates: [child0, child1]
+        statements: [["block", "each", [["get", "model.scenario.playState.video.items", ["loc", [null, [26, 12], [26, 48]]]]], [], 0, null, ["loc", [null, [26, 4], [29, 13]]]]],
+        locals: [],
+        templates: [child0]
       };
     })();
     var child2 = (function () {
+      var child0 = (function () {
+        var child0 = (function () {
+          return {
+            meta: {
+              "fragmentReason": false,
+              "revision": "Ember@2.6.1",
+              "loc": {
+                "source": null,
+                "start": {
+                  "line": 52,
+                  "column": 4
+                },
+                "end": {
+                  "line": 54,
+                  "column": 4
+                }
+              },
+              "moduleName": "ttexp/templates/play.hbs"
+            },
+            isEmpty: false,
+            arity: 1,
+            cachedFragment: null,
+            hasRendered: false,
+            buildFragment: function buildFragment(dom) {
+              var el0 = dom.createDocumentFragment();
+              var el1 = dom.createTextNode("					");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createElement("span");
+              var el2 = dom.createComment("");
+              dom.appendChild(el1, el2);
+              dom.appendChild(el0, el1);
+              var el1 = dom.createTextNode(": ");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createComment("");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createTextNode(" => tot:");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createComment("");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createTextNode(" - min:");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createComment("");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createTextNode(" - max:");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createComment("");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createElement("br");
+              dom.appendChild(el0, el1);
+              var el1 = dom.createTextNode("\n");
+              dom.appendChild(el0, el1);
+              return el0;
+            },
+            buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+              var element0 = dom.childAt(fragment, [1]);
+              var morphs = new Array(6);
+              morphs[0] = dom.createAttrMorph(element0, 'title');
+              morphs[1] = dom.createMorphAt(element0, 0, 0);
+              morphs[2] = dom.createMorphAt(fragment, 3, 3, contextualElement);
+              morphs[3] = dom.createMorphAt(fragment, 5, 5, contextualElement);
+              morphs[4] = dom.createMorphAt(fragment, 7, 7, contextualElement);
+              morphs[5] = dom.createMorphAt(fragment, 9, 9, contextualElement);
+              return morphs;
+            },
+            statements: [["attribute", "title", ["concat", [["get", "score.variableName", ["loc", [null, [53, 20], [53, 38]]]]]]], ["content", "score.variableCode", ["loc", [null, [53, 42], [53, 64]]]], ["inline", "div", [["subexpr", "round", [["subexpr", "mult", [["subexpr", "div", [["get", "score.value", ["loc", [null, [53, 97], [53, 108]]]], ["get", "model.scenario.playState.stepsCount", ["loc", [null, [53, 109], [53, 144]]]]], [], ["loc", [null, [53, 92], [53, 145]]]], 100], [], ["loc", [null, [53, 86], [53, 150]]]]], [], ["loc", [null, [53, 79], [53, 151]]]], 100], [], ["loc", [null, [53, 73], [53, 157]]]], ["content", "score.value", ["loc", [null, [53, 165], [53, 180]]]], ["content", "score.minValue", ["loc", [null, [53, 187], [53, 205]]]], ["content", "score.maxValue", ["loc", [null, [53, 212], [53, 230]]]]],
+            locals: ["score"],
+            templates: []
+          };
+        })();
+        return {
+          meta: {
+            "fragmentReason": false,
+            "revision": "Ember@2.6.1",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 51,
+                "column": 3
+              },
+              "end": {
+                "line": 55,
+                "column": 3
+              }
+            },
+            "moduleName": "ttexp/templates/play.hbs"
+          },
+          isEmpty: false,
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createComment("");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+            var morphs = new Array(1);
+            morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
+            dom.insertBoundary(fragment, 0);
+            dom.insertBoundary(fragment, null);
+            return morphs;
+          },
+          statements: [["block", "each", [["get", "model.scenario.playState.playthrough.scores", ["loc", [null, [52, 12], [52, 55]]]]], [], 0, null, ["loc", [null, [52, 4], [54, 13]]]]],
+          locals: [],
+          templates: [child0]
+        };
+      })();
       return {
         meta: {
           "fragmentReason": false,
-          "revision": "Ember@2.4.1",
+          "revision": "Ember@2.6.1",
           "loc": {
             "source": null,
             "start": {
-              "line": 44,
-              "column": 0
+              "line": 47,
+              "column": 1
             },
             "end": {
-              "line": 44,
-              "column": 167
+              "line": 57,
+              "column": 1
             }
           },
           "moduleName": "ttexp/templates/play.hbs"
@@ -3029,8 +2982,415 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         hasRendered: false,
         buildFragment: function buildFragment(dom) {
           var el0 = dom.createDocumentFragment();
-          var el1 = dom.createElement("span");
-          dom.setAttribute(el1, "class", "glyphicon glyphicon glyphicon-remove-circle");
+          var el1 = dom.createTextNode("		");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("div");
+          dom.setAttribute(el1, "id", "debug-window");
+          var el2 = dom.createTextNode("\n			Video: ");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createElement("br");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n			Passi: ");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createElement("br");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("		");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var element1 = dom.childAt(fragment, [1]);
+          var morphs = new Array(3);
+          morphs[0] = dom.createMorphAt(element1, 1, 1);
+          morphs[1] = dom.createMorphAt(element1, 4, 4);
+          morphs[2] = dom.createMorphAt(element1, 7, 7);
+          return morphs;
+        },
+        statements: [["content", "model.scenario.playState.video.uniqueCode", ["loc", [null, [49, 10], [49, 55]]]], ["content", "model.scenario.playState.stepsCount", ["loc", [null, [50, 10], [50, 49]]]], ["block", "if", [["get", "model.scenario.playState.stepsCount", ["loc", [null, [51, 9], [51, 44]]]]], [], 0, null, ["loc", [null, [51, 3], [55, 10]]]]],
+        locals: [],
+        templates: [child0]
+      };
+    })();
+    return {
+      meta: {
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["multiple-nodes", "wrong-type"]
+        },
+        "revision": "Ember@2.6.1",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 60,
+            "column": 0
+          }
+        },
+        "moduleName": "ttexp/templates/play.hbs"
+      },
+      isEmpty: false,
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createElement("div");
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("audio");
+        dom.setAttribute(el2, "autoplayXXX", "");
+        dom.setAttribute(el2, "loop", "");
+        var el3 = dom.createTextNode("\n		 ");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("source");
+        dom.setAttribute(el3, "src", "assets/media/music.mp3");
+        dom.setAttribute(el3, "type", "audio/mp3");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n		 Your browser does not support the audio element.\n	");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode(" \n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("div");
+        dom.setAttribute(el2, "id", "video-container");
+        dom.setAttribute(el2, "class", "cinemaOff hiddenxxx");
+        var el3 = dom.createTextNode("\n		");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("video");
+        dom.setAttribute(el3, "id", "video-player");
+        dom.setAttribute(el3, "autoplay", "");
+        var el4 = dom.createTextNode("\n			Your browser does not support the video element.\n		");
+        dom.appendChild(el3, el4);
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n	");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("div");
+        dom.setAttribute(el2, "id", "text-container");
+        dom.setAttribute(el2, "class", "fullscreenXXX subtitles hiddenXXX");
+        var el3 = dom.createTextNode("\n		");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("div");
+        dom.setAttribute(el3, "id", "text-dialog");
+        var el4 = dom.createTextNode("\n			");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createElement("div");
+        dom.setAttribute(el4, "id", "text-baloon");
+        var el5 = dom.createTextNode("\n				");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createComment("");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("\n			");
+        dom.appendChild(el4, el5);
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("\n		");
+        dom.appendChild(el3, el4);
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n	");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("div");
+        dom.setAttribute(el2, "id", "side-chat");
+        dom.setAttribute(el2, "class", "minimizedXXX");
+        var el3 = dom.createTextNode("\n		");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("button");
+        dom.setAttribute(el3, "id", "button-chat");
+        dom.setAttribute(el3, "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left");
+        dom.setAttribute(el3, "role", "button");
+        var el4 = dom.createElement("span");
+        dom.setAttribute(el4, "class", "glyphicon glyphicon glyphicon-comment");
+        dom.appendChild(el3, el4);
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n		");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("button");
+        dom.setAttribute(el3, "id", "button-audio");
+        dom.setAttribute(el3, "class", "btn btn-link ttexp-btn ttexp-position-absolute top-right");
+        dom.setAttribute(el3, "role", "button");
+        var el4 = dom.createElement("span");
+        dom.setAttribute(el4, "class", "glyphicon glyphicon-volume-up");
+        dom.appendChild(el3, el4);
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n	\n		");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("ul");
+        dom.setAttribute(el3, "id", "chat-options");
+        dom.setAttribute(el3, "class", "list-group ");
+        var el4 = dom.createTextNode("\n");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createComment("");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("			\n			");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createComment("\n			<li class=\"list-group-item\">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenenan massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.</li>\n			<li class=\"list-group-item\">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenenan massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.</li>\n			<li class=\"list-group-item\">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenenan massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.</li>\n			");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("\n		");
+        dom.appendChild(el3, el4);
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n	");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n	\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("a");
+        dom.setAttribute(el2, "id", "button-close");
+        dom.setAttribute(el2, "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left");
+        var el3 = dom.createElement("span");
+        dom.setAttribute(el3, "class", "glyphicon glyphicon glyphicon-remove-circle");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createComment("\n	{{#link-to \"scenarios\" id=\"button-close\" class=\"btn btn-link ttexp-btn ttexp-position-absolute top-left\"}}<span class=\"glyphicon glyphicon glyphicon-remove-circle\"></span>{{/link-to}}\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n	\n	");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createElement("div");
+        dom.setAttribute(el2, "id", "customer-logo");
+        var el3 = dom.createElement("img");
+        dom.setAttribute(el3, "src", "assets/images/logo-customer.png");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createTextNode("\n	\n");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createComment("");
+        dom.appendChild(el1, el2);
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+        var element3 = dom.childAt(fragment, [0]);
+        var element4 = dom.childAt(element3, [3, 1]);
+        var element5 = dom.childAt(element3, [9]);
+        var morphs = new Array(6);
+        morphs[0] = dom.createAttrMorph(element4, 'src');
+        morphs[1] = dom.createMorphAt(dom.childAt(element3, [5, 1, 1]), 1, 1);
+        morphs[2] = dom.createMorphAt(dom.childAt(element3, [7, 5]), 1, 1);
+        morphs[3] = dom.createElementMorph(element5);
+        morphs[4] = dom.createMorphAt(element3, 15, 15);
+        morphs[5] = dom.createMorphAt(fragment, 2, 2, contextualElement);
+        return morphs;
+      },
+      statements: [["attribute", "src", ["concat", [["get", "model.scenario.playState.video.fullPath", ["loc", [null, [7, 34], [7, 73]]]]]]], ["content", "model.scenario.playState.video.transcript", ["loc", [null, [14, 4], [14, 49]]]], ["block", "if", [["get", "model.scenario.playState.gameCompleted", ["loc", [null, [23, 9], [23, 47]]]]], [], 0, 1, ["loc", [null, [23, 3], [30, 10]]]], ["element", "action", ["exit"], [], ["loc", [null, [40, 86], [40, 103]]]], ["block", "if", [true], [], 2, null, ["loc", [null, [47, 1], [57, 8]]]], ["content", "outlet", ["loc", [null, [59, 0], [59, 10]]]]],
+      locals: [],
+      templates: [child0, child1, child2]
+    };
+  })());
+});
+define("ttexp/templates/scenarios", ["exports"], function (exports) {
+  exports["default"] = Ember.HTMLBars.template((function () {
+    var child0 = (function () {
+      var child0 = (function () {
+        return {
+          meta: {
+            "fragmentReason": false,
+            "revision": "Ember@2.6.1",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 34,
+                "column": 27
+              },
+              "end": {
+                "line": 34,
+                "column": 171
+              }
+            },
+            "moduleName": "ttexp/templates/scenarios.hbs"
+          },
+          isEmpty: false,
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createElement("span");
+            dom.setAttribute(el1, "class", "glyphicon glyphicon-play-circle");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes() {
+            return [];
+          },
+          statements: [],
+          locals: [],
+          templates: []
+        };
+      })();
+      var child1 = (function () {
+        return {
+          meta: {
+            "fragmentReason": false,
+            "revision": "Ember@2.6.1",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 35,
+                "column": 15
+              },
+              "end": {
+                "line": 35,
+                "column": 124
+              }
+            },
+            "moduleName": "ttexp/templates/scenarios.hbs"
+          },
+          isEmpty: false,
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createComment("");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+            var morphs = new Array(1);
+            morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
+            dom.insertBoundary(fragment, 0);
+            dom.insertBoundary(fragment, null);
+            return morphs;
+          },
+          statements: [["content", "scenario.name", ["loc", [null, [35, 107], [35, 124]]]]],
+          locals: [],
+          templates: []
+        };
+      })();
+      return {
+        meta: {
+          "fragmentReason": false,
+          "revision": "Ember@2.6.1",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 32,
+              "column": 9
+            },
+            "end": {
+              "line": 39,
+              "column": 9
+            }
+          },
+          "moduleName": "ttexp/templates/scenarios.hbs"
+        },
+        isEmpty: false,
+        arity: 1,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("									  	");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("tr");
+          var el2 = dom.createTextNode("\n											");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createElement("td");
+          dom.setAttribute(el2, "class", "fit");
+          var el3 = dom.createComment("");
+          dom.appendChild(el2, el3);
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n											");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createElement("td");
+          var el3 = dom.createComment("");
+          dom.appendChild(el2, el3);
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n									  		");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createElement("td");
+          var el3 = dom.createComment("");
+          dom.appendChild(el2, el3);
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n									  		");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createElement("td");
+          var el3 = dom.createTextNode("-");
+          dom.appendChild(el2, el3);
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n									  	");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+          var element0 = dom.childAt(fragment, [1]);
+          var morphs = new Array(3);
+          morphs[0] = dom.createMorphAt(dom.childAt(element0, [1]), 0, 0);
+          morphs[1] = dom.createMorphAt(dom.childAt(element0, [3]), 0, 0);
+          morphs[2] = dom.createMorphAt(dom.childAt(element0, [5]), 0, 0);
+          return morphs;
+        },
+        statements: [["block", "link-to", ["play", ["get", "scenario.id", ["loc", [null, [34, 45], [34, 56]]]]], ["id", ["subexpr", "concat", ["button-play-", ["get", "scenario.id", ["loc", [null, [34, 83], [34, 94]]]]], [], ["loc", [null, [34, 60], [34, 95]]]], "class", "btn btn-link"], 0, null, ["loc", [null, [34, 27], [34, 183]]]], ["block", "link-to", ["play", ["get", "scenario.id", ["loc", [null, [35, 33], [35, 44]]]]], ["id", ["subexpr", "concat", ["button-play-text-", ["get", "scenario.id", ["loc", [null, [35, 76], [35, 87]]]]], [], ["loc", [null, [35, 48], [35, 88]]]], "class", "btn-link"], 1, null, ["loc", [null, [35, 15], [35, 136]]]], ["content", "scenario.attempts", ["loc", [null, [36, 17], [36, 38]]]]],
+        locals: ["scenario"],
+        templates: [child0, child1]
+      };
+    })();
+    var child1 = (function () {
+      return {
+        meta: {
+          "fragmentReason": false,
+          "revision": "Ember@2.6.1",
+          "loc": {
+            "source": null,
+            "start": {
+              "line": 39,
+              "column": 9
+            },
+            "end": {
+              "line": 43,
+              "column": 9
+            }
+          },
+          "moduleName": "ttexp/templates/scenarios.hbs"
+        },
+        isEmpty: false,
+        arity: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        buildFragment: function buildFragment(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("									  	");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("tr");
+          var el2 = dom.createTextNode("\n									  		");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createElement("td");
+          dom.setAttribute(el2, "colspan", "4");
+          var el3 = dom.createTextNode("Nessuna simulazione disponibile");
+          dom.appendChild(el2, el3);
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n								  		");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
           dom.appendChild(el0, el1);
           return el0;
         },
@@ -3048,7 +3408,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
           "name": "missing-wrapper",
           "problems": ["multiple-nodes", "wrong-type"]
         },
-        "revision": "Ember@2.4.1",
+        "revision": "Ember@2.6.1",
         "loc": {
           "source": null,
           "start": {
@@ -3056,11 +3416,11 @@ define("ttexp/templates/play", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 49,
-            "column": 0
+            "line": 56,
+            "column": 10
           }
         },
-        "moduleName": "ttexp/templates/play.hbs"
+        "moduleName": "ttexp/templates/scenarios.hbs"
       },
       isEmpty: false,
       arity: 0,
@@ -3069,116 +3429,175 @@ define("ttexp/templates/play", ["exports"], function (exports) {
       buildFragment: function buildFragment(dom) {
         var el0 = dom.createDocumentFragment();
         var el1 = dom.createElement("div");
-        dom.setAttribute(el1, "id", "video-container");
-        dom.setAttribute(el1, "class", "cinemaOff hiddenxxx");
-        var el2 = dom.createTextNode("\n	");
-        dom.appendChild(el1, el2);
-        var el2 = dom.createElement("video");
-        dom.setAttribute(el2, "id", "video-player");
-        dom.setAttribute(el2, "autoplay", "");
-        var el3 = dom.createTextNode("\n		");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createElement("source");
-        dom.setAttribute(el3, "src", "assets/media/video1.mp4");
-        dom.setAttribute(el3, "type", "video/mp4");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("\n		Your browser does not support the video element.\n	");
-        dom.appendChild(el2, el3);
-        dom.appendChild(el1, el2);
-        var el2 = dom.createTextNode("\n");
-        dom.appendChild(el1, el2);
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createElement("div");
-        dom.setAttribute(el1, "id", "text-container");
-        dom.setAttribute(el1, "class", "hidden");
+        dom.setAttribute(el1, "class", "container");
         var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
         var el2 = dom.createElement("div");
-        dom.setAttribute(el2, "id", "text-dialog");
+        dom.setAttribute(el2, "class", "container-fluid");
         var el3 = dom.createTextNode("\n		");
         dom.appendChild(el2, el3);
         var el3 = dom.createElement("div");
-        dom.setAttribute(el3, "id", "text-baloon");
+        dom.setAttribute(el3, "class", "row");
         var el4 = dom.createTextNode("\n			");
         dom.appendChild(el3, el4);
-        var el4 = dom.createComment("");
+        var el4 = dom.createElement("div");
+        dom.setAttribute(el4, "class", "col-md-3 sidebar");
+        var el5 = dom.createTextNode("\n				");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createElement("div");
+        dom.setAttribute(el5, "id", "menu-header");
+        var el6 = dom.createTextNode("\n					");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("span");
+        var el7 = dom.createTextNode("Salve, ");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createElement("strong");
+        var el8 = dom.createComment("");
+        dom.appendChild(el7, el8);
+        var el8 = dom.createTextNode(" ");
+        dom.appendChild(el7, el8);
+        var el8 = dom.createComment("");
+        dom.appendChild(el7, el8);
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode("!");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n				");
+        dom.appendChild(el5, el6);
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("\n				");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createComment("");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("\n			");
+        dom.appendChild(el4, el5);
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("\n			");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createElement("div");
+        dom.setAttribute(el4, "class", "col-md-9 col-md-offset-3 content");
+        dom.setAttribute(el4, "style", "margin-left: 25%;");
+        var el5 = dom.createTextNode("\n				");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createElement("div");
+        dom.setAttribute(el5, "class", "row hidden-xs");
+        var el6 = dom.createTextNode("\n					");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("div");
+        dom.setAttribute(el6, "class", "col-sm-12");
+        var el7 = dom.createTextNode("\n						");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createElement("div");
+        dom.setAttribute(el7, "id", "logo-app");
+        var el8 = dom.createElement("img");
+        dom.setAttribute(el8, "src", "assets/images/logo-app.png");
+        dom.appendChild(el7, el8);
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode("\n					");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n				");
+        dom.appendChild(el5, el6);
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("\n				");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createElement("div");
+        dom.setAttribute(el5, "id", "main-content");
+        dom.setAttribute(el5, "class", "panel panel-default");
+        var el6 = dom.createTextNode("\n					");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("div");
+        dom.setAttribute(el6, "class", "panel-heading");
+        var el7 = dom.createTextNode("\n						");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createElement("h3");
+        dom.setAttribute(el7, "class", "panel-title");
+        var el8 = dom.createTextNode("Simulazioni disponibili");
+        dom.appendChild(el7, el8);
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode("\n					");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n					");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("div");
+        dom.setAttribute(el6, "class", "panel-body");
+        var el7 = dom.createTextNode("\n						");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createElement("div");
+        dom.setAttribute(el7, "class", "table-responsive");
+        var el8 = dom.createTextNode("\n							");
+        dom.appendChild(el7, el8);
+        var el8 = dom.createElement("table");
+        dom.setAttribute(el8, "class", "table table-striped");
+        var el9 = dom.createTextNode("\n								");
+        dom.appendChild(el8, el9);
+        var el9 = dom.createElement("thead");
+        var el10 = dom.createTextNode("\n									");
+        dom.appendChild(el9, el10);
+        var el10 = dom.createElement("tr");
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("th");
+        dom.setAttribute(el11, "class", "fit");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("th");
+        var el12 = dom.createTextNode("Simulazione");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("th");
+        var el12 = dom.createTextNode("Tentativi");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n										");
+        dom.appendChild(el10, el11);
+        var el11 = dom.createElement("th");
+        var el12 = dom.createTextNode("Media");
+        dom.appendChild(el11, el12);
+        dom.appendChild(el10, el11);
+        var el11 = dom.createTextNode("\n									");
+        dom.appendChild(el10, el11);
+        dom.appendChild(el9, el10);
+        var el10 = dom.createTextNode("\n								");
+        dom.appendChild(el9, el10);
+        dom.appendChild(el8, el9);
+        var el9 = dom.createTextNode("\n								");
+        dom.appendChild(el8, el9);
+        var el9 = dom.createElement("tbody");
+        var el10 = dom.createTextNode("\n");
+        dom.appendChild(el9, el10);
+        var el10 = dom.createComment("");
+        dom.appendChild(el9, el10);
+        var el10 = dom.createTextNode("								");
+        dom.appendChild(el9, el10);
+        dom.appendChild(el8, el9);
+        var el9 = dom.createTextNode("\n							");
+        dom.appendChild(el8, el9);
+        dom.appendChild(el7, el8);
+        var el8 = dom.createTextNode("\n						");
+        dom.appendChild(el7, el8);
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode(" \n					");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n				");
+        dom.appendChild(el5, el6);
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("\n			");
+        dom.appendChild(el4, el5);
         dom.appendChild(el3, el4);
         var el4 = dom.createTextNode("\n		");
         dom.appendChild(el3, el4);
-        dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("\n		\n");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createComment("");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("	");
-        dom.appendChild(el2, el3);
-        dom.appendChild(el1, el2);
-        var el2 = dom.createTextNode("\n");
-        dom.appendChild(el1, el2);
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createElement("audio");
-        dom.setAttribute(el1, "autoplay", "");
-        dom.setAttribute(el1, "loop", "");
-        var el2 = dom.createTextNode("\n	 ");
-        dom.appendChild(el1, el2);
-        var el2 = dom.createElement("source");
-        dom.setAttribute(el2, "src", "assets/media/music.mp3");
-        dom.setAttribute(el2, "type", "audio/mpeg");
-        dom.appendChild(el1, el2);
-        var el2 = dom.createTextNode("\n	 Your browser does not support the audio element.\n");
-        dom.appendChild(el1, el2);
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode(" \n");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createElement("div");
-        dom.setAttribute(el1, "id", "side-chat");
-        dom.setAttribute(el1, "class", "minimizedXXX");
-        var el2 = dom.createTextNode("\n	");
-        dom.appendChild(el1, el2);
-        var el2 = dom.createElement("button");
-        dom.setAttribute(el2, "id", "button-chat");
-        dom.setAttribute(el2, "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left");
-        dom.setAttribute(el2, "role", "button");
-        var el3 = dom.createElement("span");
-        dom.setAttribute(el3, "class", "glyphicon glyphicon glyphicon-comment");
-        dom.appendChild(el2, el3);
-        dom.appendChild(el1, el2);
-        var el2 = dom.createTextNode("\n	");
-        dom.appendChild(el1, el2);
-        var el2 = dom.createElement("button");
-        dom.setAttribute(el2, "id", "button-audio");
-        dom.setAttribute(el2, "class", "btn btn-link ttexp-btn ttexp-position-absolute top-right");
-        dom.setAttribute(el2, "role", "button");
-        var el3 = dom.createElement("span");
-        dom.setAttribute(el3, "class", "glyphicon glyphicon-volume-up");
-        dom.appendChild(el2, el3);
-        dom.appendChild(el1, el2);
-        var el2 = dom.createTextNode("\n	");
-        dom.appendChild(el1, el2);
-        var el2 = dom.createElement("ul");
-        dom.setAttribute(el2, "id", "chat-options");
-        dom.setAttribute(el2, "class", "list-group ");
-        var el3 = dom.createTextNode("\n");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createComment("");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("		\n		");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createComment("\n		<li class=\"list-group-item\">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenenan massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.</li>\n		<li class=\"list-group-item\">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenenan massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.</li>\n		<li class=\"list-group-item\">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenenan massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat mas.</li>\n		");
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n	");
         dom.appendChild(el2, el3);
         dom.appendChild(el1, el2);
         var el2 = dom.createTextNode("\n");
         dom.appendChild(el1, el2);
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n\n");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createComment("");
         dom.appendChild(el0, el1);
         var el1 = dom.createTextNode("\n\n");
         dom.appendChild(el0, el1);
@@ -3192,23 +3611,24 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         dom.appendChild(el0, el1);
         var el1 = dom.createComment("");
         dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
-        dom.appendChild(el0, el1);
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var element0 = dom.childAt(fragment, [2, 1]);
+        var element1 = dom.childAt(fragment, [0, 1, 1]);
+        var element2 = dom.childAt(element1, [1]);
+        var element3 = dom.childAt(element2, [1, 1, 1]);
         var morphs = new Array(5);
-        morphs[0] = dom.createMorphAt(dom.childAt(element0, [1]), 1, 1);
-        morphs[1] = dom.createMorphAt(element0, 3, 3);
-        morphs[2] = dom.createMorphAt(dom.childAt(fragment, [6, 5]), 1, 1);
-        morphs[3] = dom.createMorphAt(fragment, 8, 8, contextualElement);
-        morphs[4] = dom.createMorphAt(fragment, 12, 12, contextualElement);
+        morphs[0] = dom.createMorphAt(element3, 0, 0);
+        morphs[1] = dom.createMorphAt(element3, 2, 2);
+        morphs[2] = dom.createMorphAt(element2, 3, 3);
+        morphs[3] = dom.createMorphAt(dom.childAt(element1, [3, 3, 3, 1, 1, 3]), 1, 1);
+        morphs[4] = dom.createMorphAt(fragment, 4, 4, contextualElement);
+        dom.insertBoundary(fragment, null);
         return morphs;
       },
-      statements: [["content", "model.dialog", ["loc", [null, [10, 3], [10, 19]]]], ["block", "if", [["get", "model.scores", ["loc", [null, [13, 8], [13, 20]]]]], [], 0, null, ["loc", [null, [13, 2], [17, 9]]]], ["block", "each", [["get", "model.items", ["loc", [null, [28, 10], [28, 21]]]]], [], 1, null, ["loc", [null, [28, 2], [34, 11]]]], ["block", "link-to", ["index"], ["id", "button-close", "class", "btn btn-link ttexp-btn ttexp-position-absolute top-left"], 2, null, ["loc", [null, [44, 0], [44, 179]]]], ["content", "outlet", ["loc", [null, [48, 0], [48, 10]]]]],
+      statements: [["content", "firstName", ["loc", [null, [6, 26], [6, 39]]]], ["content", "lastName", ["loc", [null, [6, 40], [6, 52]]]], ["inline", "partial", ["layout/menu"], [], ["loc", [null, [8, 4], [8, 29]]]], ["block", "each", [["get", "model", ["loc", [null, [32, 17], [32, 22]]]]], [], 0, 1, ["loc", [null, [32, 9], [43, 18]]]], ["content", "outlet", ["loc", [null, [56, 0], [56, 10]]]]],
       locals: [],
-      templates: [child0, child1, child2]
+      templates: [child0, child1]
     };
   })());
 });
@@ -3218,7 +3638,7 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
       return {
         meta: {
           "fragmentReason": false,
-          "revision": "Ember@2.4.1",
+          "revision": "Ember@2.6.1",
           "loc": {
             "source": null,
             "start": {
@@ -3257,7 +3677,7 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
           "name": "missing-wrapper",
           "problems": ["multiple-nodes", "wrong-type"]
         },
-        "revision": "Ember@2.4.1",
+        "revision": "Ember@2.6.1",
         "loc": {
           "source": null,
           "start": {
@@ -3345,7 +3765,7 @@ catch(err) {
 /* jshint ignore:start */
 
 if (!runningTests) {
-  require("ttexp/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+1ae582ea"});
+  require("ttexp/app")["default"].create({"serverApiUrl":"http://ttexp-server.localhost/api","LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.0.0+125ad548"});
 }
 
 /* jshint ignore:end */

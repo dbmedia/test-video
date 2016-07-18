@@ -34,6 +34,15 @@ define('ttexp/tests/authorizers/oauth2.jshint', ['exports'], function (exports) 
     assert.ok(true, 'authorizers/oauth2.js should pass jshint.');
   });
 });
+define('ttexp/tests/controllers/action.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - controllers/action.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'controllers/action.js should pass jshint.');
+  });
+});
 define('ttexp/tests/controllers/help.jshint', ['exports'], function (exports) {
   'use strict';
 
@@ -77,6 +86,15 @@ define('ttexp/tests/controllers/play.jshint', ['exports'], function (exports) {
   QUnit.test('should pass jshint', function (assert) {
     assert.expect(1);
     assert.ok(true, 'controllers/play.js should pass jshint.');
+  });
+});
+define('ttexp/tests/controllers/scenarios.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - controllers/scenarios.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'controllers/scenarios.js should pass jshint.');
   });
 });
 define('ttexp/tests/controllers/scores.jshint', ['exports'], function (exports) {
@@ -185,6 +203,87 @@ define('ttexp/tests/initializers/cordova.jshint', ['exports'], function (exports
     assert.ok(true, 'initializers/cordova.js should pass jshint.');
   });
 });
+define('ttexp/tests/models/action.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - models/action.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'models/action.js should pass jshint.');
+  });
+});
+define('ttexp/tests/models/item.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - models/item.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'models/item.js should pass jshint.');
+  });
+});
+define('ttexp/tests/models/play-state.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - models/play-state.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(false, 'models/play-state.js should pass jshint.\nmodels/play-state.js: line 10, col 18, \'Ember\' is not defined.\n\n1 error');
+  });
+});
+define('ttexp/tests/models/playthrough.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - models/playthrough.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'models/playthrough.js should pass jshint.');
+  });
+});
+define('ttexp/tests/models/scenario.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - models/scenario.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'models/scenario.js should pass jshint.');
+  });
+});
+define('ttexp/tests/models/score.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - models/score.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'models/score.js should pass jshint.');
+  });
+});
+define('ttexp/tests/models/tank.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - models/tank.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'models/tank.js should pass jshint.');
+  });
+});
+define('ttexp/tests/models/user.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - models/user.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'models/user.js should pass jshint.');
+  });
+});
+define('ttexp/tests/models/video.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - models/video.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(false, 'models/video.js should pass jshint.\nmodels/video.js: line 12, col 13, \'Ember\' is not defined.\n\n1 error');
+  });
+});
 define('ttexp/tests/router.jshint', ['exports'], function (exports) {
   'use strict';
 
@@ -194,6 +293,15 @@ define('ttexp/tests/router.jshint', ['exports'], function (exports) {
     assert.ok(true, 'router.js should pass jshint.');
   });
 });
+define('ttexp/tests/routes/action.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - routes/action.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(false, 'routes/action.js should pass jshint.\nroutes/action.js: line 10, col 21, \'transition\' is defined but never used.\nroutes/action.js: line 19, col 9, \'params\' is defined but never used.\nroutes/action.js: line 2, col 8, \'ENV\' is defined but never used.\n\n3 errors');
+  });
+});
 define('ttexp/tests/routes/admin/index.jshint', ['exports'], function (exports) {
   'use strict';
 
@@ -201,15 +309,6 @@ define('ttexp/tests/routes/admin/index.jshint', ['exports'], function (exports) 
   QUnit.test('should pass jshint', function (assert) {
     assert.expect(1);
     assert.ok(true, 'routes/admin/index.js should pass jshint.');
-  });
-});
-define('ttexp/tests/routes/admin/scenario.jshint', ['exports'], function (exports) {
-  'use strict';
-
-  QUnit.module('JSHint - routes/admin/scenario.js');
-  QUnit.test('should pass jshint', function (assert) {
-    assert.expect(1);
-    assert.ok(true, 'routes/admin/scenario.js should pass jshint.');
   });
 });
 define('ttexp/tests/routes/application.jshint', ['exports'], function (exports) {
@@ -236,7 +335,7 @@ define('ttexp/tests/routes/index.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - routes/index.js');
   QUnit.test('should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(true, 'routes/index.js should pass jshint.');
+    assert.ok(false, 'routes/index.js should pass jshint.\nroutes/index.js: line 6, col 9, \'params\' is defined but never used.\nroutes/index.js: line 2, col 8, \'ENV\' is defined but never used.\n\n2 errors');
   });
 });
 define('ttexp/tests/routes/page-not-found.jshint', ['exports'], function (exports) {
@@ -254,7 +353,16 @@ define('ttexp/tests/routes/play.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - routes/play.js');
   QUnit.test('should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'routes/play.js should pass jshint.\nroutes/play.js: line 2, col 8, \'AuthenticatedRouteMixin\' is defined but never used.\n\n1 error');
+    assert.ok(false, 'routes/play.js should pass jshint.\nroutes/play.js: line 13, col 9, \'self\' is defined but never used.\nroutes/play.js: line 17, col 11, \'playthrough\' is defined but never used.\nroutes/play.js: line 18, col 11, \'video\' is defined but never used.\nroutes/play.js: line 12, col 21, \'transition\' is defined but never used.\nroutes/play.js: line 46, col 10, \'item\' is defined but never used.\nroutes/play.js: line 2, col 8, \'ENV\' is defined but never used.\n\n6 errors');
+  });
+});
+define('ttexp/tests/routes/scenarios.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - routes/scenarios.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(false, 'routes/scenarios.js should pass jshint.\nroutes/scenarios.js: line 6, col 9, \'params\' is defined but never used.\nroutes/scenarios.js: line 2, col 8, \'ENV\' is defined but never used.\n\n2 errors');
   });
 });
 define('ttexp/tests/routes/scores.jshint', ['exports'], function (exports) {
@@ -264,6 +372,15 @@ define('ttexp/tests/routes/scores.jshint', ['exports'], function (exports) {
   QUnit.test('should pass jshint', function (assert) {
     assert.expect(1);
     assert.ok(true, 'routes/scores.js should pass jshint.');
+  });
+});
+define('ttexp/tests/services/session.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - services/session.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'services/session.js should pass jshint.');
   });
 });
 define('ttexp/tests/test-helper', ['exports', 'ttexp/tests/helpers/resolver', 'ember-qunit'], function (exports, _ttexpTestsHelpersResolver, _emberQunit) {
@@ -277,6 +394,50 @@ define('ttexp/tests/test-helper.jshint', ['exports'], function (exports) {
   QUnit.test('should pass jshint', function (assert) {
     assert.expect(1);
     assert.ok(true, 'test-helper.js should pass jshint.');
+  });
+});
+define('ttexp/tests/unit/adapters/scenario-test', ['exports', 'ember-qunit'], function (exports, _emberQunit) {
+
+  (0, _emberQunit.moduleFor)('adapter:scenario', 'Unit | Adapter | scenario', {
+    // Specify the other units that are required for this test.
+    // needs: ['serializer:foo']
+  });
+
+  // Replace this with your real tests.
+  (0, _emberQunit.test)('it exists', function (assert) {
+    var adapter = this.subject();
+    assert.ok(adapter);
+  });
+});
+define('ttexp/tests/unit/adapters/scenario-test.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - unit/adapters/scenario-test.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'unit/adapters/scenario-test.js should pass jshint.');
+  });
+});
+define('ttexp/tests/unit/controllers/scenario-test', ['exports', 'ember-qunit'], function (exports, _emberQunit) {
+
+  (0, _emberQunit.moduleFor)('controller:scenario', 'Unit | Controller | scenario', {
+    // Specify the other units that are required for this test.
+    // needs: ['controller:foo']
+  });
+
+  // Replace this with your real tests.
+  (0, _emberQunit.test)('it exists', function (assert) {
+    var controller = this.subject();
+    assert.ok(controller);
+  });
+});
+define('ttexp/tests/unit/controllers/scenario-test.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - unit/controllers/scenario-test.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'unit/controllers/scenario-test.js should pass jshint.');
   });
 });
 define('ttexp/tests/unit/initializers/cordova-test', ['exports', 'ember', 'ttexp/initializers/cordova', 'qunit'], function (exports, _ember, _ttexpInitializersCordova, _qunit) {
@@ -309,6 +470,50 @@ define('ttexp/tests/unit/initializers/cordova-test.jshint', ['exports'], functio
     assert.ok(true, 'unit/initializers/cordova-test.js should pass jshint.');
   });
 });
+define('ttexp/tests/unit/models/action-test', ['exports', 'ember-qunit'], function (exports, _emberQunit) {
+
+  (0, _emberQunit.moduleForModel)('action', 'Unit | Model | action', {
+    // Specify the other units that are required for this test.
+    needs: []
+  });
+
+  (0, _emberQunit.test)('it exists', function (assert) {
+    var model = this.subject();
+    // let store = this.store();
+    assert.ok(!!model);
+  });
+});
+define('ttexp/tests/unit/models/action-test.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - unit/models/action-test.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'unit/models/action-test.js should pass jshint.');
+  });
+});
+define('ttexp/tests/unit/models/item-test', ['exports', 'ember-qunit'], function (exports, _emberQunit) {
+
+  (0, _emberQunit.moduleForModel)('item', 'Unit | Model | item', {
+    // Specify the other units that are required for this test.
+    needs: []
+  });
+
+  (0, _emberQunit.test)('it exists', function (assert) {
+    var model = this.subject();
+    // let store = this.store();
+    assert.ok(!!model);
+  });
+});
+define('ttexp/tests/unit/models/item-test.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - unit/models/item-test.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'unit/models/item-test.js should pass jshint.');
+  });
+});
 define('ttexp/tests/unit/models/pippo-test', ['exports', 'ember-qunit'], function (exports, _emberQunit) {
 
   (0, _emberQunit.moduleForModel)('pippo', 'Unit | Model | pippo', {
@@ -329,6 +534,160 @@ define('ttexp/tests/unit/models/pippo-test.jshint', ['exports'], function (expor
   QUnit.test('should pass jshint', function (assert) {
     assert.expect(1);
     assert.ok(true, 'unit/models/pippo-test.js should pass jshint.');
+  });
+});
+define('ttexp/tests/unit/models/play-state-test', ['exports', 'ember-qunit'], function (exports, _emberQunit) {
+
+  (0, _emberQunit.moduleForModel)('play-state', 'Unit | Model | play state', {
+    // Specify the other units that are required for this test.
+    needs: []
+  });
+
+  (0, _emberQunit.test)('it exists', function (assert) {
+    var model = this.subject();
+    // let store = this.store();
+    assert.ok(!!model);
+  });
+});
+define('ttexp/tests/unit/models/play-state-test.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - unit/models/play-state-test.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'unit/models/play-state-test.js should pass jshint.');
+  });
+});
+define('ttexp/tests/unit/models/playthrough-test', ['exports', 'ember-qunit'], function (exports, _emberQunit) {
+
+  (0, _emberQunit.moduleForModel)('playthrough', 'Unit | Model | playthrough', {
+    // Specify the other units that are required for this test.
+    needs: []
+  });
+
+  (0, _emberQunit.test)('it exists', function (assert) {
+    var model = this.subject();
+    // let store = this.store();
+    assert.ok(!!model);
+  });
+});
+define('ttexp/tests/unit/models/playthrough-test.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - unit/models/playthrough-test.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'unit/models/playthrough-test.js should pass jshint.');
+  });
+});
+define('ttexp/tests/unit/models/scenario-test', ['exports', 'ember-qunit'], function (exports, _emberQunit) {
+
+  (0, _emberQunit.moduleForModel)('scenario', 'Unit | Model | scenario', {
+    // Specify the other units that are required for this test.
+    needs: []
+  });
+
+  (0, _emberQunit.test)('it exists', function (assert) {
+    var model = this.subject();
+    // let store = this.store();
+    assert.ok(!!model);
+  });
+});
+define('ttexp/tests/unit/models/scenario-test.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - unit/models/scenario-test.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'unit/models/scenario-test.js should pass jshint.');
+  });
+});
+define('ttexp/tests/unit/models/tank-test', ['exports', 'ember-qunit'], function (exports, _emberQunit) {
+
+  (0, _emberQunit.moduleForModel)('tank', 'Unit | Model | tank', {
+    // Specify the other units that are required for this test.
+    needs: []
+  });
+
+  (0, _emberQunit.test)('it exists', function (assert) {
+    var model = this.subject();
+    // let store = this.store();
+    assert.ok(!!model);
+  });
+});
+define('ttexp/tests/unit/models/tank-test.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - unit/models/tank-test.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'unit/models/tank-test.js should pass jshint.');
+  });
+});
+define('ttexp/tests/unit/models/user-test', ['exports', 'ember-qunit'], function (exports, _emberQunit) {
+
+  (0, _emberQunit.moduleForModel)('user', 'Unit | Model | user', {
+    // Specify the other units that are required for this test.
+    needs: []
+  });
+
+  (0, _emberQunit.test)('it exists', function (assert) {
+    var model = this.subject();
+    // let store = this.store();
+    assert.ok(!!model);
+  });
+});
+define('ttexp/tests/unit/models/user-test.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - unit/models/user-test.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'unit/models/user-test.js should pass jshint.');
+  });
+});
+define('ttexp/tests/unit/models/video-test', ['exports', 'ember-qunit'], function (exports, _emberQunit) {
+
+  (0, _emberQunit.moduleForModel)('video', 'Unit | Model | video', {
+    // Specify the other units that are required for this test.
+    needs: []
+  });
+
+  (0, _emberQunit.test)('it exists', function (assert) {
+    var model = this.subject();
+    // let store = this.store();
+    assert.ok(!!model);
+  });
+});
+define('ttexp/tests/unit/models/video-test.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - unit/models/video-test.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'unit/models/video-test.js should pass jshint.');
+  });
+});
+define('ttexp/tests/unit/services/session-test', ['exports', 'ember-qunit'], function (exports, _emberQunit) {
+
+  (0, _emberQunit.moduleFor)('service:session', 'Unit | Service | session', {
+    // Specify the other units that are required for this test.
+    // needs: ['service:foo']
+  });
+
+  // Replace this with your real tests.
+  (0, _emberQunit.test)('it exists', function (assert) {
+    var service = this.subject();
+    assert.ok(service);
+  });
+});
+define('ttexp/tests/unit/services/session-test.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - unit/services/session-test.js');
+  QUnit.test('should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'unit/services/session-test.js should pass jshint.');
   });
 });
 /* jshint ignore:start */

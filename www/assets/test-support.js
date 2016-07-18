@@ -12,10 +12,10 @@
  *            Portions Copyright 2008-2011 Apple Inc. All rights reserved.
  * @license   Licensed under MIT license
  *            See https://raw.github.com/emberjs/ember.js/master/LICENSE
- * @version   2.4.1
+ * @version   2.6.1
  */
 
-var enifed, requireModule, require, requirejs, Ember;
+var enifed, requireModule, require, Ember;
 var mainContext = this;
 
 (function() {
@@ -26,7 +26,7 @@ var mainContext = this;
     Ember = this.Ember = this.Ember || {};
   }
 
-  if (typeof Ember === 'undefined') { Ember = {}; };
+  if (typeof Ember === 'undefined') { Ember = {}; }
 
   if (typeof Ember.__loader === 'undefined') {
     var registry = {};
@@ -46,9 +46,9 @@ var mainContext = this;
       registry[name] = value;
     };
 
-    requirejs = require = requireModule = function(name) {
+    require = requireModule = function(name) {
       return internalRequire(name, null);
-    }
+    };
 
     // setup `require` module
     require['default'] = require;
@@ -89,7 +89,7 @@ var mainContext = this;
       var deps = mod.deps;
       var callback = mod.callback;
       var length = deps.length;
-      var reified = new Array(length);;
+      var reified = new Array(length);
 
       for (var i = 0; i < length; i++) {
         if (deps[i] === 'exports') {
@@ -104,9 +104,9 @@ var mainContext = this;
       callback.apply(this, reified);
 
       return exports;
-    };
+    }
 
-    requirejs._eak_seen = registry;
+    requireModule._eak_seen = registry;
 
     Ember.__loader = {
       define: enifed,
@@ -115,7 +115,7 @@ var mainContext = this;
     };
   } else {
     enifed = Ember.__loader.define;
-    requirejs = require = requireModule = Ember.__loader.require;
+    require = requireModule = Ember.__loader.require;
   }
 })();
 
@@ -152,18 +152,27 @@ enifed('ember-debug/deprecate', ['exports', 'ember-metal/core', 'ember-metal/err
     _emberMetalLogger.default.warn('DEPRECATION: ' + updatedMessage);
   });
 
-  registerHandler(function logDeprecationStackTrace(message, options, next) {
-    if (_emberMetalCore.default.LOG_STACKTRACE_ON_DEPRECATION) {
-      var stackStr = '';
-      var error = undefined,
-          stack = undefined;
+  var captureErrorForStack = undefined;
 
-      // When using new Error, we can't do the arguments check for Chrome. Alternatives are welcome
+  if (new Error().stack) {
+    captureErrorForStack = function () {
+      return new Error();
+    };
+  } else {
+    captureErrorForStack = function () {
       try {
         __fail__.fail();
       } catch (e) {
-        error = e;
+        return e;
       }
+    };
+  }
+
+  registerHandler(function logDeprecationStackTrace(message, options, next) {
+    if (_emberMetalCore.default.LOG_STACKTRACE_ON_DEPRECATION) {
+      var stackStr = '';
+      var error = captureErrorForStack();
+      var stack = undefined;
 
       if (error.stack) {
         if (error['arguments']) {
@@ -210,8 +219,10 @@ enifed('ember-debug/deprecate', ['exports', 'ember-metal/core', 'ember-metal/err
 
   /**
     Display a deprecation warning with the provided message and a stack trace
-    (Chrome and Firefox only). Ember build tools will remove any calls to
-    `Ember.deprecate()` when doing a production build.
+    (Chrome and Firefox only).
+  
+    * In a production build, this method is defined as an empty function (NOP).
+    Uses of this method in Ember itself are stripped from the ember.prod.js build.
   
     @method deprecate
     @param {String} message A description of the deprecation.
@@ -254,29 +265,14 @@ enifed('ember-debug/deprecate', ['exports', 'ember-metal/core', 'ember-metal/err
     _emberDebugHandlers.invoke.apply(undefined, ['deprecate'].concat(_slice.call(arguments)));
   }
 });
-enifed('ember-debug/handlers', ['exports', 'ember-debug/is-plain-function', 'ember-debug/deprecate'], function (exports, _emberDebugIsPlainFunction, _emberDebugDeprecate) {
-  'use strict';
+enifed("ember-debug/handlers", ["exports"], function (exports) {
+  "use strict";
 
-  exports.generateTestAsFunctionDeprecation = generateTestAsFunctionDeprecation;
   exports.registerHandler = registerHandler;
   exports.invoke = invoke;
   var HANDLERS = {};
 
   exports.HANDLERS = HANDLERS;
-
-  function generateTestAsFunctionDeprecation(source) {
-    return 'Calling `' + source + '` with a function argument is deprecated. Please ' + 'use `!!Constructor` for constructors, or an `IIFE` to compute the test for deprecation. ' + 'In a future version functions will be treated as truthy values instead of being executed.';
-  }
-
-  function normalizeTest(test, source) {
-    if (_emberDebugIsPlainFunction.default(test)) {
-      _emberDebugDeprecate.default(generateTestAsFunctionDeprecation(source), false, { id: 'ember-debug.deprecate-test-as-function', until: '2.5.0' });
-
-      return test();
-    }
-
-    return test;
-  }
 
   function registerHandler(type, callback) {
     var nextHandler = HANDLERS[type] || function () {};
@@ -287,7 +283,7 @@ enifed('ember-debug/handlers', ['exports', 'ember-debug/is-plain-function', 'emb
   }
 
   function invoke(type, message, test, options) {
-    if (normalizeTest(test, 'Ember.' + type)) {
+    if (test) {
       return;
     }
 
@@ -302,7 +298,7 @@ enifed('ember-debug/handlers', ['exports', 'ember-debug/is-plain-function', 'emb
     }
   }
 });
-enifed('ember-debug/index', ['exports', 'ember-metal/core', 'ember-metal/debug', 'ember-metal/features', 'ember-metal/error', 'ember-metal/logger', 'ember-metal/environment', 'ember-debug/deprecate', 'ember-debug/warn', 'ember-debug/is-plain-function', 'ember-debug/handlers'], function (exports, _emberMetalCore, _emberMetalDebug, _emberMetalFeatures, _emberMetalError, _emberMetalLogger, _emberMetalEnvironment, _emberDebugDeprecate, _emberDebugWarn, _emberDebugIsPlainFunction, _emberDebugHandlers) {
+enifed('ember-debug/index', ['exports', 'ember-metal/core', 'ember-metal/debug', 'ember-metal/features', 'ember-metal/error', 'ember-metal/logger', 'ember-metal/environment', 'ember-debug/deprecate', 'ember-debug/warn'], function (exports, _emberMetalCore, _emberMetalDebug, _emberMetalFeatures, _emberMetalError, _emberMetalLogger, _emberMetalEnvironment, _emberDebugDeprecate, _emberDebugWarn) {
   'use strict';
 
   exports._warnIfUsingStrippedFeatureFlags = _warnIfUsingStrippedFeatureFlags;
@@ -318,9 +314,10 @@ enifed('ember-debug/index', ['exports', 'ember-metal/core', 'ember-metal/debug',
   */
 
   /**
-    Define an assertion that will throw an exception if the condition is not
-    met. Ember build tools will remove any calls to `Ember.assert()` when
-    doing a production build. Example:
+    Define an assertion that will throw an exception if the condition is not met.
+  
+    * In a production build, this method is defined as an empty function (NOP).
+    Uses of this method in Ember itself are stripped from the ember.prod.js build.
   
     ```javascript
     // Test for truthiness
@@ -338,24 +335,16 @@ enifed('ember-debug/index', ['exports', 'ember-metal/core', 'ember-metal/debug',
     @public
   */
   _emberMetalDebug.setDebugFunction('assert', function assert(desc, test) {
-    var throwAssertion = undefined;
-
-    if (_emberDebugIsPlainFunction.default(test)) {
-      _emberMetalDebug.deprecate(_emberDebugHandlers.generateTestAsFunctionDeprecation('Ember.assert'), false, { id: 'ember-debug.deprecate-test-as-function', until: '2.5.0' });
-
-      throwAssertion = !test();
-    } else {
-      throwAssertion = !test;
-    }
-
-    if (throwAssertion) {
+    if (!test) {
       throw new _emberMetalError.default('Assertion Failed: ' + desc);
     }
   });
 
   /**
-    Display a debug notice. Ember build tools will remove any calls to
-    `Ember.debug()` when doing a production build.
+    Display a debug notice.
+  
+    * In a production build, this method is defined as an empty function (NOP).
+    Uses of this method in Ember itself are stripped from the ember.prod.js build.
   
     ```javascript
     Ember.debug('I\'m a debug notice!');
@@ -372,6 +361,9 @@ enifed('ember-debug/index', ['exports', 'ember-metal/core', 'ember-metal/debug',
   /**
     Display an info notice.
   
+    * In a production build, this method is defined as an empty function (NOP).
+    Uses of this method in Ember itself are stripped from the ember.prod.js build.
+  
     @method info
     @private
   */
@@ -385,8 +377,7 @@ enifed('ember-debug/index', ['exports', 'ember-metal/core', 'ember-metal/debug',
     Display a deprecation warning with the provided message and a stack trace
     (Chrome and Firefox only) when the assigned method is called.
   
-    Ember build tools will not remove calls to `Ember.deprecateFunc()`, though
-    no warnings will be shown in production.
+    * In a production build, this method is defined as an empty function (NOP).
   
     ```javascript
     Ember.oldMethod = Ember.deprecateFunc('Please use the new, updated method', Ember.newMethod);
@@ -396,7 +387,7 @@ enifed('ember-debug/index', ['exports', 'ember-metal/core', 'ember-metal/debug',
     @param {String} message A description of the deprecation.
     @param {Object} [options] The options object for Ember.deprecate.
     @param {Function} func The new function called to replace its deprecated counterpart.
-    @return {Function} a new function that wrapped the original function with a deprecation warning
+    @return {Function} A new function that wraps the original function with a deprecation warning
     @private
   */
   _emberMetalDebug.setDebugFunction('deprecateFunc', function deprecateFunc() {
@@ -437,8 +428,10 @@ enifed('ember-debug/index', ['exports', 'ember-metal/core', 'ember-metal/debug',
   });
 
   /**
-    Run a function meant for debugging. Ember build tools will remove any calls to
-    `Ember.runInDebug()` when doing a production build.
+    Run a function meant for debugging.
+  
+    * In a production build, this method is defined as an empty function (NOP).
+    Uses of this method in Ember itself are stripped from the ember.prod.js build.
   
     ```javascript
     Ember.runInDebug(() => {
@@ -478,14 +471,18 @@ enifed('ember-debug/index', ['exports', 'ember-metal/core', 'ember-metal/debug',
     @return {void}
   */
 
-  function _warnIfUsingStrippedFeatureFlags(FEATURES, featuresWereStripped) {
+  function _warnIfUsingStrippedFeatureFlags(FEATURES, knownFeatures, featuresWereStripped) {
     if (featuresWereStripped) {
       _emberMetalDebug.warn('Ember.ENV.ENABLE_OPTIONAL_FEATURES is only available in canary builds.', !_emberMetalCore.default.ENV.ENABLE_OPTIONAL_FEATURES, { id: 'ember-debug.feature-flag-with-features-stripped' });
 
-      for (var key in FEATURES) {
-        if (FEATURES.hasOwnProperty(key) && key !== 'isEnabled') {
-          _emberMetalDebug.warn('FEATURE["' + key + '"] is set as enabled, but FEATURE flags are only available in canary builds.', !FEATURES[key], { id: 'ember-debug.feature-flag-with-features-stripped' });
+      var keys = Object.keys(FEATURES || {});
+      for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        if (key === 'isEnabled' || !(key in knownFeatures)) {
+          continue;
         }
+
+        _emberMetalDebug.warn('FEATURE["' + key + '"] is set as enabled, but FEATURE flags are only available in canary builds.', !FEATURES[key], { id: 'ember-debug.feature-flag-with-features-stripped' });
       }
     }
   }
@@ -496,7 +493,7 @@ enifed('ember-debug/index', ['exports', 'ember-metal/core', 'ember-metal/debug',
     var featuresWereStripped = true;
 
     delete _emberMetalFeatures.FEATURES['features-stripped-test'];
-    _warnIfUsingStrippedFeatureFlags(_emberMetalCore.default.ENV.FEATURES, featuresWereStripped);
+    _warnIfUsingStrippedFeatureFlags(_emberMetalCore.default.ENV.FEATURES, _emberMetalFeatures.KNOWN_FEATURES, featuresWereStripped);
 
     // Inform the developer about the Ember Inspector if not installed.
     var isFirefox = _emberMetalEnvironment.default.isFirefox;
@@ -529,7 +526,8 @@ enifed('ember-debug/index', ['exports', 'ember-metal/core', 'ember-metal/debug',
     Deprecations are invoked by calls to [Ember.deprecate](http://emberjs.com/api/classes/Ember.html#method_deprecate).
     The following example demonstrates its usage by registering a handler that throws an error if the
     message contains the word "should", otherwise defers to the default handler.
-     ```javascript
+  
+    ```javascript
     Ember.Debug.registerDeprecationHandler((message, options, next) => {
       if (message.indexOf('should') !== -1) {
         throw new Error(`Deprecation message with should: ${message}`);
@@ -539,20 +537,23 @@ enifed('ember-debug/index', ['exports', 'ember-metal/core', 'ember-metal/debug',
       }
     }
     ```
-     The handler function takes the following arguments:
-     <ul>
-      <li> <code>message</code> - The message received from the deprecation call. </li>
+  
+    The handler function takes the following arguments:
+  
+    <ul>
+      <li> <code>message</code> - The message received from the deprecation call.</li>
       <li> <code>options</code> - An object passed in with the deprecation call containing additional information including:</li>
         <ul>
-          <li> <code>id</code> - an id of the deprecation in the form of <code>package-name.specific-deprecation</code>.</li>
-          <li> <code>until</code> - is the version number Ember the feature and deprecation will be removed in.</li>
+          <li> <code>id</code> - An id of the deprecation in the form of <code>package-name.specific-deprecation</code>.</li>
+          <li> <code>until</code> - The Ember version number the feature and deprecation will be removed in.</li>
         </ul>
-      <li> <code>next</code> - a function that calls into the previously registered handler.</li>
+      <li> <code>next</code> - A function that calls into the previously registered handler.</li>
     </ul>
-     @public
+  
+    @public
     @static
     @method registerDeprecationHandler
-    @param handler {Function} a function to handle deprecation calls
+    @param handler {Function} A function to handle deprecation calls.
     @since 2.1.0
   */
   _emberMetalCore.default.Debug.registerDeprecationHandler = _emberDebugDeprecate.registerHandler;
@@ -561,23 +562,27 @@ enifed('ember-debug/index', ['exports', 'ember-metal/core', 'ember-metal/debug',
     Warnings are invoked by calls made to [Ember.warn](http://emberjs.com/api/classes/Ember.html#method_warn).
     The following example demonstrates its usage by registering a handler that does nothing overriding Ember's
     default warning behavior.
-     ```javascript
+  
+    ```javascript
     // next is not called, so no warnings get the default behavior
     Ember.Debug.registerWarnHandler(() => {});
     ```
-     The handler function takes the following arguments:
-     <ul>
+  
+    The handler function takes the following arguments:
+  
+    <ul>
       <li> <code>message</code> - The message received from the warn call. </li>
       <li> <code>options</code> - An object passed in with the warn call containing additional information including:</li>
         <ul>
-          <li> <code>id</code> - an id of the warning in the form of <code>package-name.specific-warning</code>.</li>
+          <li> <code>id</code> - An id of the warning in the form of <code>package-name.specific-warning</code>.</li>
         </ul>
-      <li> <code>next</code> - a function that calls into the previously registered handler.</li>
+      <li> <code>next</code> - A function that calls into the previously registered handler.</li>
     </ul>
-     @public
+  
+    @public
     @static
     @method registerWarnHandler
-    @param handler {Function} a function to handle warnings
+    @param handler {Function} A function to handle warnings.
     @since 2.1.0
   */
   _emberMetalCore.default.Debug.registerWarnHandler = _emberDebugWarn.registerHandler;
@@ -594,15 +599,6 @@ enifed('ember-debug/index', ['exports', 'ember-metal/core', 'ember-metal/debug',
   exports.runningNonEmberDebugJS = runningNonEmberDebugJS;
   if (runningNonEmberDebugJS) {
     _emberMetalDebug.warn('Please use `ember.debug.js` instead of `ember.js` for development and debugging.');
-  }
-});
-enifed('ember-debug/is-plain-function', ['exports'], function (exports) {
-  'use strict';
-
-  exports.default = isPlainFunction;
-
-  function isPlainFunction(test) {
-    return typeof test === 'function' && test.PrototypeMixin === undefined;
   }
 });
 enifed('ember-debug/warn', ['exports', 'ember-metal/logger', 'ember-metal/debug', 'ember-debug/handlers'], function (exports, _emberMetalLogger, _emberMetalDebug, _emberDebugHandlers) {
@@ -634,14 +630,16 @@ enifed('ember-debug/warn', ['exports', 'ember-metal/logger', 'ember-metal/debug'
   */
 
   /**
-    Display a warning with the provided message. Ember build tools will
-    remove any calls to `Ember.warn()` when doing a production build.
+    Display a warning with the provided message.
+  
+    * In a production build, this method is defined as an empty function (NOP).
+    Uses of this method in Ember itself are stripped from the ember.prod.js build.
   
     @method warn
     @param {String} message A warning to display.
     @param {Boolean} test An optional boolean. If falsy, the warning
       will be displayed.
-    @param {Object} options An ojbect that can be used to pass a unique
+    @param {Object} options An object that can be used to pass a unique
       `id` for this warning.  The `id` can be used by Ember debugging tools
       to change the behavior (raise, log, or silence) for that specific warning.
       The `id` should be namespaced by dots, e.g. "ember-debug.feature-flag-with-features-stripped"
@@ -751,7 +749,7 @@ enifed('ember-testing/adapters/qunit', ['exports', 'ember-testing/adapters/adapt
     }
   });
 });
-enifed('ember-testing/helpers', ['exports', 'ember-metal/property_get', 'ember-metal/error', 'ember-metal/run_loop', 'ember-views/system/jquery', 'ember-testing/test', 'ember-runtime/ext/rsvp'], function (exports, _emberMetalProperty_get, _emberMetalError, _emberMetalRun_loop, _emberViewsSystemJquery, _emberTestingTest, _emberRuntimeExtRsvp) {
+enifed('ember-testing/helpers', ['exports', 'ember-metal/property_get', 'ember-metal/error', 'ember-metal/run_loop', 'ember-views/system/jquery', 'ember-testing/test', 'ember-runtime/ext/rsvp', 'ember-metal/features'], function (exports, _emberMetalProperty_get, _emberMetalError, _emberMetalRun_loop, _emberViewsSystemJquery, _emberTestingTest, _emberRuntimeExtRsvp, _emberMetalFeatures) {
   'use strict';
 
   /**
@@ -762,16 +760,108 @@ enifed('ember-testing/helpers', ['exports', 'ember-metal/property_get', 'ember-m
   var helper = _emberTestingTest.default.registerHelper;
   var asyncHelper = _emberTestingTest.default.registerAsyncHelper;
 
-  function currentRouteName(app) {
-    var appController = app.__container__.lookup('controller:application');
+  var keyboardEventTypes, mouseEventTypes, buildKeyboardEvent, buildMouseEvent, buildBasicEvent, fireEvent, focus;
 
-    return _emberMetalProperty_get.get(appController, 'currentRouteName');
+  var defaultEventOptions = { canBubble: true, cancelable: true };
+  keyboardEventTypes = ['keydown', 'keypress', 'keyup'];
+  mouseEventTypes = ['click', 'mousedown', 'mouseup', 'dblclick', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover'];
+
+  buildKeyboardEvent = function buildKeyboardEvent(type) {
+    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    var event = undefined;
+    try {
+      event = document.createEvent('KeyEvents');
+      var eventOpts = _emberViewsSystemJquery.default.extend({}, defaultEventOptions, options);
+      event.initKeyEvent(type, eventOpts.canBubble, eventOpts.cancelable, window, eventOpts.ctrlKey, eventOpts.altKey, eventOpts.shiftKey, eventOpts.metaKey, eventOpts.keyCode, eventOpts.charCode);
+    } catch (e) {
+      event = buildBasicEvent(type, options);
+    }
+    return event;
+  };
+
+  buildMouseEvent = function buildMouseEvent(type) {
+    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    var event = undefined;
+    try {
+      event = document.createEvent('MouseEvents');
+      var eventOpts = _emberViewsSystemJquery.default.extend({}, defaultEventOptions, options);
+      event.initMouseEvent(type, eventOpts.canBubble, eventOpts.cancelable, window, eventOpts.detail, eventOpts.screenX, eventOpts.screenY, eventOpts.clientX, eventOpts.clientY, eventOpts.ctrlKey, eventOpts.altKey, eventOpts.shiftKey, eventOpts.metaKey, eventOpts.button, eventOpts.relatedTarget);
+    } catch (e) {
+      event = buildBasicEvent(type, options);
+    }
+    return event;
+  };
+
+  buildBasicEvent = function buildBasicEvent(type) {
+    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    var event = document.createEvent('Events');
+    event.initEvent(type, true, true);
+    _emberViewsSystemJquery.default.extend(event, options);
+    return event;
+  };
+
+  fireEvent = function fireEvent(element, type) {
+    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    if (!element) {
+      return;
+    }
+    var event = undefined;
+    if (keyboardEventTypes.indexOf(type) > -1) {
+      event = buildKeyboardEvent(type, options);
+    } else if (mouseEventTypes.indexOf(type) > -1) {
+      var rect = element.getBoundingClientRect();
+      var x = rect.left + 1;
+      var y = rect.top + 1;
+      var simulatedCoordinates = {
+        screenX: x + 5,
+        screenY: y + 95,
+        clientX: x,
+        clientY: y
+      };
+      event = buildMouseEvent(type, _emberViewsSystemJquery.default.extend(simulatedCoordinates, options));
+    } else {
+      event = buildBasicEvent(type, options);
+    }
+    element.dispatchEvent(event);
+  };
+
+  focus = function focus(el) {
+    if (!el) {
+      return;
+    }
+    var $el = _emberViewsSystemJquery.default(el);
+    if ($el.is(':input, [contenteditable=true]')) {
+      var type = $el.prop('type');
+      if (type !== 'checkbox' && type !== 'radio' && type !== 'hidden') {
+        _emberMetalRun_loop.default(null, function () {
+          // Firefox does not trigger the `focusin` event if the window
+          // does not have focus. If the document doesn't have focus just
+          // use trigger('focusin') instead.
+
+          if (!document.hasFocus || document.hasFocus()) {
+            el.focus();
+          } else {
+            $el.trigger('focusin');
+          }
+        });
+      }
+    }
+  };
+
+  function currentRouteName(app) {
+    var routingService = app.__container__.lookup('service:-routing');
+
+    return _emberMetalProperty_get.get(routingService, 'currentRouteName');
   }
 
   function currentPath(app) {
-    var appController = app.__container__.lookup('controller:application');
+    var routingService = app.__container__.lookup('service:-routing');
 
-    return _emberMetalProperty_get.get(appController, 'currentPath');
+    return _emberMetalProperty_get.get(routingService, 'currentPath');
   }
 
   function currentURL(app) {
@@ -783,24 +873,6 @@ enifed('ember-testing/helpers', ['exports', 'ember-metal/property_get', 'ember-m
   function pauseTest() {
     _emberTestingTest.default.adapter.asyncStart();
     return new _emberRuntimeExtRsvp.default.Promise(function () {}, 'TestAdapter paused promise');
-  }
-
-  function focus(el) {
-    if (el && el.is(':input, [contenteditable=true]')) {
-      var type = el.prop('type');
-      if (type !== 'checkbox' && type !== 'radio' && type !== 'hidden') {
-        _emberMetalRun_loop.default(el, function () {
-          // Firefox does not trigger the `focusin` event if the window
-          // does not have focus. If the document doesn't have focus just
-          // use trigger('focusin') instead.
-          if (!document.hasFocus || document.hasFocus()) {
-            this.focus();
-          } else {
-            this.trigger('focusin');
-          }
-        });
-      }
-    }
   }
 
   function visit(app, url) {
@@ -828,12 +900,14 @@ enifed('ember-testing/helpers', ['exports', 'ember-metal/property_get', 'ember-m
 
   function click(app, selector, context) {
     var $el = app.testHelpers.findWithAssert(selector, context);
-    _emberMetalRun_loop.default($el, 'mousedown');
+    var el = $el[0];
 
-    focus($el);
+    _emberMetalRun_loop.default(null, fireEvent, el, 'mousedown');
 
-    _emberMetalRun_loop.default($el, 'mouseup');
-    _emberMetalRun_loop.default($el, 'click');
+    focus(el);
+
+    _emberMetalRun_loop.default(null, fireEvent, el, 'mouseup');
+    _emberMetalRun_loop.default(null, fireEvent, el, 'click');
 
     return app.testHelpers.wait();
   }
@@ -870,10 +944,9 @@ enifed('ember-testing/helpers', ['exports', 'ember-metal/property_get', 'ember-m
     }
 
     var $el = app.testHelpers.findWithAssert(selector, context);
+    var el = $el[0];
 
-    var event = _emberViewsSystemJquery.default.Event(type, options);
-
-    _emberMetalRun_loop.default($el, 'trigger', event);
+    _emberMetalRun_loop.default(null, fireEvent, el, type, options);
 
     return app.testHelpers.wait();
   }
@@ -894,18 +967,19 @@ enifed('ember-testing/helpers', ['exports', 'ember-metal/property_get', 'ember-m
   }
 
   function fillIn(app, selector, contextOrText, text) {
-    var $el, context;
+    var $el, el, context;
     if (typeof text === 'undefined') {
       text = contextOrText;
     } else {
       context = contextOrText;
     }
     $el = app.testHelpers.findWithAssert(selector, context);
-    focus($el);
+    el = $el[0];
+    focus(el);
     _emberMetalRun_loop.default(function () {
       $el.val(text);
-      $el.trigger('input');
-      $el.change();
+      fireEvent(el, 'input');
+      fireEvent(el, 'change');
     });
     return app.testHelpers.wait();
   }
@@ -932,10 +1006,10 @@ enifed('ember-testing/helpers', ['exports', 'ember-metal/property_get', 'ember-m
 
   function wait(app, value) {
     return new _emberRuntimeExtRsvp.default.Promise(function (resolve) {
+      var router = app.__container__.lookup('router:main');
+
       // Every 10ms, poll for the async thing to have finished
       var watcher = setInterval(function () {
-        var router = app.__container__.lookup('router:main');
-
         // 1. If the router is loading, keep polling
         var routerIsLoading = router.router && !!router.router.activeTransition;
         if (routerIsLoading) {
@@ -1216,6 +1290,10 @@ enifed('ember-testing/helpers', ['exports', 'ember-metal/property_get', 'ember-m
   */
   asyncHelper('triggerEvent', triggerEvent);
 });
+
+// Firefox does not trigger the `focusin` event if the window
+// does not have focus. If the document doesn't have focus just
+// use trigger('focusin') instead.
 enifed('ember-testing/index', ['exports', 'ember-metal/core', 'ember-testing/initializers', 'ember-testing/support', 'ember-testing/setup_for_testing', 'ember-testing/test', 'ember-testing/adapters/adapter', 'ember-testing/adapters/qunit', 'ember-testing/helpers'], function (exports, _emberMetalCore, _emberTestingInitializers, _emberTestingSupport, _emberTestingSetup_for_testing, _emberTestingTest, _emberTestingAdaptersAdapter, _emberTestingAdaptersQunit, _emberTestingHelpers) {
   'use strict';
 
