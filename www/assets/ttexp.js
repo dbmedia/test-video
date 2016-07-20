@@ -856,7 +856,7 @@ define('ttexp/routes/play', ['exports', 'ember', 'ttexp/config/environment', 'em
         url = "http://demo-client.ttexp.net:8088/" + url;
         var videoPlayer = _ember['default'].$("#video-player");
         videoPlayer.attr("src", url);
-        videoPlayer.get(0).load();
+        //      videoPlayer.get(0).load();
         $("#overlay").hide();
         videoPlayer.get(0).play();
       },
