@@ -353,7 +353,7 @@ define('ttexp/tests/routes/play.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint | routes/play.js');
   QUnit.test('should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'routes/play.js should pass jshint.\nroutes/play.js: line 13, col 9, \'self\' is defined but never used.\nroutes/play.js: line 17, col 11, \'playthrough\' is defined but never used.\nroutes/play.js: line 18, col 11, \'video\' is defined but never used.\nroutes/play.js: line 12, col 21, \'transition\' is defined but never used.\nroutes/play.js: line 60, col 10, \'item\' is defined but never used.\nroutes/play.js: line 57, col 7, \'$\' is not defined.\nroutes/play.js: line 2, col 8, \'ENV\' is defined but never used.\n\n7 errors');
+    assert.ok(false, 'routes/play.js should pass jshint.\nroutes/play.js: line 13, col 9, \'self\' is defined but never used.\nroutes/play.js: line 17, col 11, \'playthrough\' is defined but never used.\nroutes/play.js: line 18, col 11, \'video\' is defined but never used.\nroutes/play.js: line 12, col 21, \'transition\' is defined but never used.\nroutes/play.js: line 62, col 10, \'item\' is defined but never used.\nroutes/play.js: line 58, col 7, \'$\' is not defined.\nroutes/play.js: line 2, col 8, \'ENV\' is defined but never used.\n\n7 errors');
   });
 });
 define('ttexp/tests/routes/scenarios.jshint', ['exports'], function (exports) {

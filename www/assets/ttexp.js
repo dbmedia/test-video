@@ -855,9 +855,11 @@ define('ttexp/routes/play', ['exports', 'ember', 'ttexp/config/environment', 'em
         var url = this.currentModel.scenario.get('playState').get('video').get('fullPath');
         url = "http://demo-client.ttexp.net:8088/" + url;
         var videoPlayer = _ember['default'].$("#video-player");
+        videoPlayer.hide();
         videoPlayer.attr("src", url);
         //      videoPlayer.get(0).load();
         $("#overlay").hide();
+        videoPlayer.show();
         videoPlayer.get(0).play();
       },
       exit: function exit(item) {
@@ -3207,6 +3209,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         dom.appendChild(el2, el3);
         var el3 = dom.createElement("video");
         dom.setAttribute(el3, "id", "video-player");
+        dom.setAttribute(el3, "controls", "true");
         var el4 = dom.createTextNode("\n			Your browser does not support the video element.\n		");
         dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
