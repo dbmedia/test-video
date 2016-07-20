@@ -7319,6 +7319,8 @@ html, body {
         margin-right: 32px; }
         .page-play #side-chat #chat-options li:first-child {
           border-top-width: 3px; }
+        .page-play #side-chat #chat-options li:active {
+          color: #ffaa44; }
   .page-play #side-chat.minimized {
     width: 64px; }
     .page-play #side-chat.minimized #chat-options,

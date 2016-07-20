@@ -714,7 +714,8 @@ define('ttexp/models/video', ['exports', 'ember-data'], function (exports, _embe
     playState: _emberData['default'].belongsTo('playState'),
 
     fullPath: Ember.computed('uniqueCode', 'scenarioCode', function () {
-      return 'assets/media/video/' + this.get('scenarioCode').toLowerCase() + '/' + this.get('uniqueCode') + '.mp4';
+      //    return 'assets/media/video/'+this.get('scenarioCode').toLowerCase()+'/'+this.get('uniqueCode')+'.mp4';
+      return this.get('scenarioCode').toLowerCase() + '/' + this.get('uniqueCode') + '.mp4';
     })
   });
 });
@@ -840,20 +841,19 @@ define('ttexp/routes/play', ['exports', 'ember', 'ttexp/config/environment', 'em
                   model.scenario.reload().then(function () {
                     self.send('startVideo');
                   });
-                  //                self.refresh().then(function() {
-                  //                  self.send('startVideo');
-                  //                });
                 } else {
-                    self.transitionTo('scenarios');
-                  }
+                  self.transitionTo('scenarios');
+                }
               });
             }
           });
         }
       },
+      // https://www.icanlocalize.com/site/2010/03/using-amazon-s3-to-host-streaming-videos/
+      // http://www.inwebson.com/html5/custom-html5-video-controls-with-jquery/ (BUFFERING)
       startVideo: function startVideo() {
         var url = this.currentModel.scenario.get('playState').get('video').get('fullPath');
-        url = "http://demo-client.ttexp.net:8088/" + url;
+        url = "http://d1ceamasw3ytjh.cloudfront.net/1080/" + url;
         var videoPlayer = _ember['default'].$("#video-player");
         videoPlayer.hide();
         videoPlayer.attr("src", url);
@@ -3209,7 +3209,6 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         dom.appendChild(el2, el3);
         var el3 = dom.createElement("video");
         dom.setAttribute(el3, "id", "video-player");
-        dom.setAttribute(el3, "controls", "true");
         var el4 = dom.createTextNode("\n			Your browser does not support the video element.\n		");
         dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
