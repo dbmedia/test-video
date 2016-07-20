@@ -854,7 +854,6 @@ define('ttexp/routes/play', ['exports', 'ember', 'ttexp/config/environment', 'em
       startVideo: function startVideo() {
         var url = this.currentModel.scenario.get('playState').get('video').get('fullPath');
         url = "http://demo-client.ttexp.net:8088/" + url;
-        console.log(url);
         var videoPlayer = _ember['default'].$("#video-player");
         videoPlayer.attr("src", url);
         videoPlayer.get(0).load();
@@ -4440,7 +4439,7 @@ catch(err) {
 /* jshint ignore:start */
 
 if (!runningTests) {
-  require("ttexp/app")["default"].create({"serverApiUrl":"http://ttexp-server.localhost/api","LOG_ACTIVE_GENERATION":true,"LOG_VIEW_LOOKUPS":true,"name":"ttexp","version":"0.1.0+e75868ff"});
+  require("ttexp/app")["default"].create({"serverApiUrl":"http://demo.ttexp.net/api","LOG_ACTIVE_GENERATION":false,"LOG_VIEW_LOOKUPS":false,"name":"ttexp","version":"0.1.0+e75868ff"});
 }
 
 /* jshint ignore:end */
