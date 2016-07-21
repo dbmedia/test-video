@@ -90,14 +90,14 @@ define('ttexp/controllers/index', ['exports', 'ember'], function (exports, _embe
     }
   });
 
-  /*
-  alert('pippo');
   document.addEventListener("deviceready", onDeviceReady, true);
-  
+  function onDeviceReady() {
+    alert('device ready!!!');
+  }
+
   function exitFromApp() {
     navigator.app.exitApp();
   }
-  */
 });
 define('ttexp/controllers/login', ['exports', 'ember'], function (exports, _ember) {
   exports['default'] = _ember['default'].Controller.extend({
@@ -894,7 +894,7 @@ define('ttexp/routes/scenarios', ['exports', 'ember', 'ttexp/config/environment'
           var fileTransfer = new FileTransfer();
           var uri = encodeURI("http://d1ceamasw3ytjh.cloudfront.net/1080/tel/");
           var fileName = "TEL-I0-T0-A.mp4";
-          var fileFullpath = uri + $fileName;
+          var fileFullpath = uri + fileName;
         }
 
         /*
@@ -2538,7 +2538,7 @@ define("ttexp/templates/layout/menu", ["exports"], function (exports) {
         var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
         var el2 = dom.createElement("a");
-        dom.setAttribute(el2, "class", "list-group-item hidden showAndroid");
+        dom.setAttribute(el2, "class", "list-group-item hiddenXXX showAndroid");
         var el3 = dom.createTextNode("Esci");
         dom.appendChild(el2, el3);
         dom.appendChild(el1, el2);
@@ -2560,7 +2560,7 @@ define("ttexp/templates/layout/menu", ["exports"], function (exports) {
         morphs[4] = dom.createMorphAt(element1, 15, 15);
         return morphs;
       },
-      statements: [["block", "link-to", ["index"], ["class", "list-group-item", "data-page-route", "index"], 0, null, ["loc", [null, [2, 1], [2, 85]]]], ["block", "link-to", ["scenarios"], ["class", "list-group-item", "data-page-route", "scenarios"], 1, null, ["loc", [null, [3, 1], [3, 100]]]], ["block", "link-to", ["admin/index"], ["class", "list-group-item", "data-page-route", "admin"], 2, null, ["loc", [null, [6, 1], [6, 102]]]], ["element", "action", ["closeApp"], [], ["loc", [null, [8, 47], [8, 68]]]], ["block", "if", [["get", "session.isAuthenticated", ["loc", [null, [10, 7], [10, 30]]]]], [], 3, 4, ["loc", [null, [10, 1], [14, 8]]]]],
+      statements: [["block", "link-to", ["index"], ["class", "list-group-item", "data-page-route", "index"], 0, null, ["loc", [null, [2, 1], [2, 85]]]], ["block", "link-to", ["scenarios"], ["class", "list-group-item", "data-page-route", "scenarios"], 1, null, ["loc", [null, [3, 1], [3, 100]]]], ["block", "link-to", ["admin/index"], ["class", "list-group-item", "data-page-route", "admin"], 2, null, ["loc", [null, [6, 1], [6, 102]]]], ["element", "action", ["closeApp"], [], ["loc", [null, [8, 50], [8, 71]]]], ["block", "if", [["get", "session.isAuthenticated", ["loc", [null, [10, 7], [10, 30]]]]], [], 3, 4, ["loc", [null, [10, 1], [14, 8]]]]],
       locals: [],
       templates: [child0, child1, child2, child3, child4]
     };
