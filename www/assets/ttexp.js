@@ -886,12 +886,15 @@ define('ttexp/routes/scenarios', ['exports', 'ember', 'ttexp/config/environment'
       download: function download(scenario) {
         var self = this;
         if (scenario) {
-          console.log("DOWNLOAD " + scenario.id);
-          //        var fileTransfer = new FileTransfer();
-          //        var uri = encodeURI("http://some.server.com/download.php");
           //https://github.com/apache/cordova-plugin-file-transfer/blob/1882bfbd2d150c6db501b2092374d644cb056505/doc/index.md
           //https://github.com/apache/cordova-plugin-file-transfer
           //http://docs.phonegap.com/en/1.8.0/cordova_file_file.md.html#FileTransfer
+
+          console.log("DOWNLOAD " + scenario.id);
+          var fileTransfer = new FileTransfer();
+          var uri = encodeURI("http://d1ceamasw3ytjh.cloudfront.net/1080/tel/");
+          var fileName = "TEL-I0-T0-A.mp4";
+          var fileFullpath = uri + $fileName;
         }
 
         /*
@@ -3332,7 +3335,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         morphs[5] = dom.createMorphAt(fragment, 2, 2, contextualElement);
         return morphs;
       },
-      statements: [["element", "action", ["startVideo"], [], ["loc", [null, [8, 6], [8, 29]]]], ["content", "model.scenario.playState.video.transcript", ["loc", [null, [19, 4], [19, 49]]]], ["block", "if", [["get", "model.scenario.playState.gameCompleted", ["loc", [null, [28, 9], [28, 47]]]]], [], 0, 1, ["loc", [null, [28, 3], [35, 10]]]], ["element", "action", ["exit"], [], ["loc", [null, [45, 86], [45, 103]]]], ["block", "if", [false], [], 2, null, ["loc", [null, [52, 1], [62, 8]]]], ["content", "outlet", ["loc", [null, [64, 0], [64, 10]]]]],
+      statements: [["element", "action", ["startVideo"], [], ["loc", [null, [8, 6], [8, 29]]]], ["content", "model.scenario.playState.video.transcript", ["loc", [null, [19, 4], [19, 49]]]], ["block", "if", [["get", "model.scenario.playState.gameCompleted", ["loc", [null, [28, 9], [28, 47]]]]], [], 0, 1, ["loc", [null, [28, 3], [35, 10]]]], ["element", "action", ["exit"], [], ["loc", [null, [45, 86], [45, 103]]]], ["block", "if", [true], [], 2, null, ["loc", [null, [52, 1], [62, 8]]]], ["content", "outlet", ["loc", [null, [64, 0], [64, 10]]]]],
       locals: [],
       templates: [child0, child1, child2]
     };
@@ -4441,7 +4444,7 @@ catch(err) {
 /* jshint ignore:start */
 
 if (!runningTests) {
-  require("ttexp/app")["default"].create({"serverApiUrl":"http://demo.ttexp.net/api","LOG_ACTIVE_GENERATION":false,"LOG_VIEW_LOOKUPS":false,"name":"ttexp","version":"0.1.0+e75868ff"});
+  require("ttexp/app")["default"].create({"serverApiUrl":"http://demo.ttexp.net/api","LOG_ACTIVE_GENERATION":false,"LOG_VIEW_LOOKUPS":false,"name":"ttexp","version":"0.1.0+07b743b5"});
 }
 
 /* jshint ignore:end */

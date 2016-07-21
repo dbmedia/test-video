@@ -21,6 +21,38 @@ var runningTests = false;
     requirejs: requirejs
   };
 
+  requirejs = require = requireModule = function(name) {
+    stats.require++;
+    var pending = [];
+    var mod = findModule(name, '(require)', pending);
+
+    for (var i = pending.length - 1; i >= 0; i--) {
+      pending[i].exports();
+    }
+
+    return mod.module.exports;
+  };
+
+  function resetStats() {
+    stats = {
+      define: 0,
+      require: 0,
+      reify: 0,
+      findDeps: 0,
+      modules: 0,
+      exports: 0,
+      resolve: 0,
+      resolveRelative: 0,
+      findModule: 0,
+      pendingQueueLength: 0
+    };
+    requirejs._stats = stats;
+  }
+
+  var stats;
+
+  resetStats();
+
   loader = {
     noConflict: function(aliases) {
       var oldName, newName;
@@ -49,8 +81,6 @@ var runningTests = false;
 
   var registry = {};
   var seen = {};
-  var FAILED = false;
-  var LOADED = true;
 
   var uuid = 0;
 
@@ -61,16 +91,19 @@ var runningTests = false;
 
   var defaultDeps = ['require', 'exports', 'module'];
 
-  function Module(name, deps, callback) {
+  function Module(name, deps, callback, alias) {
+    stats.modules++;
     this.id        = uuid++;
     this.name      = name;
     this.deps      = !deps.length && callback.length ? defaultDeps : deps;
     this.module    = { exports: {} };
     this.callback  = callback;
-    this.state     = undefined;
-    this._require  = undefined;
     this.finalized = false;
     this.hasExportsAsDep = false;
+    this.isAlias = alias;
+    this.reified = new Array(deps.length);
+    this._foundDeps = false;
+    this.isPending = false;
   }
 
   Module.prototype.makeDefaultExport = function() {
@@ -82,68 +115,85 @@ var runningTests = false;
     }
   };
 
-  Module.prototype.exports = function(reifiedDeps) {
-    if (this.finalized) {
-      return this.module.exports;
-    } else {
-      if (loader.wrapModules) {
-        this.callback = loader.wrapModules(this.name, this.callback);
-      }
-      var result = this.callback.apply(this, reifiedDeps);
-      if (!(this.hasExportsAsDep && result === undefined)) {
-        this.module.exports = result;
-      }
-      this.makeDefaultExport();
-      this.finalized = true;
-      return this.module.exports;
+  Module.prototype.exports = function() {
+    if (this.finalized) { return this.module.exports; }
+    stats.exports++;
+
+    this.finalized = true;
+    this.isPending = false;
+
+    if (loader.wrapModules) {
+      this.callback = loader.wrapModules(this.name, this.callback);
     }
+
+    this.reify();
+
+    var result = this.callback.apply(this, this.reified);
+
+    if (!(this.hasExportsAsDep && result === undefined)) {
+      this.module.exports = result;
+    }
+    this.makeDefaultExport();
+    return this.module.exports;
   };
 
   Module.prototype.unsee = function() {
     this.finalized = false;
-    this.state = undefined;
+    this._foundDeps = false;
+    this.isPending = false;
     this.module = { exports: {}};
   };
 
   Module.prototype.reify = function() {
-    var deps = this.deps;
-    var length = deps.length;
-    var reified = new Array(length);
-    var dep;
+    stats.reify++;
+    var reified = this.reified;
+    for (var i = 0; i < reified.length; i++) {
+      var mod = reified[i];
+      reified[i] = mod.exports ? mod.exports : mod.module.exports();
+    }
+  };
 
-    for (var i = 0, l = length; i < l; i++) {
-      dep = deps[i];
-      if (dep === 'exports') {
-        this.hasExportsAsDep = true;
-        reified[i] = this.module.exports;
-      } else if (dep === 'require') {
-        reified[i] = this.makeRequire();
-      } else if (dep === 'module') {
-        reified[i] = this.module;
-      } else {
-        reified[i] = findModule(resolve(dep, this.name), this.name).module.exports;
-      }
+  Module.prototype.findDeps = function(pending) {
+    if (this._foundDeps) {
+      return;
     }
 
-    return reified;
+    stats.findDeps++;
+    this._foundDeps = true;
+    this.isPending = true;
+
+    var deps = this.deps;
+
+    for (var i = 0; i < deps.length; i++) {
+      var dep = deps[i];
+      var entry = this.reified[i] = { exports: undefined, module: undefined };
+      if (dep === 'exports') {
+        this.hasExportsAsDep = true;
+        entry.exports = this.module.exports;
+      } else if (dep === 'require') {
+        entry.exports = this.makeRequire();
+      } else if (dep === 'module') {
+        entry.exports = this.module;
+      } else {
+        entry.module = findModule(resolve(dep, this.name), this.name, pending);
+      }
+    }
   };
 
   Module.prototype.makeRequire = function() {
     var name = this.name;
-
-    return this._require || (this._require = function(dep) {
+    var r = function(dep) {
       return require(resolve(dep, name));
-    });
-  };
-
-  Module.prototype.build = function() {
-    if (this.state === FAILED) { return; }
-    this.state = FAILED;
-    this.exports(this.reify());
-    this.state = LOADED;
+    };
+    r['default'] = r;
+    r.has = function(dep) {
+      return has(resolve(dep, name));
+    }
+    return r;
   };
 
   define = function(name, deps, callback) {
+    stats.define++;
     if (arguments.length < 2) {
       unsupportedModule(arguments.length);
     }
@@ -153,7 +203,11 @@ var runningTests = false;
       deps     =  [];
     }
 
-    registry[name] = new Module(name, deps, callback);
+    if (callback instanceof Alias) {
+      registry[name] = new Module(callback.name, deps, callback, true);
+    } else {
+      registry[name] = new Module(name, deps, callback, false);
+    }
   };
 
   // we don't support all of AMD
@@ -173,26 +227,28 @@ var runningTests = false;
     throw new Error('Could not find module `' + name + '` imported from `' + referrer + '`');
   }
 
-  requirejs = require = requireModule = function(name) {
-    return findModule(name, '(require)').module.exports;
-  };
-
-  function findModule(name, referrer) {
+  function findModule(name, referrer, pending) {
+    stats.findModule++;
     var mod = registry[name] || registry[name + '/index'];
 
-    while (mod && mod.callback instanceof Alias) {
-      name = mod.callback.name;
-      mod = registry[name];
+    while (mod && mod.isAlias) {
+      mod = registry[mod.name];
     }
 
     if (!mod) { missingModule(name, referrer); }
 
-    mod.build();
+    if (pending && !mod.finalized && !mod.isPending) {
+      mod.findDeps(pending);
+      pending.push(mod);
+      stats.pendingQueueLength++;
+    }
     return mod;
   }
 
   function resolve(child, name) {
+    stats.resolve++;
     if (child.charAt(0) !== '.') { return child; }
+    stats.resolveRelative++;
 
     var parts = child.split('/');
     var nameParts = name.split('/');
@@ -214,15 +270,43 @@ var runningTests = false;
     return parentBase.join('/');
   }
 
+  function has(name) {
+    return !!(registry[name] || registry[name + '/index']);
+  }
+
   requirejs.entries = requirejs._eak_seen = registry;
+  requirejs.has = has;
   requirejs.unsee = function(moduleName) {
-    findModule(moduleName, '(unsee)').unsee();
+    findModule(moduleName, '(unsee)', false).unsee();
   };
 
   requirejs.clear = function() {
+    resetStats();
     requirejs.entries = requirejs._eak_seen = registry = {};
     seen = {};
   };
+
+  // prime
+  define('foo',      function() {});
+  define('foo/bar',  [], function() {});
+  define('foo/asdf', ['module', 'exports', 'require'], function(module, exports, require) {
+    if (require.has('foo/bar')) {
+      require('foo/bar');
+    }
+  });
+  define('foo/baz',  [], define.alias('foo'));
+  define('foo/quz',  define.alias('foo'));
+  define('foo/bar',  ['foo', './quz', './baz', './asdf', './bar', '../foo'], function() {});
+  define('foo/main', ['foo/bar'], function() {});
+
+  require('foo/main');
+  require.unsee('foo/bar');
+
+  requirejs.clear();
+
+  if (typeof exports === 'object' && typeof module === 'object' && module.exports) {
+    module.exports = { require: require, define: define };
+  }
 })(this);
 
 ;/*!
