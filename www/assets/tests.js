@@ -302,15 +302,6 @@ define('ttexp/tests/routes/action.jshint', ['exports'], function (exports) {
     assert.ok(false, 'routes/action.js should pass jshint.\nroutes/action.js: line 10, col 21, \'transition\' is defined but never used.\nroutes/action.js: line 19, col 9, \'params\' is defined but never used.\nroutes/action.js: line 2, col 8, \'ENV\' is defined but never used.\n\n3 errors');
   });
 });
-define('ttexp/tests/routes/admin/index.jshint', ['exports'], function (exports) {
-  'use strict';
-
-  QUnit.module('JSHint | routes/admin/index.js');
-  QUnit.test('should pass jshint', function (assert) {
-    assert.expect(1);
-    assert.ok(true, 'routes/admin/index.js should pass jshint.');
-  });
-});
 define('ttexp/tests/routes/application.jshint', ['exports'], function (exports) {
   'use strict';
 

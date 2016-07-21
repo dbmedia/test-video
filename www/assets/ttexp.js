@@ -733,8 +733,6 @@ define('ttexp/router', ['exports', 'ember', 'ttexp/config/environment'], functio
 		this.route('play', { path: '/play/:scenario_id' });
 		this.route('action', { path: '/action/:scenario_id/:item_id' });
 		this.route('scores', { path: '/scores/:playthrough_id' });
-		this.route('admin/index', { path: '/admin' });
-		this.route('admin/scenario', { path: '/admin/scenario' });
 		this.route('page-not-found', { path: '/*wildcard' });
 	});
 
@@ -784,9 +782,6 @@ define('ttexp/routes/action', ['exports', 'ember', 'ttexp/config/environment', '
       return model;
     }
   });
-});
-define("ttexp/routes/admin/index", ["exports", "ember", "ember-simple-auth/mixins/authenticated-route-mixin"], function (exports, _ember, _emberSimpleAuthMixinsAuthenticatedRouteMixin) {
-  exports["default"] = _ember["default"].Route.extend(_emberSimpleAuthMixinsAuthenticatedRouteMixin["default"]);
 });
 define('ttexp/routes/application', ['exports', 'ember', 'ember-simple-auth/mixins/application-route-mixin'], function (exports, _ember, _emberSimpleAuthMixinsApplicationRouteMixin) {
   exports['default'] = _ember['default'].Route.extend(_emberSimpleAuthMixinsApplicationRouteMixin['default']);
@@ -2071,7 +2066,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 32,
+            "line": 34,
             "column": 10
           }
         },
@@ -2184,8 +2179,20 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.appendChild(el6, el7);
         var el7 = dom.createTextNode("\n						");
         dom.appendChild(el6, el7);
+        var el7 = dom.createElement("br");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createElement("br");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode("\n						");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createElement("br");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createElement("br");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode("\n						");
+        dom.appendChild(el6, el7);
         var el7 = dom.createElement("center");
-        var el8 = dom.createTextNode("CONTENUTO HOMEPAGE");
+        var el8 = dom.createTextNode("Benvenuto in TTExp");
         dom.appendChild(el7, el8);
         dom.appendChild(el6, el7);
         var el7 = dom.createTextNode("\n					");
@@ -2231,7 +2238,7 @@ define("ttexp/templates/index", ["exports"], function (exports) {
         dom.insertBoundary(fragment, null);
         return morphs;
       },
-      statements: [["content", "firstName", ["loc", [null, [6, 26], [6, 39]]]], ["content", "lastName", ["loc", [null, [6, 40], [6, 52]]]], ["inline", "partial", ["layout/menu"], [], ["loc", [null, [8, 4], [8, 29]]]], ["content", "outlet", ["loc", [null, [32, 0], [32, 10]]]]],
+      statements: [["content", "firstName", ["loc", [null, [6, 26], [6, 39]]]], ["content", "lastName", ["loc", [null, [6, 40], [6, 52]]]], ["inline", "partial", ["layout/menu"], [], ["loc", [null, [8, 4], [8, 29]]]], ["content", "outlet", ["loc", [null, [34, 0], [34, 10]]]]],
       locals: [],
       templates: []
     };
@@ -2319,47 +2326,11 @@ define("ttexp/templates/layout/menu", ["exports"], function (exports) {
           "loc": {
             "source": null,
             "start": {
-              "line": 6,
+              "line": 9,
               "column": 1
             },
             "end": {
-              "line": 6,
-              "column": 90
-            }
-          },
-          "moduleName": "ttexp/templates/layout/menu.hbs"
-        },
-        isEmpty: false,
-        arity: 0,
-        cachedFragment: null,
-        hasRendered: false,
-        buildFragment: function buildFragment(dom) {
-          var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("Amministrazione");
-          dom.appendChild(el0, el1);
-          return el0;
-        },
-        buildRenderNodes: function buildRenderNodes() {
-          return [];
-        },
-        statements: [],
-        locals: [],
-        templates: []
-      };
-    })();
-    var child3 = (function () {
-      return {
-        meta: {
-          "fragmentReason": false,
-          "revision": "Ember@2.6.1",
-          "loc": {
-            "source": null,
-            "start": {
-              "line": 10,
-              "column": 1
-            },
-            "end": {
-              "line": 12,
+              "line": 11,
               "column": 1
             }
           },
@@ -2388,12 +2359,12 @@ define("ttexp/templates/layout/menu", ["exports"], function (exports) {
           morphs[0] = dom.createElementMorph(element0);
           return morphs;
         },
-        statements: [["element", "action", ["invalidateSession"], [], ["loc", [null, [11, 29], [11, 59]]]]],
+        statements: [["element", "action", ["invalidateSession"], [], ["loc", [null, [10, 29], [10, 59]]]]],
         locals: [],
         templates: []
       };
     })();
-    var child4 = (function () {
+    var child3 = (function () {
       var child0 = (function () {
         return {
           meta: {
@@ -2402,11 +2373,11 @@ define("ttexp/templates/layout/menu", ["exports"], function (exports) {
             "loc": {
               "source": null,
               "start": {
-                "line": 13,
+                "line": 12,
                 "column": 2
               },
               "end": {
-                "line": 13,
+                "line": 12,
                 "column": 51
               }
             },
@@ -2437,11 +2408,11 @@ define("ttexp/templates/layout/menu", ["exports"], function (exports) {
           "loc": {
             "source": null,
             "start": {
-              "line": 12,
+              "line": 11,
               "column": 1
             },
             "end": {
-              "line": 14,
+              "line": 13,
               "column": 1
             }
           },
@@ -2466,7 +2437,7 @@ define("ttexp/templates/layout/menu", ["exports"], function (exports) {
           morphs[0] = dom.createMorphAt(fragment, 1, 1, contextualElement);
           return morphs;
         },
-        statements: [["block", "link-to", ["login"], ["class", "list-group-item"], 0, null, ["loc", [null, [13, 2], [13, 63]]]]],
+        statements: [["block", "link-to", ["login"], ["class", "list-group-item"], 0, null, ["loc", [null, [12, 2], [12, 63]]]]],
         locals: [],
         templates: [child0]
       };
@@ -2484,7 +2455,7 @@ define("ttexp/templates/layout/menu", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 15,
+            "line": 14,
             "column": 6
           }
         },
@@ -2510,7 +2481,7 @@ define("ttexp/templates/layout/menu", ["exports"], function (exports) {
         var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
         var el2 = dom.createElement("a");
-        dom.setAttribute(el2, "class", "list-group-item");
+        dom.setAttribute(el2, "class", "list-group-item disabled");
         dom.setAttribute(el2, "data-page-route", "messages");
         var el3 = dom.createTextNode("Messaggi");
         dom.appendChild(el2, el3);
@@ -2518,19 +2489,15 @@ define("ttexp/templates/layout/menu", ["exports"], function (exports) {
         var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
         var el2 = dom.createElement("a");
-        dom.setAttribute(el2, "class", "list-group-item");
+        dom.setAttribute(el2, "class", "list-group-item disabled");
         dom.setAttribute(el2, "data-page-route", "help");
         var el3 = dom.createTextNode("Help");
         dom.appendChild(el2, el3);
         dom.appendChild(el1, el2);
         var el2 = dom.createTextNode("\n	");
         dom.appendChild(el1, el2);
-        var el2 = dom.createComment("");
-        dom.appendChild(el1, el2);
-        var el2 = dom.createTextNode("\n	");
-        dom.appendChild(el1, el2);
         var el2 = dom.createElement("a");
-        dom.setAttribute(el2, "class", "list-group-item");
+        dom.setAttribute(el2, "class", "list-group-item disabled");
         dom.setAttribute(el2, "data-page-route", "user");
         var el3 = dom.createTextNode("Profilo Utente");
         dom.appendChild(el2, el3);
@@ -2551,18 +2518,17 @@ define("ttexp/templates/layout/menu", ["exports"], function (exports) {
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
         var element1 = dom.childAt(fragment, [0]);
-        var element2 = dom.childAt(element1, [13]);
-        var morphs = new Array(5);
+        var element2 = dom.childAt(element1, [11]);
+        var morphs = new Array(4);
         morphs[0] = dom.createMorphAt(element1, 1, 1);
         morphs[1] = dom.createMorphAt(element1, 3, 3);
-        morphs[2] = dom.createMorphAt(element1, 9, 9);
-        morphs[3] = dom.createElementMorph(element2);
-        morphs[4] = dom.createMorphAt(element1, 15, 15);
+        morphs[2] = dom.createElementMorph(element2);
+        morphs[3] = dom.createMorphAt(element1, 13, 13);
         return morphs;
       },
-      statements: [["block", "link-to", ["index"], ["class", "list-group-item", "data-page-route", "index"], 0, null, ["loc", [null, [2, 1], [2, 85]]]], ["block", "link-to", ["scenarios"], ["class", "list-group-item", "data-page-route", "scenarios"], 1, null, ["loc", [null, [3, 1], [3, 100]]]], ["block", "link-to", ["admin/index"], ["class", "list-group-item", "data-page-route", "admin"], 2, null, ["loc", [null, [6, 1], [6, 102]]]], ["element", "action", ["closeApp"], [], ["loc", [null, [8, 50], [8, 71]]]], ["block", "if", [["get", "session.isAuthenticated", ["loc", [null, [10, 7], [10, 30]]]]], [], 3, 4, ["loc", [null, [10, 1], [14, 8]]]]],
+      statements: [["block", "link-to", ["index"], ["class", "list-group-item", "data-page-route", "index"], 0, null, ["loc", [null, [2, 1], [2, 85]]]], ["block", "link-to", ["scenarios"], ["class", "list-group-item", "data-page-route", "scenarios"], 1, null, ["loc", [null, [3, 1], [3, 100]]]], ["element", "action", ["closeApp"], [], ["loc", [null, [7, 50], [7, 71]]]], ["block", "if", [["get", "session.isAuthenticated", ["loc", [null, [9, 7], [9, 30]]]]], [], 2, 3, ["loc", [null, [9, 1], [13, 8]]]]],
       locals: [],
-      templates: [child0, child1, child2, child3, child4]
+      templates: [child0, child1, child2, child3]
     };
   })());
 });
