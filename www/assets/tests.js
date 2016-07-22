@@ -58,7 +58,7 @@ define('ttexp/tests/controllers/index.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint | controllers/index.js');
   QUnit.test('should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'controllers/index.js should pass jshint.\ncontrollers/index.js: line 24, col 10, \'exitFromApp\' is defined but never used.\n\n1 error');
+    assert.ok(false, 'controllers/index.js should pass jshint.\ncontrollers/index.js: line 26, col 10, \'exitFromApp\' is defined but never used.\n\n1 error');
   });
 });
 define('ttexp/tests/controllers/login.jshint', ['exports'], function (exports) {
@@ -353,7 +353,7 @@ define('ttexp/tests/routes/scenarios.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint | routes/scenarios.js');
   QUnit.test('should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'routes/scenarios.js should pass jshint.\nroutes/scenarios.js: line 6, col 9, \'params\' is defined but never used.\nroutes/scenarios.js: line 11, col 11, \'self\' is defined but never used.\nroutes/scenarios.js: line 18, col 13, \'fileTransfer\' is defined but never used.\nroutes/scenarios.js: line 21, col 13, \'fileFullpath\' is defined but never used.\nroutes/scenarios.js: line 18, col 32, \'FileTransfer\' is not defined.\nroutes/scenarios.js: line 2, col 8, \'ENV\' is defined but never used.\n\n6 errors');
+    assert.ok(false, 'routes/scenarios.js should pass jshint.\nroutes/scenarios.js: line 6, col 9, \'params\' is defined but never used.\nroutes/scenarios.js: line 11, col 11, \'self\' is defined but never used.\nroutes/scenarios.js: line 18, col 13, \'fileTransfer\' is defined but never used.\nroutes/scenarios.js: line 21, col 13, \'fileFullpath\' is defined but never used.\nroutes/scenarios.js: line 18, col 32, \'FileTransfer\' is not defined.\nroutes/scenarios.js: line 73, col 28, \'FileTransfer\' is not defined.\nroutes/scenarios.js: line 84, col 15, \'readBinaryFile\' is not defined.\nroutes/scenarios.js: line 88, col 15, \'displayImageByFileURL\' is not defined.\nroutes/scenarios.js: line 2, col 8, \'ENV\' is defined but never used.\n\n9 errors');
   });
 });
 define('ttexp/tests/routes/scores.jshint', ['exports'], function (exports) {
