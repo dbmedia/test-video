@@ -2217,7 +2217,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
               },
               "end": {
                 "line": 29,
-                "column": 101
+                "column": 116
               }
             },
             "moduleName": "ttexp/templates/play.hbs"
@@ -2228,7 +2228,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
           hasRendered: false,
           buildFragment: function buildFragment(dom) {
             var el0 = dom.createDocumentFragment();
-            var el1 = dom.createTextNode("Continua...");
+            var el1 = dom.createTextNode("Scopri il tuo punteggio...");
             dom.appendChild(el0, el1);
             return el0;
           },
@@ -2279,7 +2279,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
           morphs[0] = dom.createMorphAt(dom.childAt(fragment, [1]), 0, 0);
           return morphs;
         },
-        statements: [["block", "link-to", ["scores", ["get", "model.scenario.playState.playthrough", ["loc", [null, [29, 52], [29, 88]]]]], [], 0, null, ["loc", [null, [29, 32], [29, 113]]]]],
+        statements: [["block", "link-to", ["scores", ["get", "model.scenario.playState.playthrough", ["loc", [null, [29, 52], [29, 88]]]]], [], 0, null, ["loc", [null, [29, 32], [29, 128]]]]],
         locals: [],
         templates: [child0]
       };
@@ -3667,7 +3667,7 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
         var el5 = dom.createTextNode("\n				");
         dom.appendChild(el4, el5);
         var el5 = dom.createElement("div");
-        dom.setAttribute(el5, "class", "col-md-6");
+        dom.setAttribute(el5, "class", "col-xs-6");
         var el6 = dom.createTextNode("\n					");
         dom.appendChild(el5, el6);
         var el6 = dom.createElement("div");
@@ -3685,7 +3685,7 @@ define("ttexp/templates/scores", ["exports"], function (exports) {
         var el5 = dom.createTextNode("\n				");
         dom.appendChild(el4, el5);
         var el5 = dom.createElement("div");
-        dom.setAttribute(el5, "class", "col-md-6");
+        dom.setAttribute(el5, "class", "col-xs-6");
         var el6 = dom.createTextNode("\n					");
         dom.appendChild(el5, el6);
         var el6 = dom.createElement("div");
