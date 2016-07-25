@@ -54,6 +54,5 @@
         <allow-intent href="itms-apps:*" />
     </platform>
     
-	<plugin name="org.apache.cordova.file-transfer" spec="1.5.1" />
     <hook type="before_build" src="scripts/build_ember_app.sh" />
 </widget>
