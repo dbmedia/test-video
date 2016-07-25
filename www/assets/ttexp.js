@@ -594,6 +594,7 @@ define('ttexp/models/play-state', ['exports', 'ember-data'], function (exports, 
     scenario: _emberData['default'].belongsTo('scenario'),
     playthrough: _emberData['default'].belongsTo('playthrough'),
     video: _emberData['default'].belongsTo('video'),
+    prevVideo: _emberData['default'].belongsTo('video'),
 
     stepsCount: _emberData['default'].attr('number'),
 
@@ -714,7 +715,7 @@ define('ttexp/models/video', ['exports', 'ember-data'], function (exports, _embe
     closing: _emberData['default'].attr('boolean'),
 
     items: _emberData['default'].hasMany('item'),
-    playState: _emberData['default'].belongsTo('playState'),
+    playState: _emberData['default'].belongsTo('playState', { inverse: 'video' }),
 
     fullPath: Ember.computed('uniqueCode', 'scenarioCode', function () {
       //    return 'assets/media/video/'+this.get('scenarioCode').toLowerCase()+'/'+this.get('uniqueCode')+'.mp4';
@@ -2379,6 +2380,48 @@ define("ttexp/templates/play", ["exports"], function (exports) {
     })();
     var child2 = (function () {
       var child0 = (function () {
+        return {
+          meta: {
+            "fragmentReason": false,
+            "revision": "Ember@2.6.1",
+            "loc": {
+              "source": null,
+              "start": {
+                "line": 55,
+                "column": 3
+              },
+              "end": {
+                "line": 57,
+                "column": 3
+              }
+            },
+            "moduleName": "ttexp/templates/play.hbs"
+          },
+          isEmpty: false,
+          arity: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          buildFragment: function buildFragment(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("				(prev: ");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createComment("");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode(")\n");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+            var morphs = new Array(1);
+            morphs[0] = dom.createMorphAt(fragment, 1, 1, contextualElement);
+            return morphs;
+          },
+          statements: [["content", "model.scenario.playState.prevVideo.uniqueCode", ["loc", [null, [56, 11], [56, 60]]]]],
+          locals: [],
+          templates: []
+        };
+      })();
+      var child1 = (function () {
         var child0 = (function () {
           return {
             meta: {
@@ -2387,11 +2430,11 @@ define("ttexp/templates/play", ["exports"], function (exports) {
               "loc": {
                 "source": null,
                 "start": {
-                  "line": 57,
+                  "line": 61,
                   "column": 4
                 },
                 "end": {
-                  "line": 59,
+                  "line": 63,
                   "column": 4
                 }
               },
@@ -2442,7 +2485,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
               morphs[5] = dom.createMorphAt(fragment, 9, 9, contextualElement);
               return morphs;
             },
-            statements: [["attribute", "title", ["concat", [["get", "score.variableName", ["loc", [null, [58, 20], [58, 38]]]]]]], ["content", "score.variableCode", ["loc", [null, [58, 42], [58, 64]]]], ["inline", "div", [["subexpr", "round", [["subexpr", "mult", [["subexpr", "div", [["get", "score.value", ["loc", [null, [58, 97], [58, 108]]]], ["get", "model.scenario.playState.stepsCount", ["loc", [null, [58, 109], [58, 144]]]]], [], ["loc", [null, [58, 92], [58, 145]]]], 100], [], ["loc", [null, [58, 86], [58, 150]]]]], [], ["loc", [null, [58, 79], [58, 151]]]], 100], [], ["loc", [null, [58, 73], [58, 157]]]], ["content", "score.value", ["loc", [null, [58, 165], [58, 180]]]], ["content", "score.minValue", ["loc", [null, [58, 187], [58, 205]]]], ["content", "score.maxValue", ["loc", [null, [58, 212], [58, 230]]]]],
+            statements: [["attribute", "title", ["concat", [["get", "score.variableName", ["loc", [null, [62, 20], [62, 38]]]]]]], ["content", "score.variableCode", ["loc", [null, [62, 42], [62, 64]]]], ["inline", "div", [["subexpr", "round", [["subexpr", "mult", [["subexpr", "div", [["get", "score.value", ["loc", [null, [62, 97], [62, 108]]]], ["get", "model.scenario.playState.stepsCount", ["loc", [null, [62, 109], [62, 144]]]]], [], ["loc", [null, [62, 92], [62, 145]]]], 100], [], ["loc", [null, [62, 86], [62, 150]]]]], [], ["loc", [null, [62, 79], [62, 151]]]], 100], [], ["loc", [null, [62, 73], [62, 157]]]], ["content", "score.value", ["loc", [null, [62, 165], [62, 180]]]], ["content", "score.minValue", ["loc", [null, [62, 187], [62, 205]]]], ["content", "score.maxValue", ["loc", [null, [62, 212], [62, 230]]]]],
             locals: ["score"],
             templates: []
           };
@@ -2454,11 +2497,11 @@ define("ttexp/templates/play", ["exports"], function (exports) {
             "loc": {
               "source": null,
               "start": {
-                "line": 56,
+                "line": 60,
                 "column": 3
               },
               "end": {
-                "line": 60,
+                "line": 64,
                 "column": 3
               }
             },
@@ -2481,7 +2524,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
             dom.insertBoundary(fragment, null);
             return morphs;
           },
-          statements: [["block", "each", [["get", "model.scenario.playState.playthrough.scores", ["loc", [null, [57, 12], [57, 55]]]]], [], 0, null, ["loc", [null, [57, 4], [59, 13]]]]],
+          statements: [["block", "each", [["get", "model.scenario.playState.playthrough.scores", ["loc", [null, [61, 12], [61, 55]]]]], [], 0, null, ["loc", [null, [61, 4], [63, 13]]]]],
           locals: [],
           templates: [child0]
         };
@@ -2497,7 +2540,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
               "column": 1
             },
             "end": {
-              "line": 62,
+              "line": 66,
               "column": 1
             }
           },
@@ -2516,6 +2559,12 @@ define("ttexp/templates/play", ["exports"], function (exports) {
           var el2 = dom.createTextNode("\n			Video: ");
           dom.appendChild(el1, el2);
           var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("			");
           dom.appendChild(el1, el2);
           var el2 = dom.createElement("br");
           dom.appendChild(el1, el2);
@@ -2538,15 +2587,16 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         },
         buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
           var element1 = dom.childAt(fragment, [1]);
-          var morphs = new Array(3);
+          var morphs = new Array(4);
           morphs[0] = dom.createMorphAt(element1, 1, 1);
-          morphs[1] = dom.createMorphAt(element1, 4, 4);
+          morphs[1] = dom.createMorphAt(element1, 3, 3);
           morphs[2] = dom.createMorphAt(element1, 7, 7);
+          morphs[3] = dom.createMorphAt(element1, 10, 10);
           return morphs;
         },
-        statements: [["content", "model.scenario.playState.video.uniqueCode", ["loc", [null, [54, 10], [54, 55]]]], ["content", "model.scenario.playState.stepsCount", ["loc", [null, [55, 10], [55, 49]]]], ["block", "if", [["get", "model.scenario.playState.stepsCount", ["loc", [null, [56, 9], [56, 44]]]]], [], 0, null, ["loc", [null, [56, 3], [60, 10]]]]],
+        statements: [["content", "model.scenario.playState.video.uniqueCode", ["loc", [null, [54, 10], [54, 55]]]], ["block", "if", [["get", "model.scenario.playState.prevVideo", ["loc", [null, [55, 9], [55, 43]]]]], [], 0, null, ["loc", [null, [55, 3], [57, 10]]]], ["content", "model.scenario.playState.stepsCount", ["loc", [null, [59, 10], [59, 49]]]], ["block", "if", [["get", "model.scenario.playState.stepsCount", ["loc", [null, [60, 9], [60, 44]]]]], [], 1, null, ["loc", [null, [60, 3], [64, 10]]]]],
         locals: [],
-        templates: [child0]
+        templates: [child0, child1]
       };
     })();
     return {
@@ -2563,7 +2613,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
             "column": 0
           },
           "end": {
-            "line": 65,
+            "line": 69,
             "column": 0
           }
         },
@@ -2743,7 +2793,7 @@ define("ttexp/templates/play", ["exports"], function (exports) {
         morphs[5] = dom.createMorphAt(fragment, 2, 2, contextualElement);
         return morphs;
       },
-      statements: [["element", "action", ["startVideo"], [], ["loc", [null, [8, 6], [8, 29]]]], ["content", "model.scenario.playState.video.transcript", ["loc", [null, [19, 4], [19, 49]]]], ["block", "if", [["get", "model.scenario.playState.gameCompleted", ["loc", [null, [28, 9], [28, 47]]]]], [], 0, 1, ["loc", [null, [28, 3], [35, 10]]]], ["element", "action", ["exit"], [], ["loc", [null, [45, 86], [45, 103]]]], ["block", "if", [false], [], 2, null, ["loc", [null, [52, 1], [62, 8]]]], ["content", "outlet", ["loc", [null, [64, 0], [64, 10]]]]],
+      statements: [["element", "action", ["startVideo"], [], ["loc", [null, [8, 6], [8, 29]]]], ["content", "model.scenario.playState.video.transcript", ["loc", [null, [19, 4], [19, 49]]]], ["block", "if", [["get", "model.scenario.playState.gameCompleted", ["loc", [null, [28, 9], [28, 47]]]]], [], 0, 1, ["loc", [null, [28, 3], [35, 10]]]], ["element", "action", ["exit"], [], ["loc", [null, [45, 86], [45, 103]]]], ["block", "if", [true], [], 2, null, ["loc", [null, [52, 1], [66, 8]]]], ["content", "outlet", ["loc", [null, [68, 0], [68, 10]]]]],
       locals: [],
       templates: [child0, child1, child2]
     };
@@ -3852,7 +3902,7 @@ catch(err) {
 /* jshint ignore:start */
 
 if (!runningTests) {
-  require("ttexp/app")["default"].create({"serverApiUrl":"http://demo.ttexp.net/api","LOG_ACTIVE_GENERATION":false,"LOG_VIEW_LOOKUPS":false,"name":"ttexp","version":"0.1.0+e99c4a22"});
+  require("ttexp/app")["default"].create({"serverApiUrl":"http://demo.ttexp.net/api","LOG_ACTIVE_GENERATION":false,"LOG_VIEW_LOOKUPS":false,"name":"ttexp","version":"0.1.0+627a3193"});
 }
 
 /* jshint ignore:end */

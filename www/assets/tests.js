@@ -227,7 +227,7 @@ define('ttexp/tests/models/play-state.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint | models/play-state.js');
   QUnit.test('should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'models/play-state.js should pass jshint.\nmodels/play-state.js: line 10, col 18, \'Ember\' is not defined.\n\n1 error');
+    assert.ok(false, 'models/play-state.js should pass jshint.\nmodels/play-state.js: line 11, col 18, \'Ember\' is not defined.\n\n1 error');
   });
 });
 define('ttexp/tests/models/playthrough.jshint', ['exports'], function (exports) {
