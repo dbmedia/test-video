@@ -8,14 +8,16 @@
 		<meta name="description" content="">
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">
+
+		<meta http-equiv="Content-Security-Policy"
+			content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src *; img-src * 'self' data:; media-src *">
 		<title>True Training Experience</title>
 		
 		
-<meta name="ttexp/config/environment" content="%7B%22modulePrefix%22%3A%22ttexp%22%2C%22environment%22%3A%22development%22%2C%22baseURL%22%3A%22/%22%2C%22defaultLocationType%22%3A%22hash%22%2C%22EmberENV%22%3A%7B%22FEATURES%22%3A%7B%7D%7D%2C%22APP%22%3A%7B%22LOG_ACTIVE_GENERATION%22%3Atrue%2C%22LOG_VIEW_LOOKUPS%22%3Atrue%2C%22name%22%3A%22ttexp%22%2C%22version%22%3A%220.0.0+9b64d5ed%22%7D%2C%22cordova%22%3A%7B%22rebuildOnChange%22%3Afalse%2C%22emulate%22%3Afalse%2C%22liveReload%22%3A%7B%22enabled%22%3Afalse%2C%22platform%22%3A%22ios%22%7D%7D%2C%22contentSecurityPolicyHeader%22%3A%22Content-Security-Policy-Report-Only%22%2C%22contentSecurityPolicy%22%3A%7B%22default-src%22%3A%22%27none%27%22%2C%22script-src%22%3A%22%27self%27%20%27unsafe-eval%27%22%2C%22font-src%22%3A%22%27self%27%22%2C%22connect-src%22%3A%22%27self%27%22%2C%22img-src%22%3A%22%27self%27%22%2C%22style-src%22%3A%22%27self%27%22%2C%22media-src%22%3A%22%27self%27%22%7D%2C%22isCordovaBuild%22%3Atrue%2C%22locationType%22%3A%22hash%22%2C%22exportApplicationGlobal%22%3Atrue%7D" />
+<meta name="ttexp/config/environment" content="%7B%22modulePrefix%22%3A%22ttexp%22%2C%22environment%22%3A%22test%22%2C%22baseURL%22%3A%22/%22%2C%22authenticationRoute%22%3A%22login%22%2C%22defaultLocationType%22%3A%22hash%22%2C%22EmberENV%22%3A%7B%22FEATURES%22%3A%7B%7D%2C%22LOG_STACKTRACE_ON_DEPRECATION%22%3Afalse%7D%2C%22APP%22%3A%7B%22serverApiUrl%22%3A%22http%3A//demo.ttexp.net/api%22%2C%22LOG_ACTIVE_GENERATION%22%3Afalse%2C%22LOG_VIEW_LOOKUPS%22%3Afalse%2C%22name%22%3A%22ttexp%22%2C%22version%22%3A%220.1.0+d7c1d627%22%7D%2C%22cordova%22%3A%7B%22rebuildOnChange%22%3Afalse%2C%22emulate%22%3Afalse%2C%22liveReload%22%3A%7B%22enabled%22%3Afalse%2C%22platform%22%3A%22ios%22%7D%7D%2C%22locationType%22%3A%22hash%22%2C%22isCordovaBuild%22%3Atrue%2C%22exportApplicationGlobal%22%3Atrue%7D" />
 		
-		<link rel="stylesheet" href="assets/vendor.css">
-		<link rel="stylesheet" href="assets/ttexp.css">
+		<link rel="stylesheet" href="assets/vendor.css" integrity="sha256-2KCOvyndK6GnKnFen9QfuePwYcYPkygEczTVvYEHSQs= sha512-v+elZES+SxH4y4J2mqFo7DlB5CBK9fxDnaffekH3vKB1b6XS3zWP6p2c/YkAp29AFA3KwCLxZ0L1N0+PGJE9lw==" >
+		<link rel="stylesheet" href="assets/ttexp.css" integrity="sha256-zs6zRM8OAyu2+nCLsUevUInHcoyF4XUsZJQ4VEAmGEw= sha512-bqSepWZFoxGyLS/c2iiEiqdESS3Mli4fPL6xnVLeBYvK7cUQsh0FnFQCQqik/pwEC5IXW9tDjKyPv7lMVh/sLw==" >
 		
 		
 	</head>
@@ -23,8 +25,8 @@
 		<script src="cordova.js"></script>
 		
 		<script src="phonegap.js"></script>
-		<script src="assets/vendor.js"></script>
-		<script src="assets/ttexp.js"></script>
+		<script src="assets/vendor.js" integrity="sha256-yFC2+N+OSmQt6pCmhxhZZW9/eIoOGgNToLz5dexlq6Q= sha512-1Kzj4tPHEhtHbfacRyiCG54MUtvBDDqyOVTsVP8kJePwdCEMNhO3uiZyk++sKKIChYp+pxcQ4j0ewsjmQTJEGA==" ></script>
+		<script src="assets/ttexp.js" integrity="sha256-1qTeNVv2ODEfx06DPLoXV008Ig4Lu2FmYlQtX4xaapY= sha512-aujCz6scvW6XmGIb2Uj9F/dNzPz1AlHy69SpigDFFKT5333l93FfdaBqPlTv/fU7Aq/DGHq2UgXNdqvK0OdZsg==" ></script>
 		
 		<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
