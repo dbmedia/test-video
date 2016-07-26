@@ -9143,6 +9143,11 @@ button.close {
   overflow-x: hidden;
   height: 100%; }
 
+.table,
+.table a,
+.table a:visited {
+  color: inherit; }
+
 .table-striped > tbody > tr:nth-child(2n+1) {
   color: inherit; }
 

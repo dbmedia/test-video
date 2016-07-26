@@ -2923,7 +2923,7 @@ define("ttexp/templates/scenarios", ["exports"], function (exports) {
           var el2 = dom.createElement("td");
           var el3 = dom.createElement("a");
           dom.setAttribute(el3, "href", "#");
-          dom.setAttribute(el3, "class", "btn btn-link");
+          dom.setAttribute(el3, "class", "btn btn-link hidden");
           var el4 = dom.createElement("span");
           dom.setAttribute(el4, "class", "glyphicon glyphicon-download");
           dom.appendChild(el3, el4);
