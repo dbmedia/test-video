@@ -368,7 +368,7 @@ html, body {
           text-justify: inter-word;
           color: #ffffff; }
           .page-play #side-chat #chat-options li a:hover {
-            text-shadow: 0px 0px 4px #c21b17; }
+            /* 						text-shadow: 0px 0px 4px rgba(194, 27, 23, 1); */ }
           .page-play #side-chat #chat-options li a:active {
             color: #ffaa44; }
   .page-play #side-chat.minimized {
