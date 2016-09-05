@@ -3,7 +3,7 @@
         xmlns:gap   = "http://phonegap.com/ns/1.0"
         id          = "net.dbmediaweb.ttexp"
         versionCode = "10"
-        version     = "1.0.4" >
+        version     = "1.0.1" >
     
     <name>TTExp</name>
     <description>
@@ -28,7 +28,7 @@
     <preference name="fullscreen" value="true" />
     <preference name="orientation" value="landscape" />
     
-    <icon src="icon.png" gap:role="default" />
+    <icon src="icon.png" />
     
     <!-- iPhone 6 / 6+ -->
 	<icon src="icon-60@3x.png" platform="ios" width="180" height="180" />
@@ -58,6 +58,7 @@
     </platform>
     
 	<plugin name="cordova-plugin-whitelist" spec="1.2.2" />
-	<plugin name="org.apache.cordova.file-transfer" spec="1.5.1" />
+	<plugin name="cordova-plugin-file-transfer" spec="1.5.1" />
+	
     <hook type="before_build" src="scripts/build_ember_app.sh" />
 </widget>
