@@ -21,6 +21,38 @@ var runningTests = false;
     requirejs: requirejs
   };
 
+  requirejs = require = requireModule = function(name) {
+    stats.require++;
+    var pending = [];
+    var mod = findModule(name, '(require)', pending);
+
+    for (var i = pending.length - 1; i >= 0; i--) {
+      pending[i].exports();
+    }
+
+    return mod.module.exports;
+  };
+
+  function resetStats() {
+    stats = {
+      define: 0,
+      require: 0,
+      reify: 0,
+      findDeps: 0,
+      modules: 0,
+      exports: 0,
+      resolve: 0,
+      resolveRelative: 0,
+      findModule: 0,
+      pendingQueueLength: 0
+    };
+    requirejs._stats = stats;
+  }
+
+  var stats;
+
+  resetStats();
+
   loader = {
     noConflict: function(aliases) {
       var oldName, newName;
@@ -49,8 +81,6 @@ var runningTests = false;
 
   var registry = {};
   var seen = {};
-  var FAILED = false;
-  var LOADED = true;
 
   var uuid = 0;
 
@@ -61,16 +91,19 @@ var runningTests = false;
 
   var defaultDeps = ['require', 'exports', 'module'];
 
-  function Module(name, deps, callback) {
+  function Module(name, deps, callback, alias) {
+    stats.modules++;
     this.id        = uuid++;
     this.name      = name;
     this.deps      = !deps.length && callback.length ? defaultDeps : deps;
     this.module    = { exports: {} };
     this.callback  = callback;
-    this.state     = undefined;
-    this._require  = undefined;
     this.finalized = false;
     this.hasExportsAsDep = false;
+    this.isAlias = alias;
+    this.reified = new Array(deps.length);
+    this._foundDeps = false;
+    this.isPending = false;
   }
 
   Module.prototype.makeDefaultExport = function() {
@@ -82,68 +115,85 @@ var runningTests = false;
     }
   };
 
-  Module.prototype.exports = function(reifiedDeps) {
-    if (this.finalized) {
-      return this.module.exports;
-    } else {
-      if (loader.wrapModules) {
-        this.callback = loader.wrapModules(this.name, this.callback);
-      }
-      var result = this.callback.apply(this, reifiedDeps);
-      if (!(this.hasExportsAsDep && result === undefined)) {
-        this.module.exports = result;
-      }
-      this.makeDefaultExport();
-      this.finalized = true;
-      return this.module.exports;
+  Module.prototype.exports = function() {
+    if (this.finalized) { return this.module.exports; }
+    stats.exports++;
+
+    this.finalized = true;
+    this.isPending = false;
+
+    if (loader.wrapModules) {
+      this.callback = loader.wrapModules(this.name, this.callback);
     }
+
+    this.reify();
+
+    var result = this.callback.apply(this, this.reified);
+
+    if (!(this.hasExportsAsDep && result === undefined)) {
+      this.module.exports = result;
+    }
+    this.makeDefaultExport();
+    return this.module.exports;
   };
 
   Module.prototype.unsee = function() {
     this.finalized = false;
-    this.state = undefined;
+    this._foundDeps = false;
+    this.isPending = false;
     this.module = { exports: {}};
   };
 
   Module.prototype.reify = function() {
-    var deps = this.deps;
-    var length = deps.length;
-    var reified = new Array(length);
-    var dep;
+    stats.reify++;
+    var reified = this.reified;
+    for (var i = 0; i < reified.length; i++) {
+      var mod = reified[i];
+      reified[i] = mod.exports ? mod.exports : mod.module.exports();
+    }
+  };
 
-    for (var i = 0, l = length; i < l; i++) {
-      dep = deps[i];
-      if (dep === 'exports') {
-        this.hasExportsAsDep = true;
-        reified[i] = this.module.exports;
-      } else if (dep === 'require') {
-        reified[i] = this.makeRequire();
-      } else if (dep === 'module') {
-        reified[i] = this.module;
-      } else {
-        reified[i] = findModule(resolve(dep, this.name), this.name).module.exports;
-      }
+  Module.prototype.findDeps = function(pending) {
+    if (this._foundDeps) {
+      return;
     }
 
-    return reified;
+    stats.findDeps++;
+    this._foundDeps = true;
+    this.isPending = true;
+
+    var deps = this.deps;
+
+    for (var i = 0; i < deps.length; i++) {
+      var dep = deps[i];
+      var entry = this.reified[i] = { exports: undefined, module: undefined };
+      if (dep === 'exports') {
+        this.hasExportsAsDep = true;
+        entry.exports = this.module.exports;
+      } else if (dep === 'require') {
+        entry.exports = this.makeRequire();
+      } else if (dep === 'module') {
+        entry.exports = this.module;
+      } else {
+        entry.module = findModule(resolve(dep, this.name), this.name, pending);
+      }
+    }
   };
 
   Module.prototype.makeRequire = function() {
     var name = this.name;
-
-    return this._require || (this._require = function(dep) {
+    var r = function(dep) {
       return require(resolve(dep, name));
-    });
-  };
-
-  Module.prototype.build = function() {
-    if (this.state === FAILED) { return; }
-    this.state = FAILED;
-    this.exports(this.reify());
-    this.state = LOADED;
+    };
+    r['default'] = r;
+    r.has = function(dep) {
+      return has(resolve(dep, name));
+    }
+    return r;
   };
 
   define = function(name, deps, callback) {
+    stats.define++;
     if (arguments.length < 2) {
       unsupportedModule(arguments.length);
     }
@@ -153,7 +203,11 @@ var runningTests = false;
       deps     =  [];
     }
 
-    registry[name] = new Module(name, deps, callback);
+    if (callback instanceof Alias) {
+      registry[name] = new Module(callback.name, deps, callback, true);
+    } else {
+      registry[name] = new Module(name, deps, callback, false);
+    }
   };
 
   // we don't support all of AMD
@@ -173,26 +227,28 @@ var runningTests = false;
     throw new Error('Could not find module `' + name + '` imported from `' + referrer + '`');
   }
 
-  requirejs = require = requireModule = function(name) {
-    return findModule(name, '(require)').module.exports;
-  };
-
-  function findModule(name, referrer) {
+  function findModule(name, referrer, pending) {
+    stats.findModule++;
     var mod = registry[name] || registry[name + '/index'];
 
-    while (mod && mod.callback instanceof Alias) {
-      name = mod.callback.name;
-      mod = registry[name];
+    while (mod && mod.isAlias) {
+      mod = registry[mod.name];
     }
 
     if (!mod) { missingModule(name, referrer); }
 
-    mod.build();
+    if (pending && !mod.finalized && !mod.isPending) {
+      mod.findDeps(pending);
+      pending.push(mod);
+      stats.pendingQueueLength++;
+    }
     return mod;
   }
 
   function resolve(child, name) {
+    stats.resolve++;
     if (child.charAt(0) !== '.') { return child; }
+    stats.resolveRelative++;
 
     var parts = child.split('/');
     var nameParts = name.split('/');
@@ -214,15 +270,43 @@ var runningTests = false;
     return parentBase.join('/');
   }
 
+  function has(name) {
+    return !!(registry[name] || registry[name + '/index']);
+  }
+
   requirejs.entries = requirejs._eak_seen = registry;
+  requirejs.has = has;
   requirejs.unsee = function(moduleName) {
-    findModule(moduleName, '(unsee)').unsee();
+    findModule(moduleName, '(unsee)', false).unsee();
   };
 
   requirejs.clear = function() {
+    resetStats();
     requirejs.entries = requirejs._eak_seen = registry = {};
     seen = {};
   };
+
+  // prime
+  define('foo',      function() {});
+  define('foo/bar',  [], function() {});
+  define('foo/asdf', ['module', 'exports', 'require'], function(module, exports, require) {
+    if (require.has('foo/bar')) {
+      require('foo/bar');
+    }
+  });
+  define('foo/baz',  [], define.alias('foo'));
+  define('foo/quz',  define.alias('foo'));
+  define('foo/bar',  ['foo', './quz', './baz', './asdf', './bar', '../foo'], function() {});
+  define('foo/main', ['foo/bar'], function() {});
+
+  require('foo/main');
+  require.unsee('foo/bar');
+
+  requirejs.clear();
+
+  if (typeof exports === 'object' && typeof module === 'object' && module.exports) {
+    module.exports = { require: require, define: define };
+  }
 })(this);
 
 ;/*!
@@ -69045,20 +69129,13 @@ define('ember-ajax/utils/url-helpers', ['exports', 'ember-ajax/utils/is-fastboot
 
   exports.RequestURL = RequestURL;
 });
-define('ember-cli-app-version/components/app-version', ['exports', 'ember', 'ember-cli-app-version/templates/app-version'], function (exports, _ember, _emberCliAppVersionTemplatesAppVersion) {
-  'use strict';
-
-  exports['default'] = _ember['default'].Component.extend({
-    tagName: 'span',
-    layout: _emberCliAppVersionTemplatesAppVersion['default']
-  });
-});
 define('ember-cli-app-version/initializer-factory', ['exports', 'ember'], function (exports, _ember) {
   'use strict';
 
   exports['default'] = initializerFactory;
 
   var classify = _ember['default'].String.classify;
+  var libraries = _ember['default'].libraries;
 
   function initializerFactory(name, version) {
     var registered = false;
@@ -69066,59 +69143,11 @@ define('ember-cli-app-version/initializer-factory', ['exports', 'ember'], functi
     return function () {
       if (!registered && name && version) {
         var appName = classify(name);
-        _ember['default'].libraries.register(appName, version);
+        libraries.register(appName, version);
         registered = true;
       }
     };
   }
-});
-define("ember-cli-app-version/templates/app-version", ["exports"], function (exports) {
-  "use strict";
-
-  exports["default"] = Ember.HTMLBars.template((function () {
-    return {
-      meta: {
-        "fragmentReason": {
-          "name": "missing-wrapper",
-          "problems": ["wrong-type"]
-        },
-        "revision": "Ember@2.6.1",
-        "loc": {
-          "source": null,
-          "start": {
-            "line": 1,
-            "column": 0
-          },
-          "end": {
-            "line": 2,
-            "column": 0
-          }
-        },
-        "moduleName": "modules/ember-cli-app-version/templates/app-version.hbs"
-      },
-      isEmpty: false,
-      arity: 0,
-      cachedFragment: null,
-      hasRendered: false,
-      buildFragment: function buildFragment(dom) {
-        var el0 = dom.createDocumentFragment();
-        var el1 = dom.createComment("");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
-        dom.appendChild(el0, el1);
-        return el0;
-      },
-      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var morphs = new Array(1);
-        morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
-        dom.insertBoundary(fragment, 0);
-        return morphs;
-      },
-      statements: [["content", "version", ["loc", [null, [1, 0], [1, 11]]]]],
-      locals: [],
-      templates: []
-    };
-  })());
 });
 define('ember-cli-cordova/initializers/in-app-livereload', ['exports', 'ember-cli-cordova/utils/redirect'], function (exports, _emberCliCordovaUtilsRedirect) {
   'use strict';
@@ -69255,6 +69284,320 @@ define('ember-cli-cordova/utils/redirect', ['exports', 'ember'], function (expor
       }, 50);
     }
   };
+});
+define('ember-computed-decorators/decorator-alias', ['exports', 'ember-computed-decorators/utils/extract-value'], function (exports, _emberComputedDecoratorsUtilsExtractValue) {
+  'use strict';
+
+  exports['default'] = decoratorAlias;
+
+  function decoratorAlias(fn, errorMessage) {
+    return function () {
+      for (var _len = arguments.length, params = Array(_len), _key = 0; _key < _len; _key++) {
+        params[_key] = arguments[_key];
+      }
+
+      // determine if user called as @computed('blah', 'blah') or @computed
+      if (params.length === 0) {
+        throw new Error(errorMessage);
+      } else {
+        return function (target, key, desc) {
+          return {
+            enumerable: desc.enumerable,
+            configurable: desc.configurable,
+            writable: desc.writable,
+            initializer: function initializer() {
+              var value = (0, _emberComputedDecoratorsUtilsExtractValue['default'])(desc);
+              return fn.apply(null, params.concat(value));
+            }
+          };
+        };
+      }
+    };
+  }
+});
+define('ember-computed-decorators/ember-data', ['exports', 'ember-data', 'ember-computed-decorators/macro-alias'], function (exports, _emberData, _emberComputedDecoratorsMacroAlias) {
+  'use strict';
+
+  var attr = (0, _emberComputedDecoratorsMacroAlias['default'])(_emberData['default'].attr);
+  exports.attr = attr;
+
+  var hasMany = (0, _emberComputedDecoratorsMacroAlias['default'])(_emberData['default'].hasMany);
+  exports.hasMany = hasMany;
+
+  var belongsTo = (0, _emberComputedDecoratorsMacroAlias['default'])(_emberData['default'].belongsTo);
+  exports.belongsTo = belongsTo;
+});
+define('ember-computed-decorators/index', ['exports', 'ember', 'ember-computed-decorators/utils/handle-descriptor', 'ember-computed-decorators/utils/is-descriptor', 'ember-computed-decorators/utils/extract-value', 'ember-computed-decorators/decorator-alias', 'ember-computed-decorators/macro-alias'], function (exports, _ember, _emberComputedDecoratorsUtilsHandleDescriptor, _emberComputedDecoratorsUtilsIsDescriptor, _emberComputedDecoratorsUtilsExtractValue, _emberComputedDecoratorsDecoratorAlias, _emberComputedDecoratorsMacroAlias) {
+  'use strict';
+
+  var _slice = Array.prototype.slice;
+
+  exports['default'] = computedDecorator;
+  exports.readOnly = readOnly;
+
+  function computedDecorator() {
+    for (var _len = arguments.length, params = Array(_len), _key = 0; _key < _len; _key++) {
+      params[_key] = arguments[_key];
+    }
+
+    // determine if user called as @computed('blah', 'blah') or @computed
+    if ((0, _emberComputedDecoratorsUtilsIsDescriptor['default'])(params[params.length - 1])) {
+      return _emberComputedDecoratorsUtilsHandleDescriptor['default'].apply(undefined, arguments);
+    } else {
+      return function () /* target, key, desc */{
+        return _emberComputedDecoratorsUtilsHandleDescriptor['default'].apply(undefined, _slice.call(arguments).concat([params]));
+      };
+    }
+  }
+
+  function readOnly(target, name, desc) {
+    return {
+      writable: false,
+      enumerable: desc.enumerable,
+      configurable: desc.configurable,
+      initializer: function initializer() {
+        var value = (0, _emberComputedDecoratorsUtilsExtractValue['default'])(desc);
+        return value.readOnly();
+      }
+    };
+  }
+
+  var on = (0, _emberComputedDecoratorsDecoratorAlias['default'])(_ember['default'].on, 'Can not `on` without event names');
+  exports.on = on;
+
+  var observes = (0, _emberComputedDecoratorsDecoratorAlias['default'])(_ember['default'].observer, 'Can not `observe` without property names');exports.observes = observes;
+
+  var alias = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.alias);
+  exports.alias = alias;
+
+  var and = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.and);
+  exports.and = and;
+
+  var bool = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.bool);
+  exports.bool = bool;
+
+  var collect = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.collect);
+  exports.collect = collect;
+
+  var empty = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.empty);
+  exports.empty = empty;
+
+  var equal = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.equal);
+  exports.equal = equal;
+
+  var filter = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.filter);
+  exports.filter = filter;
+
+  var filterBy = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.filterBy);
+  exports.filterBy = filterBy;
+
+  var gt = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.gt);
+  exports.gt = gt;
+
+  var gte = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.gte);
+  exports.gte = gte;
+
+  var intersect = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.intersect);
+  exports.intersect = intersect;
+
+  var lt = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.lt);
+  exports.lt = lt;
+
+  var lte = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.lte);
+  exports.lte = lte;
+
+  var map = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.map);
+  exports.map = map;
+
+  var mapBy = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.mapBy);
+  exports.mapBy = mapBy;
+
+  var match = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.match);
+  exports.match = match;
+
+  var max = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.max);
+  exports.max = max;
+
+  var min = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.min);
+  exports.min = min;
+
+  var none = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.none);
+  exports.none = none;
+
+  var not = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.not);
+  exports.not = not;
+
+  var notEmpty = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.notEmpty);
+  exports.notEmpty = notEmpty;
+
+  var oneWay = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.oneWay);
+  exports.oneWay = oneWay;
+
+  var or = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.or);
+  exports.or = or;
+
+  var reads = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.reads);
+  exports.reads = reads;
+
+  var setDiff = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.setDiff);
+  exports.setDiff = setDiff;
+
+  var sort = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.sort);
+  exports.sort = sort;
+
+  var sum = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.sum);
+  exports.sum = sum;
+
+  var union = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.union);
+  exports.union = union;
+
+  var uniq = (0, _emberComputedDecoratorsMacroAlias['default'])(_ember['default'].computed.uniq);
+  exports.uniq = uniq;
+});
+define('ember-computed-decorators/macro-alias', ['exports', 'ember-computed-decorators/utils/is-descriptor'], function (exports, _emberComputedDecoratorsUtilsIsDescriptor) {
+  'use strict';
+
+  exports['default'] = macroAlias;
+
+  function _toConsumableArray(arr) {
+    if (Array.isArray(arr)) {
+      for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];return arr2;
+    } else {
+      return Array.from(arr);
+    }
+  }
+
+  function handleDescriptor(target, property, desc, fn) {
+    var params = arguments.length <= 4 || arguments[4] === undefined ? [] : arguments[4];
+
+    return {
+      enumerable: desc.enumerable,
+      configurable: desc.configurable,
+      writable: desc.writable,
+      initializer: function initializer() {
+        return fn.apply(undefined, _toConsumableArray(params));
+      }
+    };
+  }
+  function macroAlias(fn) {
+    return function () {
+      for (var _len = arguments.length, params = Array(_len), _key = 0; _key < _len; _key++) {
+        params[_key] = arguments[_key];
+      }
+
+      if ((0, _emberComputedDecoratorsUtilsIsDescriptor['default'])(params[params.length - 1])) {
+        return handleDescriptor.apply(undefined, params.concat([fn]));
+      } else {
+        return function (target, property, desc) {
+          return handleDescriptor(target, property, desc, fn, params);
+        };
+      }
+    };
+  }
+});
+define('ember-computed-decorators/utils/extract-value', ['exports'], function (exports) {
+  'use strict';
+
+  exports['default'] = extractValue;
+
+  function extractValue(desc) {
+    return desc.value || typeof desc.initializer === 'function' && desc.initializer();
+  }
+});
+define('ember-computed-decorators/utils/handle-descriptor', ['exports', 'ember', 'ember-computed-decorators/utils/extract-value'], function (exports, _ember, _emberComputedDecoratorsUtilsExtractValue) {
+  'use strict';
+
+  exports['default'] = handleDescriptor;
+
+  var computed = _ember['default'].computed;
+  var expandProperties = _ember['default'].expandProperties;
+  var get = _ember['default'].get;
+
+  function handleDescriptor(target, key, desc) {
+    var params = arguments.length <= 3 || arguments[3] === undefined ? [] : arguments[3];
+
+    return {
+      enumerable: desc.enumerable,
+      configurable: desc.configurable,
+      writeable: desc.writeable,
+      initializer: function initializer() {
+        var computedDescriptor = undefined;
+
+        if (desc.writable) {
+          var val = (0, _emberComputedDecoratorsUtilsExtractValue['default'])(desc);
+          if (typeof val === 'object') {
+            var value = {};
+            if (val.get) {
+              value.get = callUserSuppliedGet(params, val.get);
+            }
+            if (val.set) {
+              value.set = callUserSuppliedSet(params, val.set);
+            }
+            computedDescriptor = value;
+          } else {
+            computedDescriptor = callUserSuppliedGet(params, val);
+          }
+        } else {
+          throw new Error('ember-computed-decorators does not support using getters and setters');
+        }
+
+        return computed.apply(null, params.concat(computedDescriptor));
+      }
+    };
+  }
+
+  function expandPropertyList(propertyList) {
+    return propertyList.reduce(function (newPropertyList, property) {
+      var atEachIndex = property.indexOf('.@each');
+      if (atEachIndex !== -1) {
+        return newPropertyList.concat(property.slice(0, atEachIndex));
+      } else if (property.slice(-2) === '[]') {
+        return newPropertyList.concat(property.slice(0, -3));
+      }
+
+      expandProperties(property, function (expandedProperties) {
+        newPropertyList = newPropertyList.concat(expandedProperties);
+      });
+
+      return newPropertyList;
+    }, []);
+  }
+
+  function callUserSuppliedGet(params, func) {
+    var expandedParams = expandPropertyList(params);
+    return function () {
+      var _this = this;
+
+      var paramValues = expandedParams.map(function (p) {
+        return get(_this, p);
+      });
+
+      return func.apply(this, paramValues);
+    };
+  }
+
+  function callUserSuppliedSet(params, func) {
+    var expandedParams = expandPropertyList(params);
+    return function (key, value) {
+      var _this2 = this;
+
+      var paramValues = expandedParams.map(function (p) {
+        return get(_this2, p);
+      });
+      paramValues.unshift(value);
+
+      return func.apply(this, paramValues);
+    };
+  }
+});
+define('ember-computed-decorators/utils/is-descriptor', ['exports'], function (exports) {
+  'use strict';
+
+  exports['default'] = isDescriptor;
+
+  function isDescriptor(item) {
+    return item && typeof item === 'object' && 'writable' in item && 'enumerable' in item && 'configurable' in item;
+  }
 });
 define("ember-data/-private/adapters", ["exports", "ember-data/adapters/json-api", "ember-data/adapters/rest"], function (exports, _emberDataAdaptersJsonApi, _emberDataAdaptersRest) {
   /**
@@ -85781,6 +86124,299 @@ define("ember-data/version", ["exports"], function (exports) {
   "use strict";
 
   exports["default"] = "2.6.1";
+});
+define('ember-font-awesome/components/fa-icon', ['exports', 'ember', 'ember-computed-decorators', 'ember-font-awesome/utils/try-match', 'ember-font-awesome/utils/optional-decorator'], function (exports, _ember, _emberComputedDecorators, _emberFontAwesomeUtilsTryMatch, _emberFontAwesomeUtilsOptionalDecorator) {
+  'use strict';
+
+  function _createDecoratedObject(descriptors) {
+    var target = {};for (var i = 0; i < descriptors.length; i++) {
+      var descriptor = descriptors[i];var decorators = descriptor.decorators;var key = descriptor.key;delete descriptor.key;delete descriptor.decorators;descriptor.enumerable = true;descriptor.configurable = true;if ('value' in descriptor || descriptor.initializer) descriptor.writable = true;if (decorators) {
+        for (var f = 0; f < decorators.length; f++) {
+          var decorator = decorators[f];if (typeof decorator === 'function') {
+            descriptor = decorator(target, key, descriptor) || descriptor;
+          } else {
+            throw new TypeError('The decorator for method ' + descriptor.key + ' is of the invalid type ' + typeof decorator);
+          }
+        }
+      }if (descriptor.initializer) {
+        descriptor.value = descriptor.initializer.call(target);
+      }Object.defineProperty(target, key, descriptor);
+    }return target;
+  }
+
+  var FaIconComponent = _ember['default'].Component.extend(_createDecoratedObject([{
+    key: 'tagName',
+    initializer: function initializer() {
+      return 'i';
+    }
+  }, {
+    key: 'classNames',
+    initializer: function initializer() {
+      return ['fa'];
+    }
+  }, {
+    key: 'classNameBindings',
+    initializer: function initializer() {
+      return ['iconCssClass', 'flipCssClass', 'rotateCssClass', 'sizeCssClass', 'pullCssClass', 'stackCssClass', 'spin:fa-spin', 'fixedWidth:fa-fw', 'listItem:fa-li', 'border:fa-border', 'pulse:fa-pulse', 'inverse:fa-inverse'];
+    }
+  }, {
+    key: 'attributeBindings',
+    initializer: function initializer() {
+      return ['ariaHiddenAttribute:aria-hidden', 'title'];
+    }
+  }, {
+    key: 'iconCssClass',
+    decorators: [(0, _emberComputedDecorators['default'])('icon', 'params.[]')],
+    value: function iconCssClass(icon, params) {
+      icon = icon || params[0];
+      if (icon) {
+        return (0, _emberFontAwesomeUtilsTryMatch['default'])(icon, /^fa-/) ? icon : 'fa-' + icon;
+      }
+    }
+  }, {
+    key: 'flipCssClass',
+    decorators: [_emberFontAwesomeUtilsOptionalDecorator['default'], (0, _emberComputedDecorators['default'])('flip')],
+    value: function flipCssClass(flip) {
+      return (0, _emberFontAwesomeUtilsTryMatch['default'])(flip, /^fa-flip/) ? flip : 'fa-flip-' + flip;
+    }
+  }, {
+    key: 'rotateCssClass',
+    decorators: [_emberFontAwesomeUtilsOptionalDecorator['default'], (0, _emberComputedDecorators['default'])('rotate')],
+    value: function rotateCssClass(rotate) {
+      if ((0, _emberFontAwesomeUtilsTryMatch['default'])(rotate, /^fa-rotate/)) {
+        return rotate;
+      } else {
+        return 'fa-rotate-' + rotate;
+      }
+    }
+  }, {
+    key: 'sizeCssClass',
+    decorators: [_emberFontAwesomeUtilsOptionalDecorator['default'], (0, _emberComputedDecorators['default'])('size')],
+    value: function sizeCssClass(size) {
+      if ((0, _emberFontAwesomeUtilsTryMatch['default'])(size, /^fa-/)) {
+        return size;
+      } else if ((0, _emberFontAwesomeUtilsTryMatch['default'])(size, /(?:lg|x)$/)) {
+        return 'fa-' + size;
+      } else {
+        return 'fa-' + size + 'x';
+      }
+    }
+  }, {
+    key: 'pullCssClass',
+    decorators: [_emberFontAwesomeUtilsOptionalDecorator['default'], (0, _emberComputedDecorators['default'])('pull')],
+    value: function pullCssClass(pull) {
+      return 'fa-pull-' + pull;
+    }
+  }, {
+    key: 'stackCssClass',
+    decorators: [_emberFontAwesomeUtilsOptionalDecorator['default'], (0, _emberComputedDecorators['default'])('stack')],
+    value: function stackCssClass(stack) {
+      if ((0, _emberFontAwesomeUtilsTryMatch['default'])(stack, /^fa-/)) {
+        return stack;
+      } else if ((0, _emberFontAwesomeUtilsTryMatch['default'])(stack, /x$/)) {
+        return 'fa-stack-' + stack;
+      } else {
+        return 'fa-stack-' + stack + 'x';
+      }
+    }
+  }, {
+    key: 'ariaHiddenAttribute',
+    decorators: [(0, _emberComputedDecorators['default'])('ariaHidden')],
+    value: function ariaHiddenAttribute(ariaHidden) {
+      return ariaHidden !== false ? true : undefined;
+    }
+  }]));
+
+  FaIconComponent.reopenClass({
+    positionalParams: 'params'
+  });
+
+  exports['default'] = FaIconComponent;
+});
+define('ember-font-awesome/components/fa-list', ['exports', 'ember', 'ember-font-awesome/templates/components/fa-list'], function (exports, _ember, _emberFontAwesomeTemplatesComponentsFaList) {
+  'use strict';
+
+  exports['default'] = _ember['default'].Component.extend({
+    layout: _emberFontAwesomeTemplatesComponentsFaList['default'],
+    tagName: 'ul',
+    classNames: 'fa-ul'
+  });
+});
+define('ember-font-awesome/components/fa-stack', ['exports', 'ember', 'ember-computed-decorators', 'ember-font-awesome/utils/try-match', 'ember-font-awesome/utils/optional-decorator', 'ember-font-awesome/templates/components/fa-stack'], function (exports, _ember, _emberComputedDecorators, _emberFontAwesomeUtilsTryMatch, _emberFontAwesomeUtilsOptionalDecorator, _emberFontAwesomeTemplatesComponentsFaStack) {
+  'use strict';
+
+  function _createDecoratedObject(descriptors) {
+    var target = {};for (var i = 0; i < descriptors.length; i++) {
+      var descriptor = descriptors[i];var decorators = descriptor.decorators;var key = descriptor.key;delete descriptor.key;delete descriptor.decorators;descriptor.enumerable = true;descriptor.configurable = true;if ('value' in descriptor || descriptor.initializer) descriptor.writable = true;if (decorators) {
+        for (var f = 0; f < decorators.length; f++) {
+          var decorator = decorators[f];if (typeof decorator === 'function') {
+            descriptor = decorator(target, key, descriptor) || descriptor;
+          } else {
+            throw new TypeError('The decorator for method ' + descriptor.key + ' is of the invalid type ' + typeof decorator);
+          }
+        }
+      }if (descriptor.initializer) {
+        descriptor.value = descriptor.initializer.call(target);
+      }Object.defineProperty(target, key, descriptor);
+    }return target;
+  }
+
+  exports['default'] = _ember['default'].Component.extend(_createDecoratedObject([{
+    key: 'layout',
+    initializer: function initializer() {
+      return _emberFontAwesomeTemplatesComponentsFaStack['default'];
+    }
+  }, {
+    key: 'tagName',
+    initializer: function initializer() {
+      return 'span';
+    }
+  }, {
+    key: 'classNames',
+    initializer: function initializer() {
+      return 'fa-stack';
+    }
+  }, {
+    key: 'classNameBindings',
+    initializer: function initializer() {
+      return ['sizeCssClass'];
+    }
+  }, {
+    key: 'sizeCssClass',
+    decorators: [_emberFontAwesomeUtilsOptionalDecorator['default'], (0, _emberComputedDecorators['default'])('size')],
+    value: function sizeCssClass(size) {
+      if ((0, _emberFontAwesomeUtilsTryMatch['default'])(size, /^fa-/)) {
+        return size;
+      } else if ((0, _emberFontAwesomeUtilsTryMatch['default'])(size, /(?:lg|x)$/)) {
+        return 'fa-' + size;
+      } else {
+        return 'fa-' + size + 'x';
+      }
+    }
+  }]));
+});
+define("ember-font-awesome/templates/components/fa-list", ["exports"], function (exports) {
+  "use strict";
+
+  exports["default"] = Ember.HTMLBars.template((function () {
+    return {
+      meta: {
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.6.1",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 2,
+            "column": 0
+          }
+        },
+        "moduleName": "modules/ember-font-awesome/templates/components/fa-list.hbs"
+      },
+      isEmpty: false,
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+        var morphs = new Array(1);
+        morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
+        dom.insertBoundary(fragment, 0);
+        return morphs;
+      },
+      statements: [["inline", "yield", [["subexpr", "hash", [], ["fa-icon", ["subexpr", "component", ["fa-icon"], ["listItem", true], ["loc", [null, [1, 22], [1, 57]]]]], ["loc", [null, [1, 8], [1, 58]]]]], [], ["loc", [null, [1, 0], [1, 60]]]]],
+      locals: [],
+      templates: []
+    };
+  })());
+});
+define("ember-font-awesome/templates/components/fa-stack", ["exports"], function (exports) {
+  "use strict";
+
+  exports["default"] = Ember.HTMLBars.template((function () {
+    return {
+      meta: {
+        "fragmentReason": {
+          "name": "missing-wrapper",
+          "problems": ["wrong-type"]
+        },
+        "revision": "Ember@2.6.1",
+        "loc": {
+          "source": null,
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 5,
+            "column": 0
+          }
+        },
+        "moduleName": "modules/ember-font-awesome/templates/components/fa-stack.hbs"
+      },
+      isEmpty: false,
+      arity: 0,
+      cachedFragment: null,
+      hasRendered: false,
+      buildFragment: function buildFragment(dom) {
+        var el0 = dom.createDocumentFragment();
+        var el1 = dom.createComment("");
+        dom.appendChild(el0, el1);
+        var el1 = dom.createTextNode("\n");
+        dom.appendChild(el0, el1);
+        return el0;
+      },
+      buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
+        var morphs = new Array(1);
+        morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
+        dom.insertBoundary(fragment, 0);
+        return morphs;
+      },
+      statements: [["inline", "yield", [["subexpr", "hash", [], ["stack-1x", ["subexpr", "component", ["fa-icon"], ["stack", "1"], ["loc", [null, [2, 11], [2, 42]]]], "stack-2x", ["subexpr", "component", ["fa-icon"], ["stack", "2"], ["loc", [null, [3, 11], [3, 42]]]]], ["loc", [null, [1, 8], [4, 1]]]]], [], ["loc", [null, [1, 0], [4, 3]]]]],
+      locals: [],
+      templates: []
+    };
+  })());
+});
+define("ember-font-awesome/utils/optional-decorator", ["exports"], function (exports) {
+  "use strict";
+
+  exports["default"] = optional;
+
+  function optional(object, attributeName, descriptor) {
+    var originalFunction = descriptor.value;
+
+    descriptor.value = function () {
+      var args = [].slice.call(arguments, 0);
+      if (args.some(function (value) {
+        return value != null;
+      })) {
+        return originalFunction.apply(undefined, arguments);
+      }
+    };
+
+    return descriptor;
+  }
+});
+define('ember-font-awesome/utils/try-match', ['exports'], function (exports) {
+  'use strict';
+
+  exports['default'] = function (object, regex) {
+    return typeof object === 'string' && object.match(regex);
+  };
 });
 define('ember-getowner-polyfill/fake-owner', ['exports', 'ember'], function (exports, _ember) {
   'use strict';
