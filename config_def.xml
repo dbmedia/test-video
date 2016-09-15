@@ -27,6 +27,7 @@
     <preference name="DisallowOverscroll" value="true" />
     <preference name="fullscreen" value="true" />
     <preference name="orientation" value="landscape" />
+	<preference name="iosPersistentFileLocation" value="Library" />
     
     <icon src="icon.png" />
     
