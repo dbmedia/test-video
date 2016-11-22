@@ -27,8 +27,9 @@
     <preference name="DisallowOverscroll" value="true" />
     <preference name="fullscreen" value="true" />
     <preference name="orientation" value="landscape" />
+	<preference name="iosPersistentFileLocation" value="Library" />
     
-    <icon src="icon.png" />
+    <icon src="icon.png" gap:role="default" />
     
     <!-- iPhone 6 / 6+ -->
 	<icon src="icon-60@3x.png" platform="ios" width="180" height="180" />
